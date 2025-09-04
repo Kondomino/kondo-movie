@@ -1,0 +1,79 @@
+
+{
+    "name": "Carmel",
+    "soundtrack_uri": "gs://editora-v2-templates/music/CARMEL_WITH_TITLE.wav",
+    "fps": 30,
+    "rank": 1,
+    "clips": [
+        {
+            "clip_number": 1,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 0
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 2,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 0
+            },
+            "clip_effect": "ZoomOut"
+        },
+        {
+            "clip_number": 3,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 0
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 4,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 0
+            },
+            "clip_effect": "ZoomOut"
+        },
+        {
+            "clip_number": 5,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 2
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 6,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 1
+            },
+            "clip_effect": "PanRight"
+        },
+        {
+            "clip_number": 7,
+            "clip_type": "Title",
+            "duration": {
+                "seconds": 3,
+                "frames": 20
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 22
+                },
+                "transition_frame":false 
+            }
+        }
+    ]
+}

@@ -1,0 +1,501 @@
+{
+  "name": "Ambient - Landscape",
+  "fps": 30,
+  "soundtrack_uri": "gs://editora-v2-templates/music/AMBIENT_DANIEL_GALE_TITLE.wav",
+  "rank": 5,
+  "voiceover_offset": 5,
+  "orientation": "landscape",
+  "clips": [
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 6,
+        "frames": 28
+      },
+      "clip_effect": "ZoomIn",
+      "opacity": 0.6,
+      "clip_number": 1,
+      "multiple": [
+        {
+          "end": {
+            "seconds": 3,
+            "frames": 10
+          },
+          "start": {
+            "seconds": 0,
+            "frames": 0
+          },
+          "clip_type": "AgentName",
+          "fade_in": {
+            "frames": 20
+          },
+          "fade_out": {
+            "frames": 20
+          },
+          "position": "top",
+          "font_size": 93,
+          "transform": {
+            "y_offset": 140,
+            "scale": null,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 3,
+            "frames": 10
+          },
+          "start": {
+            "seconds": 1,
+            "frames": 19
+          },
+          "clip_type": "Presents",
+          "fade_in": {
+            "frames": 12
+          },
+          "fade_out": {
+            "frames": 20
+          },
+          "position": "center",
+          "font_size": 69,
+          "transform": {
+            "y_offset": -160,
+            "scale": null,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 3,
+            "frames": 10
+          },
+          "start": {
+            "seconds": 0,
+            "frames": 0
+          },
+          "clip_type": "AgentLogo",
+          "fade_in": {
+            "frames": 20
+          },
+          "fade_out": {
+            "frames": 20
+          },
+          "position": "bottom",
+          "font_size": null,
+          "transform": {
+            "y_offset": -160,
+            "scale": 2.5,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 6,
+            "frames": 6
+          },
+          "start": {
+            "seconds": 3,
+            "frames": 13
+          },
+          "clip_type": "Address",
+          "fade_in": {
+            "frames": 20
+          },
+          "fade_out": {
+            "frames": 20
+          },
+          "position": "center",
+          "font_size": 73,
+          "transform": {
+            "y_offset": 80,
+            "scale": null,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 6,
+            "frames": 6
+          },
+          "start": {
+            "seconds": 3,
+            "frames": 13
+          },
+          "clip_type": "PropertyLocation",
+          "fade_in": {
+            "frames": 20
+          },
+          "fade_out": {
+            "frames": 20
+          },
+          "position": "center",
+          "font_size": 60,
+          "transform": {
+            "y_offset": 190,
+            "scale": null,
+            "x_offset": null
+          }
+        }
+      ],
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 22
+      },
+      "clip_effect": "PanRight",
+      "opacity": 1,
+      "clip_number": 2,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 21
+      },
+      "clip_effect": "ZoomIn",
+      "opacity": 1,
+      "clip_number": 3,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 22
+      },
+      "clip_effect": "PanRight",
+      "opacity": 1,
+      "clip_number": 4,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 24
+      },
+      "clip_effect": "ZoomOut",
+      "opacity": 1,
+      "clip_number": 5,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 23
+      },
+      "clip_effect": "PanLeft",
+      "opacity": 1,
+      "clip_number": 6,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 19
+      },
+      "clip_effect": "ZoomIn",
+      "opacity": 1,
+      "clip_number": 7,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 22
+      },
+      "clip_effect": "PanRight",
+      "opacity": 1,
+      "clip_number": 8,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 23
+      },
+      "clip_effect": "ZoomIn",
+      "opacity": 1,
+      "clip_number": 9,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 20
+      },
+      "clip_effect": "PanLeft",
+      "opacity": 1,
+      "clip_number": 10,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 3,
+        "frames": 13
+      },
+      "clip_effect": "ZoomOut",
+      "opacity": 0.6,
+      "clip_number": 11,
+      "multiple": [
+        {
+          "end": {
+            "seconds": 24,
+            "frames": 2
+          },
+          "start": {
+            "seconds": 22,
+            "frames": 14
+          },
+          "clip_type": "Address",
+          "fade_in": {
+            "frames": 0
+          },
+          "fade_out": {
+            "frames": 5
+          },
+          "position": "center",
+          "font_size": 73,
+          "transform": {
+            "y_offset": 0,
+            "scale": null,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 24,
+            "frames": 2
+          },
+          "start": {
+            "seconds": 22,
+            "frames": 14
+          },
+          "clip_type": "AgentLogo",
+          "fade_in": {
+            "frames": 0
+          },
+          "fade_out": {
+            "frames": 5
+          },
+          "position": "bottom",
+          "font_size": null,
+          "transform": {
+            "y_offset": -100,
+            "scale": 2.5,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 25,
+            "frames": 27
+          },
+          "start": {
+            "seconds": 24,
+            "frames": 5
+          },
+          "clip_type": "BrokerageLogo",
+          "fade_in": {
+            "frames": 5
+          },
+          "fade_out": {
+            "frames": 0
+          },
+          "position": "center",
+          "font_size": null,
+          "transform": {
+            "y_offset": null,
+            "scale": 2.5,
+            "x_offset": null
+          }
+        }
+      ],
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    }
+  ]
+}

@@ -1,0 +1,393 @@
+{
+  "name": "Sonata - Landscape",
+  "fps": 30,
+  "soundtrack_uri": "gs://editora-v2-templates/music/SONATA_V2.wav",
+  "rank": 4,
+  "voiceover_offset": null,
+  "orientation": "landscape",
+  "clips": [
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 4,
+        "frames": 4
+      },
+      "clip_effect": "ZoomIn",
+      "opacity": 0.6,
+      "clip_number": 1,
+      "multiple": [
+        {
+          "end": {
+            "seconds": 2,
+            "frames": 3
+          },
+          "start": {
+            "seconds": 0,
+            "frames": 0
+          },
+          "clip_type": "AgentName",
+          "fade_in": {
+            "frames": 10
+          },
+          "fade_out": {
+            "frames": 5
+          },
+          "position": "top",
+          "font_size": 93,
+          "transform": {
+            "y_offset": 140,
+            "scale": null,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 2,
+            "frames": 3
+          },
+          "start": {
+            "seconds": 0,
+            "frames": 0
+          },
+          "clip_type": "AgentLogo",
+          "fade_in": {
+            "frames": 10
+          },
+          "fade_out": {
+            "frames": 5
+          },
+          "position": "bottom",
+          "font_size": null,
+          "transform": {
+            "y_offset": -160,
+            "scale": 2.5,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 2,
+            "frames": 3
+          },
+          "start": {
+            "seconds": 0,
+            "frames": 27
+          },
+          "clip_type": "Presents",
+          "fade_in": {
+            "frames": 5
+          },
+          "fade_out": {
+            "frames": 5
+          },
+          "position": "center",
+          "font_size": 69,
+          "transform": {
+            "y_offset": -160,
+            "scale": null,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 4,
+            "frames": 4
+          },
+          "start": {
+            "seconds": 2,
+            "frames": 5
+          },
+          "clip_type": "Address",
+          "fade_in": {
+            "frames": 5
+          },
+          "fade_out": {
+            "frames": 0
+          },
+          "position": "center",
+          "font_size": 73,
+          "transform": {
+            "y_offset": 80,
+            "scale": null,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 4,
+            "frames": 4
+          },
+          "start": {
+            "seconds": 2,
+            "frames": 5
+          },
+          "clip_type": "PropertyLocation",
+          "fade_in": {
+            "frames": 5
+          },
+          "fade_out": {
+            "frames": 0
+          },
+          "position": "center",
+          "font_size": 60,
+          "transform": {
+            "y_offset": 190,
+            "scale": null,
+            "x_offset": null
+          }
+        }
+      ],
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 2,
+        "frames": 0
+      },
+      "clip_effect": "PanRight",
+      "opacity": 1,
+      "clip_number": 2,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 27
+      },
+      "clip_effect": "PanRight",
+      "opacity": 1,
+      "clip_number": 3,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 2,
+        "frames": 1
+      },
+      "clip_effect": "PanRight",
+      "opacity": 1,
+      "clip_number": 4,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 2,
+        "frames": 2
+      },
+      "clip_effect": "PanRight",
+      "opacity": 1,
+      "clip_number": 5,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 2,
+        "frames": 2
+      },
+      "clip_effect": "PanRight",
+      "opacity": 1,
+      "clip_number": 6,
+      "multiple": null,
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    },
+    {
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 4,
+        "frames": 19
+      },
+      "clip_effect": "PanRight",
+      "opacity": 0.6,
+      "clip_number": 7,
+      "multiple": [
+        {
+          "end": {
+            "seconds": 16,
+            "frames": 5
+          },
+          "start": {
+            "seconds": 14,
+            "frames": 6
+          },
+          "clip_type": "Address",
+          "fade_in": {
+            "frames": 0
+          },
+          "fade_out": {
+            "frames": 5
+          },
+          "position": "center",
+          "font_size": 73,
+          "transform": {
+            "y_offset": 0,
+            "scale": null,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 16,
+            "frames": 5
+          },
+          "start": {
+            "seconds": 14,
+            "frames": 6
+          },
+          "clip_type": "AgentLogo",
+          "fade_in": {
+            "frames": 0
+          },
+          "fade_out": {
+            "frames": 5
+          },
+          "position": "bottom",
+          "font_size": null,
+          "transform": {
+            "y_offset": -100,
+            "scale": 2.5,
+            "x_offset": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 18,
+            "frames": 25
+          },
+          "start": {
+            "seconds": 16,
+            "frames": 6
+          },
+          "clip_type": "BrokerageLogo",
+          "fade_in": {
+            "frames": 5
+          },
+          "fade_out": {
+            "frames": 0
+          },
+          "position": "center",
+          "font_size": null,
+          "transform": {
+            "y_offset": null,
+            "scale": 2.5,
+            "x_offset": null
+          }
+        }
+      ],
+      "transition_in": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      },
+      "transition_out": {
+        "duration": {
+          "seconds": 0,
+          "frames": 0
+        },
+        "transition_frame": false,
+        "effect": "Fade"
+      }
+    }
+  ]
+}

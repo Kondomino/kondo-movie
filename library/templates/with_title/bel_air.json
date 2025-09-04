@@ -1,0 +1,153 @@
+
+{
+    "name": "Bel Air",
+    "soundtrack_uri": "gs://editora-v2-templates/music/BELAIR_WITH_TITLE.wav",
+    "fps": 30,
+    "rank": 11,
+    "clips": [
+        {
+            "clip_number": 1,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 24
+            },
+            "clip_effect": "ZoomIn",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 2,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 4,
+                "frames": 0
+            },
+            "clip_effect": "ZoomOut",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 3,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 0
+            },
+            "clip_effect": "ZoomIn",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 4,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 3
+            },
+            "clip_effect": "ZoomOut",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 5,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 1
+            },
+            "clip_effect": "PanRight",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 6,
+            "clip_type": "Title",
+            "duration": {
+                "seconds": 3,
+                "frames": 16
+            },
+            "clip_effect": "PanRight",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":false 
+            }
+        }
+    ]
+}

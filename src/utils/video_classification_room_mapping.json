@@ -1,0 +1,45 @@
+{
+    "living room": [
+        "sofa", "couch", "coffee table", "television", "armchair", "bookshelf", 
+        "living room", "tv", "entertainment center", "sectional", "recliner", 
+        "side table", "lamp", "throw pillow", "area rug"
+    ],
+    "kitchen": [
+        "stove", "sink", "refrigerator", "oven", "microwave", "countertop", "cabinet", 
+        "kitchen", "dishwasher", "range", "cooktop", "backsplash", "island", 
+        "pantry", "fridge", "appliance", "cookware"
+    ],
+    "bedroom": [
+        "bed", "mattress", "nightstand", "dresser", "wardrobe", "pillow", 
+        "bedroom", "headboard", "bedding", "closet", "chest of drawers", 
+        "vanity", "mirror", "comforter", "sheets"
+    ],
+    "office": [
+        "desk", "computer", "office chair", "bookshelf", "monitor", "keyboard", 
+        "office", "workspace", "study", "filing cabinet", "printer", "laptop", 
+        "mouse", "desk lamp", "swivel chair"
+    ],
+    "bathroom": [
+        "sink", "toilet", "bathtub", "shower", "mirror", "towel", 
+        "bathroom", "vanity", "faucet", "tile", "bath", "washroom", 
+        "lavatory", "powder room", "toilet paper", "shower curtain"
+    ],
+    "dining room": [
+        "dining table", "chair", "chandelier", "dining room", "dining set", 
+        "buffet", "sideboard", "china cabinet", "table setting", "centerpiece"
+    ],
+    "hallway": [
+        "hallway", "corridor", "passage", "entryway", "foyer", "entrance", 
+        "staircase", "stairs", "landing", "runner"
+    ],
+    "outdoor": [
+        "outdoor", "patio", "balcony", "deck", "garden", "yard", "backyard", 
+        "exterior", "terrace", "pool", "barbecue", "outdoor furniture", "lawn"
+    ],
+    "room": [
+        "room", "interior", "space", "area", "chamber", "indoor", "inside"
+    ],
+    "garage": [
+        "garage", "car", "vehicle", "storage", "workshop", "tools", "driveway"
+    ]
+}

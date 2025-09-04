@@ -1,0 +1,30 @@
+{
+    "Compass": {
+      "Active": ["Active"],
+      "Inactive": ["Expired", "Withdrawn", "Not for Sale"]
+    },
+    "Corcoran": {
+      "Active": ["Active"],
+      "Inactive": ["Expired", "Withdrawn", "Not for Sale"]
+    },
+    "Zillow": {
+      "Active": ["Active"],
+      "Inactive": ["Off Market", "Inactive", "Sold", "Not for Sale"]
+    },
+    "Daniel Gale Sotheby's": {
+      "Active": ["Active"],
+      "Inactive": ["Sold", "Not for Sale"]
+    },
+    "Jenna Cooper LA": {
+      "Active": ["Active"],
+      "Inactive": ["Off Market", "Not for Sale"]
+    },
+    "Watson Salari Group": {
+      "Active": ["Active"],
+      "Inactive": ["Sold", "Not for Sale"]
+    },
+    "ColdwellBanker": {
+      "Active": ["Active"],
+      "Inactive": ["Sold", "Expired", "Withdrawn", "Not for Sale"]
+    }
+  }

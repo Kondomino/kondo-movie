@@ -1,0 +1,253 @@
+General:
+  TIMEZONE: "UTC"
+
+Authentication:
+  ALLOWED_ORIGINS:
+    [
+      "http://localhost:3000",
+      "https://editora-v2-frontend-perf-1095143658629.us-central1.run.app",
+      "https://editora-v2-frontend-staging-1095143658629.us-central1.run.app",
+      "https://editora-v2-frontend-1095143658629.us-central1.run.app",
+      "https://beta.editora.ai",
+      "https://app.editora.ai",
+    ]
+  JWT_ALGORITHM: "HS256"
+  STYTCH_PROJECT_ID: "project-test-0d489013-9387-4607-b3e6-ceae2ee6b07c"
+  SignedURL:
+    GET_EXPIRY_IN_HOURS: 24
+    PUT_EXPIRY_IN_MINUTES: 2
+  ADMINS:
+    [
+      "claptonjoey@gmail.com", 
+      "deborahpirro.pilot@gmail.com",
+      "irenenictas.pilot@gmail.com",
+      "julie@editora.ai",
+      "souto.victor@gmail.com",
+      "victor.souto@joinplank.com",
+      "editora.internal@gmail.com",
+      "Edson.neto@joinplank.com",
+      "edson.netoxx@gmail.com",
+      "watsonsalari.demo@gmail.com",
+      "jennacooper.trial@gmail.com",
+      "natan.tavares@joinplank.com",
+      # "michellecohan.trial@gmail.com",
+      # "tager.pilot@gmail.com",
+      # "shelton.trial@gmail.com",
+      # "Tager.pilot@gmail.com",
+      # "JadeDevitt.Pilot@gmail.com",
+      # "Shelton.Pilot@gmail.com",
+      # "Cara.Sadownick.Pilot@gmail.com",
+      "editora.pilot@gmail.com"
+    ]
+  RESTRICTED_TEMPLATES: []
+
+Secret:
+  SHORTIO_API_KEY: "SHORT_IO"
+  JWT_SECRET_KEY: "JWT_SECRET"
+  STYTCH_SECRET_KEY: "STYTCH_SECRET"
+  MAILCHIMP_API_KEY: "Mandrill_API_Key"
+  OPENAI_API_KEY: "OPENAI_API_KEY"
+  ASSEMBLY_AI_TRANSCRIBER_API_KEY: "ASSEMBLY_AI_TRANSCRIBER_API_KEY"
+  ELEVEN_LABS_API_KEY: "Eleven_Labs_API_Key"
+  GOOGLE_MAPS_API_KEY: "GOOGLE_MAPS_API_KEY"
+  SCRAPFLY_API_KEY: "Scrapfly"
+
+Engines:
+  TTS: "ElevenLabs" # Options - 'OpenAI', 'ElevenLabs'
+  TRANSCRIBER: "AssemblyAI" # Options - 'OpenAI', 'AssemblyAI'
+
+GCP:
+  PROJECT_ID: "editora-prod"
+  Firestore:
+    DB: "editora-v2"
+    PROPERTIES_COLLECTION_NAME: "properties"
+    CLASSIFICATION_COLLECTION_NAME: "classification"
+    USERS_COLLECTION_NAME: "users"
+    PROJECTS_COLLECTION_NAME: "projects"
+    VERSIONS_COLLECTION_NAME: "versions"
+    SCHEMA_COLLECTION_NAME: "schema"
+    VOICEOVER_COLLECTION_NAME: "voiceover"
+    Templates:
+      TEMPLATES_COLLECTION_NAME: "templates"
+      EDLS_COLLECTION_NAME: "edls"
+      NO_TITLE_DOCUMENT_NAME: "no_title"
+      WITH_TITLE_DOCUMENT_NAME: "with_title"
+
+  Storage:
+    PROPERTIES_BUCKET: "editora-v2-properties"
+    TEMPLATES_BUCKET: "editora-v2-templates"
+    USER_BUCKET: "editora-v2-users"
+
+OpenAI:
+  Narration:
+    RESPONSE_TOKEN_LIMIT: 180
+    SCRIPT_MAX_WORDS: 30
+    SCRIPT_CHAR_LIMIT: 190
+    SCRIPT_MAX_CHARACTERS: 200
+    MAX_GEN_ATTEMPTS: 5
+    CHAT_MODEL: "gpt-4o"
+    TTS:
+      VOICE: "alloy" # OpenAI options: Alloy, Echo, Fable, Onyx, Nova, Shimmer
+      MODEL: "tts-1"
+  Classification:
+    CHAT_MODEL: "gpt-4o-mini"
+
+ElevenLabs:
+  TTS:
+    VOICE: "JBFqnCBsd6RMkjVDRZzb"
+    MODEL: "eleven_multilingual_v2"
+    VoiceSettings:
+      STABILITY: 0.50
+      SIMILARITY_BOOST: 0.75
+      STYLE: 0.0
+      USE_SPEAKER_BOOST: true
+
+AssemblyAI:
+  Transcription:
+
+Property:
+  IMAGES_DIR: "Images"
+  IMAGE_LIMIT: 100
+  RESCRAPE_AFTER: 72 # Number of hours after which a property is re-extracted
+
+Music:
+  STORAGE_DIR_PREFIX: "music"
+  PLAY_IN_LOOP: false
+  FADEOUT_DURATION: 0
+
+Classification:
+  REAL_ESTATE_DOC_ID: "real_estate_model"
+  IMAGE_CLASSIFICATION_KEY: "image_classification"
+  PRESELECTION_KEY: "preselection"
+  MAX_LABELS: 100
+  MIN_CLIPS_IN_LARGE_MOVIE: 10
+  ENABLE_HERO_SHOT: true
+  IMAGE_FORMAT: "JPEG"
+
+MovieMaker:
+  Video:
+    RESOLUTION_LANDSCAPE: [1920, 1080]
+    RESOLUTION_PORTRAIT: [1080, 1920]
+    FRAME_RATE: 30
+    CODEC: "libx264"
+    AUDIO_CODEC: "aac"
+    THREADS: 8
+    WRITE_SPEED: "ultrafast" # (MoviePy:VideoClip) Choices are: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow, placebo
+  Image:
+    ZOOM_FACTOR: 0.02
+    INITIAL_ZOOM_IN_RATIO_FOR_ZOOM_OUT: 0.1
+    PAN_SPEED: 1
+    PADDING_COLOR: [0, 0, 0]
+  Music:
+    VOLUME_RATIO_WITH_VOICEOVER: 0.4
+    VOLUME_RATIO_WITHOUT_VOICEOVER: 1
+    OFFSET: 0 # Offset from start of video in seconds
+  Narration:
+    Captions:
+      Font:
+        NAME: "GothamOffice-Regular.otf"
+        SIZE: 42
+        COLOR: "white"
+      Background:
+        COLOR: "black"
+      OPACITY: 0.60
+      HEIGHT_FACTOR_LANDSCAPE: 0.75
+      HEIGHT_FACTOR_PORTRAIT: 0.80
+      ALIGNMENT: "center"
+      FONT_MARGIN: [20, 25]
+      TRANSCRIBER_MAX_WORDS_PER_LINE: 15 # Transcriber will ensure lines have no more than 15 words
+      MAX_CHARS_PER_SRT_SEGMENT: 80 # If a line ends up with more characters, an 'intelligent' split is performed
+      TEXTWRAP_MAX_CHARS_PER_LINE: 40 # Wrap text if line exceeds # of chars
+      END_PERSIST_DURATION: 1.0 # Persist last caption for an additional amount of time
+    Voiceover:
+      MAPPINGS_STORAGE_DIR_PREFIX: "voiceover"
+      VOLUME_RATIO: 1
+      START_OFFSET: 3 # Offset from start of video in seconds
+      END_OFFSET: 2.0 # Buffer b/w end of VO and end of video in seconds
+      DURATION_VARIANCE: 1 # In seconds. # Say Movie is N seconds. Max VO duration = N-START_OFFSET-END_OFFSET. Min VO duration = Max VO duration - DURATION_VARIANCE
+      MAX_ADJUSTMENT_FACTOR: [1.0, 1.25] # Limits to shink or expand VO to fit movie. Anything beyond this window may lead to pitch distortion, subpar audio
+  EndTitles:
+    General:
+      PIXEL_GAP: 0
+      BG_COLOR: [0, 0, 0]
+      METHOD: "caption"
+      ALIGNMENT: "center"
+      LINE_SPLIT_ALGO: "AI" # Options are 'AI', 'MoviePy', 'Manual'
+      MAX_LINES: 3
+      TITLES_GAP: 10
+    Geometry:
+      Landscape:
+        H_MARGIN: 190
+        V_MARGIN: 100
+      Portrait:
+        H_MARGIN: 50
+        V_MARGIN: 100
+    Main:
+      Font:
+        NAME: "GothamOffice-Regular.otf"
+        SIZE: 130
+        COLOR: "white"
+      LINE_SIZE: 142
+      FONT_MARGIN: [0, 2]
+    Sub:
+      Font:
+        NAME: "Gotham-Light.otf"
+        SIZE: 64
+        COLOR: "white"
+      LINE_SIZE: 76
+      FONT_MARGIN: [0, 2]
+  Watermark:
+    STORAGE_DIR_PREFIX: "logo"
+    EDITORA: "editora_ai_watermark.png"
+    PIXEL_OFFSET_WIDTH_LANDSCAPE: 74
+    PIXEL_OFFSET_HEIGHT_LANDSCAPE: 74
+    SIZE_BY_HEIGHT_LANDSCAPE: 38
+    PIXEL_OFFSET_WIDTH_PORTRAIT: 55
+    PIXEL_OFFSET_HEIGHT_PORTRAIT: 80
+    SIZE_BY_HEIGHT_PORTRAIT: 45
+    OPACITY: 1.0
+  Text:
+    LETTER_SPACING: 10
+
+Notification:
+  VIDEO_RENDER_URL_PREFIX: "https://editora-v2-movie-maker-all-in-one-1095143658629.us-central1.run.app/api/v1"
+  Email:
+    EDITORA_INFO: "info@editora.ai"
+    EDITORA_SUPPORT: "support@editora.ai"
+
+
+Tenants:
+  DEFAULT_TENANT_ID: "editora"
+  TENANTS:
+    editora:
+      id: "editora"
+      name: "Editora AI"
+      url: "https://editora.ai"
+    jenna_cooper_la:
+      id: "jenna_cooper_la" 
+      name: "Jenna Cooper LA"
+      url: "https://jennacooperla.com/"
+    daniel_gale:
+      id: "daniel_gale"
+      name: "Daniel Gale"
+      url: "https://www.sothebysrealty.com/danielgalesir/eng"
+    coldwell_banker:
+      id: "coldwell_banker"
+      name: "Coldwell Banker"
+      url: "https://www.coldwellbanker.com/"
+    compass:
+      id: "compass"
+      name: "Compass"
+      url: "https://www.compass.com/"
+    corcoran_group:
+      id: "corcoran_group"
+      name: "Corcoran Group"
+      url: "https://www.corcoran.com/"
+    zillow:
+      id: "zillow"
+      name: "Zillow"
+      url: "https://www.zillow.com/"
+    watson_salari_group:
+      id: "watson_salari_group"
+      name: "Watson Salari Group" 
+      url: "https://watsonsalari.com/"

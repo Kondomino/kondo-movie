@@ -1,0 +1,161 @@
+
+{
+    "name": "Tahoe",
+    "soundtrack_uri": "gs://editora-v2-templates/music/TAHOE_WITH_TITLE.wav",
+    "fps": 30,
+    "rank": 9,
+    "clips": [
+        {
+            "clip_number": 1,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 5
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 2,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 8
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 3,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 11
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 4,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 11
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 5,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 0,
+                "frames": 20
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 6,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 0,
+                "frames": 22
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 7,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 0,
+                "frames": 18
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 8,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 10
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 9,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 13
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 10,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 0,
+                "frames": 19
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 11,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 0,
+                "frames": 22
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 12,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 0,
+                "frames": 20
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 13,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 0,
+                "frames": 20
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 14,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 14
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 15,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 9
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 16,
+            "clip_type": "Title",
+            "duration": {
+                "seconds": 2,
+                "frames": 22
+            },
+            "clip_effect": "ZoomIn",
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 5
+                },
+                "transition_frame":false 
+            }
+        }
+    ]
+}

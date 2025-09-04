@@ -1,0 +1,162 @@
+
+{
+    "name": "Big Sur",
+    "soundtrack_uri": "gs://editora-v2-templates/music/BIG_SUR_WITH_TITLE.wav",
+    "fps": 30,
+    "rank": 2,
+    "clips": [
+        {
+            "clip_number": 1,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 10
+            },
+            "clip_effect": "ZoomIn",
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 10
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 2,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 8
+            },
+            "clip_effect": "PanRight",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 2
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 10
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 3,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 9
+            },
+            "clip_effect": "ZoomIn",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 2
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 10
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 4,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 9
+            },
+            "clip_effect": "PanRight",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 2
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 10
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 5,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 7
+            },
+            "clip_effect": "ZoomIn",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 2
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 10
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 6,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 8
+            },
+            "clip_effect": "PanRight",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 2
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 10
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 7,
+            "clip_type": "Title",
+            "duration": {
+                "seconds": 4,
+                "frames": 6
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 1,
+                    "frames": 0
+                },
+                "transition_frame":false 
+            }
+        }
+    ]
+}

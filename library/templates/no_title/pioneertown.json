@@ -1,0 +1,129 @@
+
+{
+    "name": "Pioneertown",
+    "soundtrack_uri": "gs://editora-v2-templates/music/PIONEERTOWN_NO_TITLE.wav",
+    "fps": 30,
+    "rank": 5,
+    "clips": [
+        {
+            "clip_number": 1,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 24
+            },
+            "clip_effect": "ZoomIn",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 2,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 4,
+                "frames": 0
+            },
+            "clip_effect": "ZoomOut",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 3,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 13
+            },
+            "clip_effect": "ZoomIn",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 4,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 13
+            },
+            "clip_effect": "ZoomOut",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 18
+                },
+                "transition_frame":true 
+            }
+        },
+        {
+            "clip_number": 5,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 5,
+                "frames": 3
+            },
+            "clip_effect": "PanRight",
+            "transition_in": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                }
+            },
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 1,
+                    "frames": 14
+                },
+                "transition_frame":false 
+            }
+        }
+    ]
+}

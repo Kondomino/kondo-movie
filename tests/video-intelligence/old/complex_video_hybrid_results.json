@@ -1,0 +1,2160 @@
+{
+  "video_uri": "gs://editora-v2-users/tests/video-intelligence/pool_living_room_kitchen_hybrid.mp4",
+  "analysis_config": "balanced_refined_hybrid",
+  "processing_time": 36.96,
+  "cost_estimate": 0.0045,
+  "refined_scenes": [
+    {
+      "scene_type": "outdoor",
+      "start_time": 3.0,
+      "end_time": 8.0,
+      "duration": 5.0,
+      "confidence": 0.9800423979759216,
+      "keyframe_timestamp": 5.5,
+      "frame_count": 6,
+      "supporting_frames": [
+        {
+          "time": 3.0,
+          "confidence": 0.9179199934005737,
+          "description": "swimming pool",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        },
+        {
+          "time": 4.0,
+          "confidence": 0.9574629664421082,
+          "description": "swimming pool",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        },
+        {
+          "time": 5.0,
+          "confidence": 0.9555377960205078,
+          "description": "swimming pool",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        },
+        {
+          "time": 6.0,
+          "confidence": 0.924137532711029,
+          "description": "swimming pool",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        },
+        {
+          "time": 7.0,
+          "confidence": 0.885704755783081,
+          "description": "swimming pool",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        },
+        {
+          "time": 8.0,
+          "confidence": 0.7276187539100647,
+          "description": "swimming pool",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        }
+      ],
+      "priority": 1,
+      "detection_source": "vision_api",
+      "original_video_intelligence_type": "swimming pool",
+      "vision_labels": [
+        {
+          "description": "swimming pool",
+          "confidence": 0.9800423979759216
+        },
+        {
+          "description": "flooring",
+          "confidence": 0.917679488658905
+        },
+        {
+          "description": "floor",
+          "confidence": 0.9007768034934998
+        },
+        {
+          "description": "composite material",
+          "confidence": 0.8893209099769592
+        },
+        {
+          "description": "tile",
+          "confidence": 0.8534334897994995
+        },
+        {
+          "description": "flagstone",
+          "confidence": 0.8174592852592468
+        },
+        {
+          "description": "water feature",
+          "confidence": 0.7866182327270508
+        }
+      ],
+      "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_3.0s.jpg",
+      "scene_id": "scene_1"
+    },
+    {
+      "scene_type": "room",
+      "start_time": 10.0,
+      "end_time": 36.0,
+      "duration": 26.0,
+      "confidence": 0.8859614626221035,
+      "keyframe_timestamp": 23.0,
+      "frame_count": 23,
+      "supporting_frames": [
+        {
+          "time": 10.0,
+          "confidence": 0.8851991295814514,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 11.0,
+          "confidence": 0.8739264607429504,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 12.0,
+          "confidence": 0.8921086192131042,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 13.0,
+          "confidence": 0.9002611041069031,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 14.0,
+          "confidence": 0.8528367280960083,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 15.0,
+          "confidence": 0.88565993309021,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 16.0,
+          "confidence": 0.9152907729148865,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 17.0,
+          "confidence": 0.859317421913147,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 18.0,
+          "confidence": 0.8680356740951538,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 19.0,
+          "confidence": 0.8944628238677979,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 20.0,
+          "confidence": 0.8811559081077576,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 21.0,
+          "confidence": 0.8591936826705933,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 22.0,
+          "confidence": 0.8516045808792114,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 23.0,
+          "confidence": 0.8854049444198608,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 24.0,
+          "confidence": 0.900519073009491,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 25.0,
+          "confidence": 0.9192758202552795,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 26.0,
+          "confidence": 0.9093679189682007,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 27.0,
+          "confidence": 0.9171320199966431,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 28.0,
+          "confidence": 0.8704448938369751,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 29.0,
+          "confidence": 0.8670235872268677,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 34.0,
+          "confidence": 0.9056645631790161,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 35.0,
+          "confidence": 0.9015437960624695,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        },
+        {
+          "time": 36.0,
+          "confidence": 0.8816841840744019,
+          "description": "room",
+          "priority": 2,
+          "filter_reason": "generic_scene"
+        }
+      ],
+      "priority": 2,
+      "detection_source": "video_intelligence",
+      "vision_labels": [
+        {
+          "description": "flooring",
+          "confidence": 0.970565140247345
+        },
+        {
+          "description": "floor",
+          "confidence": 0.9680953025817871
+        },
+        {
+          "description": "wood",
+          "confidence": 0.9642143845558167
+        },
+        {
+          "description": "wood stain",
+          "confidence": 0.8033439517021179
+        },
+        {
+          "description": "hardwood",
+          "confidence": 0.763205885887146
+        }
+      ],
+      "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_10.0s.jpg",
+      "scene_id": "scene_2"
+    },
+    {
+      "scene_type": "kitchen",
+      "start_time": 30.0,
+      "end_time": 33.0,
+      "duration": 3.0,
+      "confidence": 0.9597262740135193,
+      "keyframe_timestamp": 31.5,
+      "frame_count": 4,
+      "supporting_frames": [
+        {
+          "time": 30.0,
+          "confidence": 0.7710341215133667,
+          "description": "kitchen",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        },
+        {
+          "time": 31.0,
+          "confidence": 0.8379983901977539,
+          "description": "kitchen",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        },
+        {
+          "time": 32.0,
+          "confidence": 0.809653639793396,
+          "description": "kitchen",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        },
+        {
+          "time": 33.0,
+          "confidence": 0.7947132587432861,
+          "description": "kitchen",
+          "priority": 1,
+          "filter_reason": "specific_scene"
+        }
+      ],
+      "priority": 1,
+      "detection_source": "vision_api",
+      "original_video_intelligence_type": "kitchen",
+      "vision_labels": [
+        {
+          "description": "flooring",
+          "confidence": 0.9663451910018921
+        },
+        {
+          "description": "kitchen",
+          "confidence": 0.9597262740135193
+        },
+        {
+          "description": "countertop",
+          "confidence": 0.9594976902008057
+        },
+        {
+          "description": "kitchen appliance",
+          "confidence": 0.9492594599723816
+        },
+        {
+          "description": "furniture",
+          "confidence": 0.9462741017341614
+        },
+        {
+          "description": "interior design",
+          "confidence": 0.9450974464416504
+        },
+        {
+          "description": "floor",
+          "confidence": 0.9369903802871704
+        },
+        {
+          "description": "major appliance",
+          "confidence": 0.9320475459098816
+        },
+        {
+          "description": "cabinetry",
+          "confidence": 0.8604010343551636
+        },
+        {
+          "description": "home appliance",
+          "confidence": 0.8573295474052429
+        }
+      ],
+      "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_30.0s.jpg",
+      "scene_id": "scene_3"
+    }
+  ],
+  "metadata": {
+    "total_scenes": 3,
+    "scenes_refined_by_vision": 2,
+    "keyframes_extracted": 3,
+    "vision_api_calls": 3,
+    "fallback_scenes": 0,
+    "video_intelligence_only": 1,
+    "video_duration": 36.066666
+  },
+  "raw_data": {
+    "video_intelligence_results": {
+      "config": {
+        "use_label_detection": true,
+        "label_detection_mode": "SHOT_AND_FRAME_MODE",
+        "model": "builtin/stable",
+        "video_confidence_threshold": 0.6,
+        "frame_confidence_threshold": 0.7,
+        "use_shot_detection": true,
+        "shot_detection_model": "builtin/stable"
+      },
+      "video_duration": 36.066666,
+      "raw_segment_labels": [
+        {
+          "description": "room",
+          "entity_id": "/m/06ht1",
+          "max_confidence": 0.7402945160865784,
+          "segments": [
+            {
+              "start_time": 0.0,
+              "end_time": 36.066666,
+              "confidence": 0.7402945160865784
+            }
+          ]
+        }
+      ],
+      "raw_frame_labels": [
+        {
+          "description": "leisure",
+          "entity_id": "/m/04g3r",
+          "max_confidence": 0.8107568621635437,
+          "frames": [
+            {
+              "time_offset": 4.0,
+              "confidence": 0.8107568621635437
+            },
+            {
+              "time_offset": 5.0,
+              "confidence": 0.7571572661399841
+            }
+          ]
+        },
+        {
+          "description": "kitchen",
+          "entity_id": "/m/0d4wf",
+          "max_confidence": 0.8379983901977539,
+          "frames": [
+            {
+              "time_offset": 30.0,
+              "confidence": 0.7710341215133667
+            },
+            {
+              "time_offset": 31.0,
+              "confidence": 0.8379983901977539
+            },
+            {
+              "time_offset": 32.0,
+              "confidence": 0.809653639793396
+            },
+            {
+              "time_offset": 33.0,
+              "confidence": 0.7947132587432861
+            }
+          ],
+          "filtered_reason": "specific_scene",
+          "priority": 1
+        },
+        {
+          "description": "wood flooring",
+          "entity_id": "/m/027xhm0",
+          "max_confidence": 0.7736266851425171,
+          "frames": [
+            {
+              "time_offset": 20.0,
+              "confidence": 0.7620993256568909
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.7214171290397644
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.7519527077674866
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.7736266851425171
+            }
+          ]
+        },
+        {
+          "description": "countertop",
+          "entity_id": "/m/0b3fp9",
+          "max_confidence": 0.9042280316352844,
+          "frames": [
+            {
+              "time_offset": 31.0,
+              "confidence": 0.809581995010376
+            },
+            {
+              "time_offset": 32.0,
+              "confidence": 0.9017425775527954
+            },
+            {
+              "time_offset": 33.0,
+              "confidence": 0.9042280316352844
+            }
+          ],
+          "filtered_reason": "context_related",
+          "priority": 2
+        },
+        {
+          "description": "sunlounger",
+          "entity_id": "/m/056zd5",
+          "max_confidence": 0.7638890743255615,
+          "frames": [
+            {
+              "time_offset": 3.0,
+              "confidence": 0.7638890743255615
+            }
+          ]
+        },
+        {
+          "description": "stairs",
+          "entity_id": "/m/01lynh",
+          "max_confidence": 0.7563838362693787,
+          "frames": [
+            {
+              "time_offset": 18.0,
+              "confidence": 0.7563838362693787
+            }
+          ]
+        },
+        {
+          "description": "tile",
+          "entity_id": "/m/021w6f",
+          "max_confidence": 0.8720206618309021,
+          "frames": [
+            {
+              "time_offset": 7.0,
+              "confidence": 0.7077659964561462
+            },
+            {
+              "time_offset": 8.0,
+              "confidence": 0.8288546800613403
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.761812150478363
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.8720206618309021
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.7799170017242432
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.7701064348220825
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.7127145528793335
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.8084917664527893
+            },
+            {
+              "time_offset": 31.0,
+              "confidence": 0.7127066850662231
+            }
+          ]
+        },
+        {
+          "description": "glass",
+          "entity_id": "/m/039jq",
+          "max_confidence": 0.9296219348907471,
+          "frames": [
+            {
+              "time_offset": 8.0,
+              "confidence": 0.8741642236709595
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.9296219348907471
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.7477798461914062
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.7363713979721069
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.7159737348556519
+            }
+          ]
+        },
+        {
+          "description": "house",
+          "entity_id": "/m/03jm5",
+          "max_confidence": 0.7751947045326233,
+          "frames": [
+            {
+              "time_offset": 10.0,
+              "confidence": 0.7023305892944336
+            },
+            {
+              "time_offset": 13.0,
+              "confidence": 0.7397547960281372
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.7751947045326233
+            },
+            {
+              "time_offset": 21.0,
+              "confidence": 0.7087234854698181
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.7046476006507874
+            },
+            {
+              "time_offset": 29.0,
+              "confidence": 0.744360625743866
+            }
+          ]
+        },
+        {
+          "description": "hardwood",
+          "entity_id": "/m/020g49",
+          "max_confidence": 0.8076968193054199,
+          "frames": [
+            {
+              "time_offset": 19.0,
+              "confidence": 0.7616329193115234
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.7939668893814087
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.8076968193054199
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.7560144662857056
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.7199263572692871
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.726543128490448
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.7272017002105713
+            }
+          ]
+        },
+        {
+          "description": "door",
+          "entity_id": "/m/02dgv",
+          "max_confidence": 0.8126440048217773,
+          "frames": [
+            {
+              "time_offset": 9.0,
+              "confidence": 0.7025070786476135
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.7787032127380371
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.8126440048217773
+            }
+          ]
+        },
+        {
+          "description": "table",
+          "entity_id": "/m/04bcr3",
+          "max_confidence": 0.8350909948348999,
+          "frames": [
+            {
+              "time_offset": 10.0,
+              "confidence": 0.7007028460502625
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.7083509564399719
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.8350909948348999
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.7318261861801147
+            },
+            {
+              "time_offset": 29.0,
+              "confidence": 0.8318608999252319
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.8349425792694092
+            },
+            {
+              "time_offset": 31.0,
+              "confidence": 0.8078346252441406
+            }
+          ]
+        },
+        {
+          "description": "laminate flooring",
+          "entity_id": "/m/04xvs0",
+          "max_confidence": 0.8046472668647766,
+          "frames": [
+            {
+              "time_offset": 20.0,
+              "confidence": 0.8046472668647766
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.7275118827819824
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.7465219497680664
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.7060036063194275
+            }
+          ]
+        },
+        {
+          "description": "wood",
+          "entity_id": "/m/083vt",
+          "max_confidence": 0.7764022350311279,
+          "frames": [
+            {
+              "time_offset": 1.0,
+              "confidence": 0.7095195651054382
+            },
+            {
+              "time_offset": 2.0,
+              "confidence": 0.7012044787406921
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.734995424747467
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.7595247030258179
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.7764022350311279
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.7322518825531006
+            }
+          ]
+        },
+        {
+          "description": "wall",
+          "entity_id": "/m/09qqq",
+          "max_confidence": 0.829860508441925,
+          "frames": [
+            {
+              "time_offset": 1.0,
+              "confidence": 0.829860508441925
+            },
+            {
+              "time_offset": 2.0,
+              "confidence": 0.7947097420692444
+            }
+          ]
+        },
+        {
+          "description": "floor",
+          "entity_id": "/m/0l7_8",
+          "max_confidence": 0.9375264048576355,
+          "frames": [
+            {
+              "time_offset": 0.0,
+              "confidence": 0.77757328748703
+            },
+            {
+              "time_offset": 1.0,
+              "confidence": 0.8548452854156494
+            },
+            {
+              "time_offset": 2.0,
+              "confidence": 0.7088757157325745
+            },
+            {
+              "time_offset": 4.0,
+              "confidence": 0.705451488494873
+            },
+            {
+              "time_offset": 5.0,
+              "confidence": 0.7699741125106812
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.8151064515113831
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.8409558534622192
+            },
+            {
+              "time_offset": 8.0,
+              "confidence": 0.9054375290870667
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.8702613115310669
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.9085044264793396
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.8900586366653442
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.900514543056488
+            },
+            {
+              "time_offset": 13.0,
+              "confidence": 0.7287470102310181
+            },
+            {
+              "time_offset": 14.0,
+              "confidence": 0.7078905701637268
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.7983758449554443
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.7835408449172974
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.8139700293540955
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.9092049598693848
+            },
+            {
+              "time_offset": 21.0,
+              "confidence": 0.7113979458808899
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.9261342883110046
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.9287947416305542
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.9318223595619202
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.9366007447242737
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.9375264048576355
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.8853165507316589
+            },
+            {
+              "time_offset": 28.0,
+              "confidence": 0.8196491003036499
+            },
+            {
+              "time_offset": 29.0,
+              "confidence": 0.8508483171463013
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.9074382781982422
+            },
+            {
+              "time_offset": 31.0,
+              "confidence": 0.8929285407066345
+            },
+            {
+              "time_offset": 32.0,
+              "confidence": 0.8234449625015259
+            },
+            {
+              "time_offset": 33.0,
+              "confidence": 0.7829700708389282
+            },
+            {
+              "time_offset": 34.0,
+              "confidence": 0.7013550996780396
+            }
+          ]
+        },
+        {
+          "description": "property",
+          "entity_id": "/m/05wrt",
+          "max_confidence": 0.9348561763763428,
+          "frames": [
+            {
+              "time_offset": 0.0,
+              "confidence": 0.8765038847923279
+            },
+            {
+              "time_offset": 2.0,
+              "confidence": 0.8975940942764282
+            },
+            {
+              "time_offset": 3.0,
+              "confidence": 0.9003823399543762
+            },
+            {
+              "time_offset": 4.0,
+              "confidence": 0.9223840236663818
+            },
+            {
+              "time_offset": 5.0,
+              "confidence": 0.9260162711143494
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.9348561763763428
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.911372721195221
+            },
+            {
+              "time_offset": 8.0,
+              "confidence": 0.9221949577331543
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.902836799621582
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.899626612663269
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.9012507200241089
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.9082338809967041
+            },
+            {
+              "time_offset": 13.0,
+              "confidence": 0.9109606146812439
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.8880695700645447
+            },
+            {
+              "time_offset": 18.0,
+              "confidence": 0.8845255374908447
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.8987782001495361
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.9153202772140503
+            },
+            {
+              "time_offset": 21.0,
+              "confidence": 0.916201651096344
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.9116674065589905
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.9070194959640503
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.9169884920120239
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.920718252658844
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.9028815627098083
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.925525963306427
+            },
+            {
+              "time_offset": 28.0,
+              "confidence": 0.9230408072471619
+            },
+            {
+              "time_offset": 29.0,
+              "confidence": 0.922520637512207
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.9198558330535889
+            },
+            {
+              "time_offset": 31.0,
+              "confidence": 0.9009841084480286
+            },
+            {
+              "time_offset": 34.0,
+              "confidence": 0.9175827503204346
+            },
+            {
+              "time_offset": 35.0,
+              "confidence": 0.9057820439338684
+            },
+            {
+              "time_offset": 36.0,
+              "confidence": 0.8919544816017151
+            }
+          ]
+        },
+        {
+          "description": "swimming pool",
+          "entity_id": "/m/0b_rs",
+          "max_confidence": 0.9574629664421082,
+          "frames": [
+            {
+              "time_offset": 3.0,
+              "confidence": 0.9179199934005737
+            },
+            {
+              "time_offset": 4.0,
+              "confidence": 0.9574629664421082
+            },
+            {
+              "time_offset": 5.0,
+              "confidence": 0.9555377960205078
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.924137532711029
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.885704755783081
+            },
+            {
+              "time_offset": 8.0,
+              "confidence": 0.7276187539100647
+            }
+          ],
+          "filtered_reason": "specific_scene",
+          "priority": 1
+        },
+        {
+          "description": "room",
+          "entity_id": "/m/06ht1",
+          "max_confidence": 0.9262535572052002,
+          "frames": [
+            {
+              "time_offset": 10.0,
+              "confidence": 0.8851991295814514
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.8739264607429504
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.8921086192131042
+            },
+            {
+              "time_offset": 13.0,
+              "confidence": 0.9002611041069031
+            },
+            {
+              "time_offset": 14.0,
+              "confidence": 0.8528367280960083
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.88565993309021
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.9152907729148865
+            },
+            {
+              "time_offset": 17.0,
+              "confidence": 0.859317421913147
+            },
+            {
+              "time_offset": 18.0,
+              "confidence": 0.8680356740951538
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.8944628238677979
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.8811559081077576
+            },
+            {
+              "time_offset": 21.0,
+              "confidence": 0.8591936826705933
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.8516045808792114
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.8854049444198608
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.900519073009491
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.9192758202552795
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.9093679189682007
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.9171320199966431
+            },
+            {
+              "time_offset": 28.0,
+              "confidence": 0.8704448938369751
+            },
+            {
+              "time_offset": 29.0,
+              "confidence": 0.8670235872268677
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.9018314480781555
+            },
+            {
+              "time_offset": 31.0,
+              "confidence": 0.8974666595458984
+            },
+            {
+              "time_offset": 32.0,
+              "confidence": 0.9037537574768066
+            },
+            {
+              "time_offset": 33.0,
+              "confidence": 0.9262535572052002
+            },
+            {
+              "time_offset": 34.0,
+              "confidence": 0.9056645631790161
+            },
+            {
+              "time_offset": 35.0,
+              "confidence": 0.9015437960624695
+            },
+            {
+              "time_offset": 36.0,
+              "confidence": 0.8816841840744019
+            }
+          ],
+          "filtered_reason": "generic_scene",
+          "priority": 2
+        },
+        {
+          "description": "water",
+          "entity_id": "/m/0838f",
+          "max_confidence": 0.8083471059799194,
+          "frames": [
+            {
+              "time_offset": 3.0,
+              "confidence": 0.7821610569953918
+            },
+            {
+              "time_offset": 4.0,
+              "confidence": 0.8083471059799194
+            }
+          ]
+        },
+        {
+          "description": "real estate",
+          "entity_id": "/m/023907r",
+          "max_confidence": 0.7768604755401611,
+          "frames": [
+            {
+              "time_offset": 6.0,
+              "confidence": 0.7768604755401611
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.7212581038475037
+            }
+          ]
+        },
+        {
+          "description": "furniture",
+          "entity_id": "/m/0c_jw",
+          "max_confidence": 0.8555631637573242,
+          "frames": [
+            {
+              "time_offset": 10.0,
+              "confidence": 0.7487484812736511
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.7985039949417114
+            },
+            {
+              "time_offset": 13.0,
+              "confidence": 0.7763733267784119
+            },
+            {
+              "time_offset": 14.0,
+              "confidence": 0.813898503780365
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.7990559935569763
+            },
+            {
+              "time_offset": 28.0,
+              "confidence": 0.7055143117904663
+            },
+            {
+              "time_offset": 29.0,
+              "confidence": 0.8555631637573242
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.7315716743469238
+            },
+            {
+              "time_offset": 31.0,
+              "confidence": 0.727227509021759
+            }
+          ]
+        },
+        {
+          "description": "interior design",
+          "entity_id": "/m/02rfdq",
+          "max_confidence": 0.7985467314720154,
+          "frames": [
+            {
+              "time_offset": 18.0,
+              "confidence": 0.7354239821434021
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.7479156851768494
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.7657536864280701
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.7985467314720154
+            },
+            {
+              "time_offset": 28.0,
+              "confidence": 0.7015817761421204
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.7448720335960388
+            }
+          ]
+        },
+        {
+          "description": "flooring",
+          "entity_id": "/m/01c34b",
+          "max_confidence": 0.8717367053031921,
+          "frames": [
+            {
+              "time_offset": 8.0,
+              "confidence": 0.7955495119094849
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.7830355763435364
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.8424047827720642
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.8173659443855286
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.841826856136322
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.7686898112297058
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.7511965036392212
+            },
+            {
+              "time_offset": 17.0,
+              "confidence": 0.7131614089012146
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.7509433031082153
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.8556514382362366
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.8717367053031921
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.855373740196228
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.870842456817627
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.8598394393920898
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.8691253662109375
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.7890242338180542
+            },
+            {
+              "time_offset": 29.0,
+              "confidence": 0.7123295068740845
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.845380961894989
+            },
+            {
+              "time_offset": 31.0,
+              "confidence": 0.8491791486740112
+            },
+            {
+              "time_offset": 32.0,
+              "confidence": 0.784529983997345
+            },
+            {
+              "time_offset": 33.0,
+              "confidence": 0.7245760560035706
+            }
+          ]
+        },
+        {
+          "description": "window",
+          "entity_id": "/m/0d4v4",
+          "max_confidence": 0.7749335169792175,
+          "frames": [
+            {
+              "time_offset": 8.0,
+              "confidence": 0.7384445071220398
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.7749335169792175
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.7377122044563293
+            },
+            {
+              "time_offset": 18.0,
+              "confidence": 0.7223713994026184
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.7372757792472839
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.7145434021949768
+            },
+            {
+              "time_offset": 21.0,
+              "confidence": 0.7103309035301208
+            }
+          ]
+        },
+        {
+          "description": "home",
+          "entity_id": "/m/01l0mw",
+          "max_confidence": 0.8505896925926208,
+          "frames": [
+            {
+              "time_offset": 11.0,
+              "confidence": 0.7322420477867126
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.7144889235496521
+            },
+            {
+              "time_offset": 13.0,
+              "confidence": 0.7929726839065552
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.8505896925926208
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.7086296081542969
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.7506082057952881
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.755777895450592
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.7607689499855042
+            },
+            {
+              "time_offset": 29.0,
+              "confidence": 0.7461234927177429
+            },
+            {
+              "time_offset": 30.0,
+              "confidence": 0.7268638014793396
+            }
+          ],
+          "filtered_reason": "context_related",
+          "priority": 2
+        },
+        {
+          "description": "chair",
+          "entity_id": "/m/01mzpv",
+          "max_confidence": 0.8067285418510437,
+          "frames": [
+            {
+              "time_offset": 29.0,
+              "confidence": 0.8067285418510437
+            }
+          ]
+        }
+      ],
+      "shot_annotations": [
+        {
+          "shot_number": 1,
+          "start_time": 0.0,
+          "end_time": 36.066666,
+          "duration": 36.066666
+        }
+      ]
+    },
+    "keyframes": [
+      {
+        "scene": {
+          "scene_type": "swimming pool",
+          "start_time": 3.0,
+          "end_time": 8.0,
+          "duration": 5.0,
+          "confidence": 0.8947302997112274,
+          "keyframe_timestamp": 5.5,
+          "frame_count": 6,
+          "supporting_frames": [
+            {
+              "time": 3.0,
+              "confidence": 0.9179199934005737,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 4.0,
+              "confidence": 0.9574629664421082,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 5.0,
+              "confidence": 0.9555377960205078,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 6.0,
+              "confidence": 0.924137532711029,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 7.0,
+              "confidence": 0.885704755783081,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 8.0,
+              "confidence": 0.7276187539100647,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            }
+          ],
+          "priority": 1
+        },
+        "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_3.0s.jpg",
+        "timestamp": 5.5,
+        "scene_id": "scene_3.0s"
+      },
+      {
+        "scene": {
+          "scene_type": "room",
+          "start_time": 10.0,
+          "end_time": 36.0,
+          "duration": 26.0,
+          "confidence": 0.8859614626221035,
+          "keyframe_timestamp": 23.0,
+          "frame_count": 23,
+          "supporting_frames": [
+            {
+              "time": 10.0,
+              "confidence": 0.8851991295814514,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 11.0,
+              "confidence": 0.8739264607429504,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 12.0,
+              "confidence": 0.8921086192131042,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 13.0,
+              "confidence": 0.9002611041069031,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 14.0,
+              "confidence": 0.8528367280960083,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 15.0,
+              "confidence": 0.88565993309021,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 16.0,
+              "confidence": 0.9152907729148865,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 17.0,
+              "confidence": 0.859317421913147,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 18.0,
+              "confidence": 0.8680356740951538,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 19.0,
+              "confidence": 0.8944628238677979,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 20.0,
+              "confidence": 0.8811559081077576,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 21.0,
+              "confidence": 0.8591936826705933,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 22.0,
+              "confidence": 0.8516045808792114,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 23.0,
+              "confidence": 0.8854049444198608,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 24.0,
+              "confidence": 0.900519073009491,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 25.0,
+              "confidence": 0.9192758202552795,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 26.0,
+              "confidence": 0.9093679189682007,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 27.0,
+              "confidence": 0.9171320199966431,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 28.0,
+              "confidence": 0.8704448938369751,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 29.0,
+              "confidence": 0.8670235872268677,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 34.0,
+              "confidence": 0.9056645631790161,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 35.0,
+              "confidence": 0.9015437960624695,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 36.0,
+              "confidence": 0.8816841840744019,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            }
+          ],
+          "priority": 2
+        },
+        "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_10.0s.jpg",
+        "timestamp": 23.0,
+        "scene_id": "scene_10.0s"
+      },
+      {
+        "scene": {
+          "scene_type": "kitchen",
+          "start_time": 30.0,
+          "end_time": 33.0,
+          "duration": 3.0,
+          "confidence": 0.8033498525619507,
+          "keyframe_timestamp": 31.5,
+          "frame_count": 4,
+          "supporting_frames": [
+            {
+              "time": 30.0,
+              "confidence": 0.7710341215133667,
+              "description": "kitchen",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 31.0,
+              "confidence": 0.8379983901977539,
+              "description": "kitchen",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 32.0,
+              "confidence": 0.809653639793396,
+              "description": "kitchen",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 33.0,
+              "confidence": 0.7947132587432861,
+              "description": "kitchen",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            }
+          ],
+          "priority": 1
+        },
+        "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_30.0s.jpg",
+        "timestamp": 31.5,
+        "scene_id": "scene_30.0s"
+      }
+    ],
+    "vision_results": [
+      {
+        "scene_id": "scene_3.0s",
+        "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_3.0s.jpg",
+        "scene": {
+          "scene_type": "swimming pool",
+          "start_time": 3.0,
+          "end_time": 8.0,
+          "duration": 5.0,
+          "confidence": 0.8947302997112274,
+          "keyframe_timestamp": 5.5,
+          "frame_count": 6,
+          "supporting_frames": [
+            {
+              "time": 3.0,
+              "confidence": 0.9179199934005737,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 4.0,
+              "confidence": 0.9574629664421082,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 5.0,
+              "confidence": 0.9555377960205078,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 6.0,
+              "confidence": 0.924137532711029,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 7.0,
+              "confidence": 0.885704755783081,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 8.0,
+              "confidence": 0.7276187539100647,
+              "description": "swimming pool",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            }
+          ],
+          "priority": 1
+        },
+        "vision_labels": [
+          {
+            "description": "swimming pool",
+            "confidence": 0.9800423979759216
+          },
+          {
+            "description": "flooring",
+            "confidence": 0.917679488658905
+          },
+          {
+            "description": "floor",
+            "confidence": 0.9007768034934998
+          },
+          {
+            "description": "composite material",
+            "confidence": 0.8893209099769592
+          },
+          {
+            "description": "tile",
+            "confidence": 0.8534334897994995
+          },
+          {
+            "description": "flagstone",
+            "confidence": 0.8174592852592468
+          },
+          {
+            "description": "water feature",
+            "confidence": 0.7866182327270508
+          }
+        ],
+        "label_count": 7
+      },
+      {
+        "scene_id": "scene_10.0s",
+        "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_10.0s.jpg",
+        "scene": {
+          "scene_type": "room",
+          "start_time": 10.0,
+          "end_time": 36.0,
+          "duration": 26.0,
+          "confidence": 0.8859614626221035,
+          "keyframe_timestamp": 23.0,
+          "frame_count": 23,
+          "supporting_frames": [
+            {
+              "time": 10.0,
+              "confidence": 0.8851991295814514,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 11.0,
+              "confidence": 0.8739264607429504,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 12.0,
+              "confidence": 0.8921086192131042,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 13.0,
+              "confidence": 0.9002611041069031,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 14.0,
+              "confidence": 0.8528367280960083,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 15.0,
+              "confidence": 0.88565993309021,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 16.0,
+              "confidence": 0.9152907729148865,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 17.0,
+              "confidence": 0.859317421913147,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 18.0,
+              "confidence": 0.8680356740951538,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 19.0,
+              "confidence": 0.8944628238677979,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 20.0,
+              "confidence": 0.8811559081077576,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 21.0,
+              "confidence": 0.8591936826705933,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 22.0,
+              "confidence": 0.8516045808792114,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 23.0,
+              "confidence": 0.8854049444198608,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 24.0,
+              "confidence": 0.900519073009491,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 25.0,
+              "confidence": 0.9192758202552795,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 26.0,
+              "confidence": 0.9093679189682007,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 27.0,
+              "confidence": 0.9171320199966431,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 28.0,
+              "confidence": 0.8704448938369751,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 29.0,
+              "confidence": 0.8670235872268677,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 34.0,
+              "confidence": 0.9056645631790161,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 35.0,
+              "confidence": 0.9015437960624695,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            },
+            {
+              "time": 36.0,
+              "confidence": 0.8816841840744019,
+              "description": "room",
+              "priority": 2,
+              "filter_reason": "generic_scene"
+            }
+          ],
+          "priority": 2
+        },
+        "vision_labels": [
+          {
+            "description": "flooring",
+            "confidence": 0.970565140247345
+          },
+          {
+            "description": "floor",
+            "confidence": 0.9680953025817871
+          },
+          {
+            "description": "wood",
+            "confidence": 0.9642143845558167
+          },
+          {
+            "description": "wood stain",
+            "confidence": 0.8033439517021179
+          },
+          {
+            "description": "hardwood",
+            "confidence": 0.763205885887146
+          }
+        ],
+        "label_count": 5
+      },
+      {
+        "scene_id": "scene_30.0s",
+        "keyframe_uri": "gs://editora-v2-users/tests/video-intelligence/keyframes/keyframe_scene_30.0s.jpg",
+        "scene": {
+          "scene_type": "kitchen",
+          "start_time": 30.0,
+          "end_time": 33.0,
+          "duration": 3.0,
+          "confidence": 0.8033498525619507,
+          "keyframe_timestamp": 31.5,
+          "frame_count": 4,
+          "supporting_frames": [
+            {
+              "time": 30.0,
+              "confidence": 0.7710341215133667,
+              "description": "kitchen",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 31.0,
+              "confidence": 0.8379983901977539,
+              "description": "kitchen",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 32.0,
+              "confidence": 0.809653639793396,
+              "description": "kitchen",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            },
+            {
+              "time": 33.0,
+              "confidence": 0.7947132587432861,
+              "description": "kitchen",
+              "priority": 1,
+              "filter_reason": "specific_scene"
+            }
+          ],
+          "priority": 1
+        },
+        "vision_labels": [
+          {
+            "description": "flooring",
+            "confidence": 0.9663451910018921
+          },
+          {
+            "description": "kitchen",
+            "confidence": 0.9597262740135193
+          },
+          {
+            "description": "countertop",
+            "confidence": 0.9594976902008057
+          },
+          {
+            "description": "kitchen appliance",
+            "confidence": 0.9492594599723816
+          },
+          {
+            "description": "furniture",
+            "confidence": 0.9462741017341614
+          },
+          {
+            "description": "interior design",
+            "confidence": 0.9450974464416504
+          },
+          {
+            "description": "floor",
+            "confidence": 0.9369903802871704
+          },
+          {
+            "description": "major appliance",
+            "confidence": 0.9320475459098816
+          },
+          {
+            "description": "cabinetry",
+            "confidence": 0.8604010343551636
+          },
+          {
+            "description": "home appliance",
+            "confidence": 0.8573295474052429
+          }
+        ],
+        "label_count": 10
+      }
+    ]
+  }
+}

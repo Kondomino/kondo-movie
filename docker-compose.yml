@@ -1,0 +1,14 @@
+services:
+  property:
+    image: editora-v2-movie-maker
+    container_name: editora-v2-movie-maker
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    volumes:
+      - ./secrets:/secrets:ro  # Mount secrets as read-only
+    ports:
+      - 8080:8080
+    env_file:
+      - .env

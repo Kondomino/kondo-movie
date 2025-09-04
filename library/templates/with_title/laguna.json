@@ -1,0 +1,80 @@
+
+{
+    "name": "Laguna",
+    "soundtrack_uri": "gs://editora-v2-templates/music/LAGUNA_WITH_TITLE.wav",
+    "fps": 30,
+    "rank": 12,
+    "clips": [
+        {
+            "clip_number": 1,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 29
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 2,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 1
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 3,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 3
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 4,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 27
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 5,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 0
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 6,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 0
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 7,
+            "clip_type": "Title",
+            "duration": {
+                "seconds": 4,
+                "frames": 0
+            },
+            "clip_effect": "ZoomIn",
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 25
+                },
+                "transition_frame":false 
+            }
+        }
+    ]
+}

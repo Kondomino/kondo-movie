@@ -1,0 +1,107 @@
+
+{
+    "name": "Malibu",
+    "soundtrack_uri": "gs://editora-v2-templates/music/MALIBU_NO_TITLE.wav",
+    "fps": 30,
+    "rank": 14,
+    "clips": [
+        {
+            "clip_number": 1,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 18
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 2,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 1
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 3,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 21
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 4,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 2,
+                "frames": 18
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 5,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 17
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 6,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 3
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 7,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 1
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 8,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 0
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 9,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 1,
+                "frames": 24
+            },
+            "clip_effect": "ZoomIn"
+        },
+        {
+            "clip_number": 10,
+            "clip_type": "Image",
+            "duration": {
+                "seconds": 3,
+                "frames": 11
+            },
+            "clip_effect": "ZoomIn",
+            "transition_out": {
+                "effect": "fade",
+                "duration": {
+                    "seconds": 0,
+                    "frames": 20
+                },
+                "transition_frame":false 
+            }
+        }
+    ]
+}

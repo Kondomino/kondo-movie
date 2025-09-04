@@ -1,0 +1,278 @@
+{
+  "video_info": {
+    "name": "julie_01_indoors_and_outdoors.MOV",
+    "description": "Multi-room indoor/outdoor property tour by Julie",
+    "notes": "Real estate property tour with multiple indoor and outdoor spaces"
+  },
+  "processing_summary": {
+    "total_videos_processed": 1,
+    "total_scenes_detected": 8,
+    "keyframes_extracted": 8,
+    "vision_api_calls": 8,
+    "scenes_refined_by_vision": 8,
+    "cost_estimate": 0.012,
+    "processing_time": 43.084920167922974
+  },
+  "api_usage": {
+    "google_video_intelligence_used": true,
+    "google_vision_api_used": true
+  },
+  "scene_statistics": {
+    "total_scenes": 8,
+    "unique_categories": 2,
+    "categories_found": [
+      "Exterior",
+      "Other"
+    ],
+    "summary_stats": {
+      "total_scenes": 8,
+      "categories": 2,
+      "avg_confidence": 0.907363660633564,
+      "detection_sources": {
+        "vision_api": 8
+      },
+      "scenes_with_keyframes": 8,
+      "category_distribution": {
+        "Exterior": 4,
+        "Other": 4
+      }
+    },
+    "scenes_per_category": {
+      "Exterior": 4,
+      "Other": 4
+    }
+  },
+  "label_analysis": {
+    "video_intelligence_labels": [],
+    "vision_api_labels": [],
+    "total_unique_labels": 0,
+    "label_frequency": {}
+  },
+  "confidence_distribution": {
+    "note": "No confidence scores available in results"
+  },
+  "classification_sources": {
+    "summary": {
+      "video_intelligence_only": 0,
+      "vision_api_only": 0,
+      "hybrid_classification": 0,
+      "unknown_source": 8
+    },
+    "details": [
+      {
+        "category": "Exterior",
+        "scene_id": "scene_0.0s",
+        "has_video_intelligence": false,
+        "has_vision_api": false,
+        "classification_source": "unknown"
+      },
+      {
+        "category": "Exterior",
+        "scene_id": "scene_0.0s",
+        "has_video_intelligence": false,
+        "has_vision_api": false,
+        "classification_source": "unknown"
+      },
+      {
+        "category": "Exterior",
+        "scene_id": "scene_23.0s",
+        "has_video_intelligence": false,
+        "has_vision_api": false,
+        "classification_source": "unknown"
+      },
+      {
+        "category": "Exterior",
+        "scene_id": "scene_29.0s",
+        "has_video_intelligence": false,
+        "has_vision_api": false,
+        "classification_source": "unknown"
+      },
+      {
+        "category": "Other",
+        "scene_id": "scene_5.0s",
+        "has_video_intelligence": false,
+        "has_vision_api": false,
+        "classification_source": "unknown"
+      },
+      {
+        "category": "Other",
+        "scene_id": "scene_10.0s",
+        "has_video_intelligence": false,
+        "has_vision_api": false,
+        "classification_source": "unknown"
+      },
+      {
+        "category": "Other",
+        "scene_id": "scene_11.0s",
+        "has_video_intelligence": false,
+        "has_vision_api": false,
+        "classification_source": "unknown"
+      },
+      {
+        "category": "Other",
+        "scene_id": "scene_34.0s",
+        "has_video_intelligence": false,
+        "has_vision_api": false,
+        "classification_source": "unknown"
+      }
+    ]
+  },
+  "scene_details": [
+    {
+      "scene_number": 1,
+      "category": "Exterior",
+      "scene_id": "scene_0.0s",
+      "timestamps": {
+        "start": 0.0,
+        "end": 25.0,
+        "duration": 25.0
+      },
+      "confidence": "unknown",
+      "keyframe_info": {
+        "timestamp": "unknown",
+        "gs_url": "unknown"
+      }
+    },
+    {
+      "scene_number": 2,
+      "category": "Exterior",
+      "scene_id": "scene_0.0s",
+      "timestamps": {
+        "start": 0.0,
+        "end": 0.0,
+        "duration": 0.0
+      },
+      "confidence": "unknown",
+      "keyframe_info": {
+        "timestamp": "unknown",
+        "gs_url": "unknown"
+      }
+    },
+    {
+      "scene_number": 3,
+      "category": "Exterior",
+      "scene_id": "scene_23.0s",
+      "timestamps": {
+        "start": 23.0,
+        "end": 26.0,
+        "duration": 3.0
+      },
+      "confidence": "unknown",
+      "keyframe_info": {
+        "timestamp": "unknown",
+        "gs_url": "unknown"
+      }
+    },
+    {
+      "scene_number": 4,
+      "category": "Exterior",
+      "scene_id": "scene_29.0s",
+      "timestamps": {
+        "start": 29.0,
+        "end": 32.0,
+        "duration": 3.0
+      },
+      "confidence": "unknown",
+      "keyframe_info": {
+        "timestamp": "unknown",
+        "gs_url": "unknown"
+      }
+    },
+    {
+      "scene_number": 5,
+      "category": "Other",
+      "scene_id": "scene_5.0s",
+      "timestamps": {
+        "start": 5.0,
+        "end": 17.0,
+        "duration": 12.0
+      },
+      "confidence": "unknown",
+      "keyframe_info": {
+        "timestamp": "unknown",
+        "gs_url": "unknown"
+      }
+    },
+    {
+      "scene_number": 6,
+      "category": "Other",
+      "scene_id": "scene_10.0s",
+      "timestamps": {
+        "start": 10.0,
+        "end": 0.0,
+        "duration": -10.0
+      },
+      "confidence": "unknown",
+      "keyframe_info": {
+        "timestamp": "unknown",
+        "gs_url": "unknown"
+      }
+    },
+    {
+      "scene_number": 7,
+      "category": "Other",
+      "scene_id": "scene_11.0s",
+      "timestamps": {
+        "start": 11.0,
+        "end": 21.0,
+        "duration": 10.0
+      },
+      "confidence": "unknown",
+      "keyframe_info": {
+        "timestamp": "unknown",
+        "gs_url": "unknown"
+      }
+    },
+    {
+      "scene_number": 8,
+      "category": "Other",
+      "scene_id": "scene_34.0s",
+      "timestamps": {
+        "start": 34.0,
+        "end": 0.0,
+        "duration": -34.0
+      },
+      "confidence": "unknown",
+      "keyframe_info": {
+        "timestamp": "unknown",
+        "gs_url": "unknown"
+      }
+    }
+  ],
+  "calibration_insights": {
+    "algorithm_performance": {
+      "expected_categories": [
+        "kitchen",
+        "living room",
+        "outdoor",
+        "bedroom"
+      ],
+      "found_categories": [
+        "Exterior",
+        "Other"
+      ],
+      "categories_matched": [],
+      "categories_missed": [
+        "bedroom",
+        "kitchen",
+        "outdoor",
+        "living room"
+      ],
+      "unexpected_categories": [
+        "Exterior",
+        "Other"
+      ],
+      "match_rate": 0.0
+    },
+    "potential_improvements": [],
+    "label_quality_assessment": {
+      "generic_labels_found": 0,
+      "specific_labels_found": 0,
+      "generic_to_specific_ratio": "infinite",
+      "quality_score": 0
+    },
+    "recommendations": [
+      "Algorithm may need tuning - low match rate with expected categories"
+    ]
+  }
+}

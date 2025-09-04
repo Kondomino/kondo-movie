@@ -1,0 +1,550 @@
+{
+  "shot_mode_only": {
+    "config_name": "shot_mode_only",
+    "config": {
+      "use_label_detection": true,
+      "label_detection_mode": "SHOT_MODE",
+      "model": "builtin/stable",
+      "video_confidence_threshold": 0.5,
+      "use_shot_detection": true
+    },
+    "video_uri": "gs://editora-v2-users/tests/video-intelligence/two_rooms_optimized.mp4",
+    "segment_labels": [
+      {
+        "description": "wood flooring",
+        "entity_id": "/m/027xhm0",
+        "is_scene_related": false,
+        "max_confidence": 0.598766028881073,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.598766028881073
+          }
+        ]
+      },
+      {
+        "description": "hardwood",
+        "entity_id": "/m/020g49",
+        "is_scene_related": false,
+        "max_confidence": 0.5992308855056763,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.5992308855056763
+          }
+        ]
+      },
+      {
+        "description": "flooring",
+        "entity_id": "/m/01c34b",
+        "is_scene_related": false,
+        "max_confidence": 0.6835359334945679,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.6835359334945679
+          }
+        ]
+      },
+      {
+        "description": "tile",
+        "entity_id": "/m/021w6f",
+        "is_scene_related": false,
+        "max_confidence": 0.578340470790863,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.578340470790863
+          }
+        ]
+      },
+      {
+        "description": "wood",
+        "entity_id": "/m/083vt",
+        "is_scene_related": false,
+        "max_confidence": 0.5177484154701233,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.5177484154701233
+          }
+        ]
+      },
+      {
+        "description": "room",
+        "entity_id": "/m/06ht1",
+        "is_scene_related": true,
+        "max_confidence": 0.7402945160865784,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.7402945160865784
+          }
+        ]
+      },
+      {
+        "description": "floor",
+        "entity_id": "/m/0l7_8",
+        "is_scene_related": false,
+        "max_confidence": 0.5697897672653198,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.5697897672653198
+          }
+        ]
+      }
+    ],
+    "frame_labels": [],
+    "shot_annotations": [
+      {
+        "shot_number": 1,
+        "start_time": 0.0,
+        "end_time": 27.0,
+        "duration": 27.0
+      }
+    ]
+  },
+  "shot_mode_high_confidence": {
+    "config_name": "shot_mode_high_confidence",
+    "config": {
+      "use_label_detection": true,
+      "label_detection_mode": "SHOT_MODE",
+      "model": "builtin/stable",
+      "video_confidence_threshold": 0.7,
+      "use_shot_detection": true
+    },
+    "video_uri": "gs://editora-v2-users/tests/video-intelligence/two_rooms_optimized.mp4",
+    "segment_labels": [
+      {
+        "description": "room",
+        "entity_id": "/m/06ht1",
+        "is_scene_related": true,
+        "max_confidence": 0.7402945160865784,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.7402945160865784
+          }
+        ]
+      }
+    ],
+    "frame_labels": [],
+    "shot_annotations": [
+      {
+        "shot_number": 1,
+        "start_time": 0.0,
+        "end_time": 27.0,
+        "duration": 27.0
+      }
+    ]
+  },
+  "shot_mode_latest_model": {
+    "config_name": "shot_mode_latest_model",
+    "config": {
+      "use_label_detection": true,
+      "label_detection_mode": "SHOT_MODE",
+      "model": "builtin/latest",
+      "video_confidence_threshold": 0.6,
+      "use_shot_detection": true
+    },
+    "video_uri": "gs://editora-v2-users/tests/video-intelligence/two_rooms_optimized.mp4",
+    "segment_labels": [],
+    "frame_labels": [],
+    "shot_annotations": [
+      {
+        "shot_number": 1,
+        "start_time": 0.0,
+        "end_time": 27.0,
+        "duration": 27.0
+      }
+    ]
+  },
+  "frame_mode_filtered": {
+    "config_name": "frame_mode_filtered",
+    "config": {
+      "use_label_detection": true,
+      "label_detection_mode": "FRAME_MODE",
+      "model": "builtin/stable",
+      "frame_confidence_threshold": 0.8,
+      "use_shot_detection": true
+    },
+    "video_uri": "gs://editora-v2-users/tests/video-intelligence/two_rooms_optimized.mp4",
+    "segment_labels": [
+      {
+        "description": "room",
+        "entity_id": "/m/06ht1",
+        "is_scene_related": true,
+        "max_confidence": 0.7402945160865784,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.7402945160865784
+          }
+        ]
+      },
+      {
+        "description": "tile",
+        "entity_id": "/m/021w6f",
+        "is_scene_related": false,
+        "max_confidence": 0.578340470790863,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.578340470790863
+          }
+        ]
+      },
+      {
+        "description": "flooring",
+        "entity_id": "/m/01c34b",
+        "is_scene_related": false,
+        "max_confidence": 0.6835359334945679,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.6835359334945679
+          }
+        ]
+      },
+      {
+        "description": "hardwood",
+        "entity_id": "/m/020g49",
+        "is_scene_related": false,
+        "max_confidence": 0.5992308855056763,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.5992308855056763
+          }
+        ]
+      },
+      {
+        "description": "living room",
+        "entity_id": "/m/03f6tq",
+        "is_scene_related": true,
+        "max_confidence": 0.4006035029888153,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.4006035029888153
+          }
+        ]
+      },
+      {
+        "description": "laminate flooring",
+        "entity_id": "/m/04xvs0",
+        "is_scene_related": false,
+        "max_confidence": 0.4504328966140747,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.4504328966140747
+          }
+        ]
+      },
+      {
+        "description": "wood flooring",
+        "entity_id": "/m/027xhm0",
+        "is_scene_related": false,
+        "max_confidence": 0.598766028881073,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.598766028881073
+          }
+        ]
+      },
+      {
+        "description": "furniture",
+        "entity_id": "/m/0c_jw",
+        "is_scene_related": false,
+        "max_confidence": 0.4772520959377289,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.4772520959377289
+          }
+        ]
+      },
+      {
+        "description": "floor",
+        "entity_id": "/m/0l7_8",
+        "is_scene_related": false,
+        "max_confidence": 0.5697897672653198,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.5697897672653198
+          }
+        ]
+      },
+      {
+        "description": "wood",
+        "entity_id": "/m/083vt",
+        "is_scene_related": false,
+        "max_confidence": 0.5177484154701233,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.5177484154701233
+          }
+        ]
+      }
+    ],
+    "frame_labels": [
+      {
+        "description": "room",
+        "entity_id": "/m/06ht1",
+        "is_scene_related": true,
+        "max_confidence": 0.9224112629890442,
+        "frames": [
+          {
+            "time_offset": 2.0,
+            "confidence": 0.8802940845489502
+          },
+          {
+            "time_offset": 4.0,
+            "confidence": 0.8453906178474426
+          },
+          {
+            "time_offset": 7.0,
+            "confidence": 0.8641013503074646
+          },
+          {
+            "time_offset": 8.0,
+            "confidence": 0.9207891225814819
+          },
+          {
+            "time_offset": 9.0,
+            "confidence": 0.9195756912231445
+          },
+          {
+            "time_offset": 10.0,
+            "confidence": 0.8745529651641846
+          },
+          {
+            "time_offset": 15.0,
+            "confidence": 0.8442678451538086
+          },
+          {
+            "time_offset": 16.0,
+            "confidence": 0.8657740354537964
+          },
+          {
+            "time_offset": 17.0,
+            "confidence": 0.9079950451850891
+          },
+          {
+            "time_offset": 18.0,
+            "confidence": 0.9021764397621155
+          },
+          {
+            "time_offset": 19.0,
+            "confidence": 0.8575370907783508
+          },
+          {
+            "time_offset": 25.0,
+            "confidence": 0.9057042002677917
+          },
+          {
+            "time_offset": 26.0,
+            "confidence": 0.9199032187461853
+          },
+          {
+            "time_offset": 27.0,
+            "confidence": 0.9224112629890442
+          }
+        ]
+      },
+      {
+        "description": "interior design",
+        "entity_id": "/m/02rfdq",
+        "is_scene_related": true,
+        "max_confidence": 0.8193403482437134,
+        "frames": [
+          {
+            "time_offset": 19.0,
+            "confidence": 0.8193403482437134
+          }
+        ]
+      },
+      {
+        "description": "living room",
+        "entity_id": "/m/03f6tq",
+        "is_scene_related": true,
+        "max_confidence": 0.852618932723999,
+        "frames": [
+          {
+            "time_offset": 19.0,
+            "confidence": 0.852618932723999
+          }
+        ]
+      }
+    ],
+    "shot_annotations": [
+      {
+        "shot_number": 1,
+        "start_time": 0.0,
+        "end_time": 27.0,
+        "duration": 27.0
+      }
+    ]
+  },
+  "combined_optimized": {
+    "config_name": "combined_optimized",
+    "config": {
+      "use_label_detection": true,
+      "label_detection_mode": "SHOT_AND_FRAME_MODE",
+      "model": "builtin/stable",
+      "video_confidence_threshold": 0.6,
+      "frame_confidence_threshold": 0.8,
+      "use_shot_detection": true
+    },
+    "video_uri": "gs://editora-v2-users/tests/video-intelligence/two_rooms_optimized.mp4",
+    "segment_labels": [
+      {
+        "description": "flooring",
+        "entity_id": "/m/01c34b",
+        "is_scene_related": false,
+        "max_confidence": 0.6835359334945679,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.6835359334945679
+          }
+        ]
+      },
+      {
+        "description": "room",
+        "entity_id": "/m/06ht1",
+        "is_scene_related": true,
+        "max_confidence": 0.7402945160865784,
+        "segments": [
+          {
+            "start_time": 0.0,
+            "end_time": 27.0,
+            "confidence": 0.7402945160865784
+          }
+        ]
+      }
+    ],
+    "frame_labels": [
+      {
+        "description": "interior design",
+        "entity_id": "/m/02rfdq",
+        "is_scene_related": true,
+        "max_confidence": 0.8193403482437134,
+        "frames": [
+          {
+            "time_offset": 19.0,
+            "confidence": 0.8193403482437134
+          }
+        ]
+      },
+      {
+        "description": "living room",
+        "entity_id": "/m/03f6tq",
+        "is_scene_related": true,
+        "max_confidence": 0.852618932723999,
+        "frames": [
+          {
+            "time_offset": 19.0,
+            "confidence": 0.852618932723999
+          }
+        ]
+      },
+      {
+        "description": "room",
+        "entity_id": "/m/06ht1",
+        "is_scene_related": true,
+        "max_confidence": 0.9224112629890442,
+        "frames": [
+          {
+            "time_offset": 2.0,
+            "confidence": 0.8802940845489502
+          },
+          {
+            "time_offset": 4.0,
+            "confidence": 0.8453906178474426
+          },
+          {
+            "time_offset": 7.0,
+            "confidence": 0.8641013503074646
+          },
+          {
+            "time_offset": 8.0,
+            "confidence": 0.9207891225814819
+          },
+          {
+            "time_offset": 9.0,
+            "confidence": 0.9195756912231445
+          },
+          {
+            "time_offset": 10.0,
+            "confidence": 0.8745529651641846
+          },
+          {
+            "time_offset": 15.0,
+            "confidence": 0.8442678451538086
+          },
+          {
+            "time_offset": 16.0,
+            "confidence": 0.8657740354537964
+          },
+          {
+            "time_offset": 17.0,
+            "confidence": 0.9079950451850891
+          },
+          {
+            "time_offset": 18.0,
+            "confidence": 0.9021764397621155
+          },
+          {
+            "time_offset": 19.0,
+            "confidence": 0.8575370907783508
+          },
+          {
+            "time_offset": 25.0,
+            "confidence": 0.9057042002677917
+          },
+          {
+            "time_offset": 26.0,
+            "confidence": 0.9199032187461853
+          },
+          {
+            "time_offset": 27.0,
+            "confidence": 0.9224112629890442
+          }
+        ]
+      }
+    ],
+    "shot_annotations": [
+      {
+        "shot_number": 1,
+        "start_time": 0.0,
+        "end_time": 27.0,
+        "duration": 27.0
+      }
+    ]
+  }
+}

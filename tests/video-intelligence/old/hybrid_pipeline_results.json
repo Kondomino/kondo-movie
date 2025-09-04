@@ -1,0 +1,729 @@
+{
+  "video_uri": "gs://editora-v2-users/tests/video-intelligence/two_rooms_hybrid.mp4",
+  "analysis_config": "balanced_refined_hybrid",
+  "processing_time": 18.18,
+  "cost_estimate": 0.0,
+  "refined_scenes": [
+    {
+      "scene_type": "room",
+      "start_time": 2.0,
+      "end_time": 27.0,
+      "duration": 25.0,
+      "confidence": 0.895067885518074,
+      "keyframe_timestamp": 14.5,
+      "frame_count": 12,
+      "supporting_frames": [
+        {
+          "time": 2.0,
+          "confidence": 0.8802940845489502,
+          "description": "room"
+        },
+        {
+          "time": 7.0,
+          "confidence": 0.8641013503074646,
+          "description": "room"
+        },
+        {
+          "time": 8.0,
+          "confidence": 0.9207891225814819,
+          "description": "room"
+        },
+        {
+          "time": 9.0,
+          "confidence": 0.9195756912231445,
+          "description": "room"
+        },
+        {
+          "time": 10.0,
+          "confidence": 0.8745530247688293,
+          "description": "room"
+        },
+        {
+          "time": 16.0,
+          "confidence": 0.8657740354537964,
+          "description": "room"
+        },
+        {
+          "time": 17.0,
+          "confidence": 0.9079951047897339,
+          "description": "room"
+        },
+        {
+          "time": 18.0,
+          "confidence": 0.9021764397621155,
+          "description": "room"
+        },
+        {
+          "time": 19.0,
+          "confidence": 0.8575370907783508,
+          "description": "room"
+        },
+        {
+          "time": 25.0,
+          "confidence": 0.9057042002677917,
+          "description": "room"
+        },
+        {
+          "time": 26.0,
+          "confidence": 0.9199032187461853,
+          "description": "room"
+        },
+        {
+          "time": 27.0,
+          "confidence": 0.9224112629890442,
+          "description": "room"
+        }
+      ],
+      "scene_id": "scene_1"
+    }
+  ],
+  "metadata": {
+    "total_scenes": 1,
+    "scenes_refined_by_vision": 0,
+    "keyframes_extracted": 0,
+    "vision_api_calls": 0,
+    "fallback_scenes": 0,
+    "video_intelligence_only": 0,
+    "video_duration": 27.0
+  },
+  "raw_data": {
+    "video_intelligence_results": {
+      "config": {
+        "use_label_detection": true,
+        "label_detection_mode": "SHOT_AND_FRAME_MODE",
+        "model": "builtin/stable",
+        "video_confidence_threshold": 0.85,
+        "frame_confidence_threshold": 0.85,
+        "use_shot_detection": true,
+        "shot_detection_model": "builtin/stable"
+      },
+      "video_duration": 27.0,
+      "raw_segment_labels": [],
+      "raw_frame_labels": [
+        {
+          "description": "hardwood",
+          "entity_id": "/m/020g49",
+          "max_confidence": 0.9359132051467896,
+          "frames": [
+            {
+              "time_offset": 0.0,
+              "confidence": 0.8997466564178467
+            },
+            {
+              "time_offset": 1.0,
+              "confidence": 0.9172547459602356
+            },
+            {
+              "time_offset": 2.0,
+              "confidence": 0.8580067753791809
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.9238304495811462
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.8899739980697632
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.9359132051467896
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.9174619317054749
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.9237511157989502
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.857383668422699
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.8541639447212219
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.8595024347305298
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.8605912923812866
+            }
+          ]
+        },
+        {
+          "description": "laminate flooring",
+          "entity_id": "/m/04xvs0",
+          "max_confidence": 0.9459202885627747,
+          "frames": [
+            {
+              "time_offset": 0.0,
+              "confidence": 0.8868259787559509
+            },
+            {
+              "time_offset": 1.0,
+              "confidence": 0.8972092270851135
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.9377230405807495
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.8973868489265442
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.9459202885627747
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.8705414533615112
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.8845182061195374
+            }
+          ]
+        },
+        {
+          "description": "tile",
+          "entity_id": "/m/021w6f",
+          "max_confidence": 0.9196561574935913,
+          "frames": [
+            {
+              "time_offset": 0.0,
+              "confidence": 0.8649696707725525
+            },
+            {
+              "time_offset": 14.0,
+              "confidence": 0.9150096774101257
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.9196561574935913
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.8584505319595337
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.8895071744918823
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.8929052948951721
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.885664165019989
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.8743323087692261
+            }
+          ]
+        },
+        {
+          "description": "property",
+          "entity_id": "/m/05wrt",
+          "max_confidence": 0.9136434197425842,
+          "frames": [
+            {
+              "time_offset": 0.0,
+              "confidence": 0.8755243420600891
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.8759912252426147
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.9029538631439209
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.9136434197425842
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.8992098569869995
+            },
+            {
+              "time_offset": 17.0,
+              "confidence": 0.8839504718780518
+            },
+            {
+              "time_offset": 18.0,
+              "confidence": 0.884750485420227
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.8922712802886963
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.8974930644035339
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.9045479893684387
+            }
+          ]
+        },
+        {
+          "description": "flooring",
+          "entity_id": "/m/01c34b",
+          "max_confidence": 0.9517928957939148,
+          "frames": [
+            {
+              "time_offset": 0.0,
+              "confidence": 0.9130684733390808
+            },
+            {
+              "time_offset": 1.0,
+              "confidence": 0.9335795640945435
+            },
+            {
+              "time_offset": 2.0,
+              "confidence": 0.9126152396202087
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.9442049860954285
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.8888580799102783
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.9504625201225281
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.9110078811645508
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.9517928957939148
+            },
+            {
+              "time_offset": 14.0,
+              "confidence": 0.8742457032203674
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.9219608902931213
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.8919568061828613
+            },
+            {
+              "time_offset": 18.0,
+              "confidence": 0.9148648977279663
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.9235566854476929
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.9214369654655457
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.9138323068618774
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.9202165007591248
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.9276688098907471
+            }
+          ]
+        },
+        {
+          "description": "mattress",
+          "entity_id": "/m/03dg8j",
+          "max_confidence": 0.9016543030738831,
+          "frames": [
+            {
+              "time_offset": 7.0,
+              "confidence": 0.9016543030738831
+            }
+          ]
+        },
+        {
+          "description": "room",
+          "entity_id": "/m/06ht1",
+          "max_confidence": 0.9224112629890442,
+          "frames": [
+            {
+              "time_offset": 2.0,
+              "confidence": 0.8802940845489502
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.8641013503074646
+            },
+            {
+              "time_offset": 8.0,
+              "confidence": 0.9207891225814819
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.9195756912231445
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.8745530247688293
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.8657740354537964
+            },
+            {
+              "time_offset": 17.0,
+              "confidence": 0.9079951047897339
+            },
+            {
+              "time_offset": 18.0,
+              "confidence": 0.9021764397621155
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.8575370907783508
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.9057042002677917
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.9199032187461853
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.9224112629890442
+            }
+          ],
+          "filtered_reason": "scene_related"
+        },
+        {
+          "description": "living room",
+          "entity_id": "/m/03f6tq",
+          "max_confidence": 0.852618932723999,
+          "frames": [
+            {
+              "time_offset": 19.0,
+              "confidence": 0.852618932723999
+            }
+          ],
+          "filtered_reason": "scene_related"
+        },
+        {
+          "description": "wood",
+          "entity_id": "/m/083vt",
+          "max_confidence": 0.9203646183013916,
+          "frames": [
+            {
+              "time_offset": 1.0,
+              "confidence": 0.8791224956512451
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.8974071741104126
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.8673408627510071
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.9203646183013916
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.882469654083252
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.9032118320465088
+            }
+          ]
+        },
+        {
+          "description": "desk",
+          "entity_id": "/m/01y9k5",
+          "max_confidence": 0.9435285329818726,
+          "frames": [
+            {
+              "time_offset": 3.0,
+              "confidence": 0.9435285329818726
+            }
+          ]
+        },
+        {
+          "description": "wood flooring",
+          "entity_id": "/m/027xhm0",
+          "max_confidence": 0.9121726155281067,
+          "frames": [
+            {
+              "time_offset": 1.0,
+              "confidence": 0.8822159767150879
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.9033923745155334
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.8877713084220886
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.9121726155281067
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.859224796295166
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.8578276634216309
+            }
+          ]
+        },
+        {
+          "description": "floor",
+          "entity_id": "/m/0l7_8",
+          "max_confidence": 0.9714694619178772,
+          "frames": [
+            {
+              "time_offset": 0.0,
+              "confidence": 0.9400008320808411
+            },
+            {
+              "time_offset": 1.0,
+              "confidence": 0.9499484300613403
+            },
+            {
+              "time_offset": 2.0,
+              "confidence": 0.9616885185241699
+            },
+            {
+              "time_offset": 5.0,
+              "confidence": 0.8849478960037231
+            },
+            {
+              "time_offset": 6.0,
+              "confidence": 0.9624344706535339
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.9633811116218567
+            },
+            {
+              "time_offset": 8.0,
+              "confidence": 0.8897634744644165
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.8959278464317322
+            },
+            {
+              "time_offset": 10.0,
+              "confidence": 0.9714694619178772
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.951244592666626
+            },
+            {
+              "time_offset": 12.0,
+              "confidence": 0.962197482585907
+            },
+            {
+              "time_offset": 13.0,
+              "confidence": 0.8767291903495789
+            },
+            {
+              "time_offset": 14.0,
+              "confidence": 0.9381936192512512
+            },
+            {
+              "time_offset": 15.0,
+              "confidence": 0.9612565040588379
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.9544716477394104
+            },
+            {
+              "time_offset": 17.0,
+              "confidence": 0.8936759233474731
+            },
+            {
+              "time_offset": 18.0,
+              "confidence": 0.961155354976654
+            },
+            {
+              "time_offset": 19.0,
+              "confidence": 0.9691975712776184
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.9630470871925354
+            },
+            {
+              "time_offset": 21.0,
+              "confidence": 0.8738425970077515
+            },
+            {
+              "time_offset": 22.0,
+              "confidence": 0.8592064380645752
+            },
+            {
+              "time_offset": 23.0,
+              "confidence": 0.9621445536613464
+            },
+            {
+              "time_offset": 24.0,
+              "confidence": 0.9658316373825073
+            },
+            {
+              "time_offset": 25.0,
+              "confidence": 0.9658170938491821
+            },
+            {
+              "time_offset": 26.0,
+              "confidence": 0.9010677933692932
+            },
+            {
+              "time_offset": 27.0,
+              "confidence": 0.8911446928977966
+            }
+          ]
+        },
+        {
+          "description": "bed",
+          "entity_id": "/m/03ssj5",
+          "max_confidence": 0.9194761514663696,
+          "frames": [
+            {
+              "time_offset": 7.0,
+              "confidence": 0.9194761514663696
+            }
+          ]
+        },
+        {
+          "description": "chair",
+          "entity_id": "/m/01mzpv",
+          "max_confidence": 0.9484661817550659,
+          "frames": [
+            {
+              "time_offset": 2.0,
+              "confidence": 0.903670608997345
+            },
+            {
+              "time_offset": 4.0,
+              "confidence": 0.9484661817550659
+            }
+          ]
+        },
+        {
+          "description": "table",
+          "entity_id": "/m/04bcr3",
+          "max_confidence": 0.9170954823493958,
+          "frames": [
+            {
+              "time_offset": 3.0,
+              "confidence": 0.9170954823493958
+            },
+            {
+              "time_offset": 17.0,
+              "confidence": 0.8554518222808838
+            }
+          ]
+        },
+        {
+          "description": "bed frame",
+          "entity_id": "/m/0h70h_",
+          "max_confidence": 0.9458364844322205,
+          "frames": [
+            {
+              "time_offset": 7.0,
+              "confidence": 0.9458364844322205
+            }
+          ]
+        },
+        {
+          "description": "furniture",
+          "entity_id": "/m/0c_jw",
+          "max_confidence": 0.9782835245132446,
+          "frames": [
+            {
+              "time_offset": 2.0,
+              "confidence": 0.9207753539085388
+            },
+            {
+              "time_offset": 3.0,
+              "confidence": 0.9782835245132446
+            },
+            {
+              "time_offset": 4.0,
+              "confidence": 0.9694089889526367
+            },
+            {
+              "time_offset": 7.0,
+              "confidence": 0.972480058670044
+            },
+            {
+              "time_offset": 8.0,
+              "confidence": 0.9118380546569824
+            },
+            {
+              "time_offset": 9.0,
+              "confidence": 0.9484935402870178
+            },
+            {
+              "time_offset": 11.0,
+              "confidence": 0.8792715072631836
+            },
+            {
+              "time_offset": 16.0,
+              "confidence": 0.8838502168655396
+            },
+            {
+              "time_offset": 17.0,
+              "confidence": 0.9223765134811401
+            },
+            {
+              "time_offset": 20.0,
+              "confidence": 0.8662022948265076
+            }
+          ]
+        }
+      ],
+      "shot_annotations": [
+        {
+          "shot_number": 1,
+          "start_time": 0.0,
+          "end_time": 27.0,
+          "duration": 27.0
+        }
+      ]
+    },
+    "keyframes": [],
+    "vision_results": []
+  }
+}

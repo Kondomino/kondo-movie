@@ -1,0 +1,243 @@
+{
+    "canonicalListingURL": "/ca/palo-alto/4100-old-adobe-rd/lid-P00800000GiKfPAnVWmlNKXlZKSgTcY6ePKVbeoK",
+    "price": {
+        "listPrice": 4500000,
+        "originalListPrice": 4500000,
+        "currency": "USD"
+    },
+    "summary": {
+        "addressLine1": "4100 Old Adobe Road",
+        "addressLine3": "Palo Alto, CA 94306",
+        "listPrice": "$4,500,000",
+        "closedListPrice": "$4,500,000",
+        "bedroomsTotal": 3,
+        "bathroomsTotal": 3,
+        "listingSqFt": 2640,
+        "squareFeet": "2,640",
+        "propertyType": "Single Family",
+        "standardStatus": "PENDING",
+        "geogsonLocation": {
+            "lat": 37.39503833,
+            "lng": -122.140699
+        },
+        "listingAttribution": {
+            "listedBy": [
+                {
+                    "agentName": "Young Platinum Group"
+                }
+            ],
+            "agentOffices": [
+                {
+                    "officeName": "Golden Gate Sotheby'S International Realty"
+                }
+            ],
+            "lastUpdatedTimestamp": "November 17, 2024, 08:23 AM",
+            "agentOrOfficePhoneEmail": "650-847-1141",
+            "mlsListingId": "ML81976945",
+            "sourceName": "CRMLS",
+            "displayOrder": {
+                "listByDesc": false,
+                "officesDesc": false
+            },
+            "isBrandListing": false
+        },
+        "isAddressHidden": false,
+        "isPriceHidden": false,
+        "isSoldListing": false,
+        "isVirtualTourAvailable": false
+    },
+    "about": {
+        "addressLine1": "4100 Old Adobe Road",
+        "isPropertyTypeLand": false,
+        "description": "Welcome to this sophisticated and extensively updated home on an acre of mature oaks, lush young redwoods, and rolling lavender hillsides. The three-bedroom, two-and-a-half-bathroom home spans 2,640 square feet and blends modern sophistication with classical elegance. Enter through regal pedestrian gates with decorative wrought iron scrollwork and explore the multiple levels connected by graceful, illuminated walkways and a stunning 8-foot-wide staircase flanked by Italianate white balusters. Newly built retaining walls enable grounds that include a 2-car garage, ample outdoor parking, a large greenhouse, a playhouse, and tremendous expansion potential. A wide balcony wraps three sides of the home, creating graceful indoor-outdoor flow. Inside, natural light floods through eight 8-foot-wide sliding doors, ceilings soar to 12.5 feet, and deluxe bathrooms boast luxurious vanities, Toto Neorest toilets, and lighted oversized anti-fog mirrors. The interior, exterior, and landscaping have been significantly upgraded in 2022. This spectacular home offers privacy, beauty, and access to top Palo Alto schools, Silicon Valley employers, and Stanford University-- a perfect blend of luxury and convenience.",
+        "homeFacts": {
+            "propertyType": "Single Family",
+            "bathroomsTotal": 3,
+            "bedroomsTotal": 3,
+            "yearBuilt": 1974
+        },
+        "priceSummary": {
+            "listPrice": "4,500,000",
+            "pricePerSqFt": "$1,704 per Sq. Ft."
+        },
+        "mlsListingId": "ML81976945",
+        "lastUpdatedTimestamp": "November 17, 2024, 08:23 AM",
+        "added": "13 day(s) ago"
+    },
+    "roomAndInterior": {
+        "bedrooms": {
+            "bedroomsTotal": 3
+        },
+        "bathrooms": {
+            "bathroomsTotal": 3,
+            "bathroomsFull": 2
+        },
+        "interior": {
+            "livingArea": "2,640"
+        }
+    },
+    "address": {
+        "postalCode": "94306",
+        "stateOrProvince": "CA",
+        "stateOrProvinceName": "California",
+        "countyOrParish": "Santa Clara",
+        "city": "Palo Alto",
+        "unparsedAddress": "4100 Old Adobe Road",
+        "streetName": "Old Adobe Road",
+        "streetNumber": "4100",
+        "country": "US",
+        "countryCode": "US",
+        "countryName": "United States",
+        "country_name": "United States"
+    },
+    "structure": {
+        "structureDetails": {
+            "buildingArea": "2,640",
+            "yearBuilt": 1974
+        }
+    },
+    "lot": {
+        "lotSizeSquareFeet": "43,546",
+        "lotSizeAcres": "1.00"
+    },
+    "finances": {
+        "finances": {
+            "listPrice": "$4,500,000",
+            "pricePerSqFt": "$1,704 per Sq. Ft."
+        }
+    },
+    "locationAndSchools": {
+        "neighborhood": "Palo Alto",
+        "county": "Santa Clara"
+    },
+    "media": {
+        "images": [
+            {
+                "indexNum": 0,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P00.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 1,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P01.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 2,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P02.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 3,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P03.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 4,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P04.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 5,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P05.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 6,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P06.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 7,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P07.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 8,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P08.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 9,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P09.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 10,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P10.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 11,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P11.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 12,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P12.jpg",
+                "isPortrait": false
+            },
+            {
+                "indexNum": 13,
+                "mediaUrl": "https://images-listings.coldwellbanker.com/CRMLS/ML/81/97/69/45/_P/ML81976945_P13.jpg",
+                "isPortrait": false
+            }
+        ]
+    },
+    "idxFeedAttribution": {
+        "idxFeedAttributionCompany": "Coldwell Banker Top Team"
+    },
+    "listingMasterId": "P00800000GiKfPAnVWmlNKXlZKSgTcY6ePKVbeoK",
+    "contactForm": {
+        "mlsListingId": "ML81976945",
+        "postalCode": "94306",
+        "addressLine1": "4100 Old Adobe Road"
+    },
+    "disclaimerAttribution": {
+        "disclaimer": "The information being provided by California Regional MLS (Southern California) is for the consumer's personal, non-commercial use and may not be used for any purpose other than to identify prospective properties consumer may be interested in purchasing. Any information relating to real estate for sale referenced on this web site comes from the Internet Data Exchange (IDX) program of the California Regional MLS (Southern California). Coldwell Banker Top Team is not a Multiple Listing Service (MLS), nor does it offer MLS access. This website is a service of Coldwell Banker Top Team, a broker participant of California Regional MLS (Southern California). This web site may reference real estate listing(s) held by a brokerage firm other than the broker and/or agent who owns this web site.\n\nThe accuracy of all information, regardless of source, including but not limited to open house information, square footages and lot sizes, is deemed reliable but not guaranteed and should be personally verified through personal inspection by and/or with the appropriate professionals. The data contained herein is copyrighted by California Regional MLS (Southern California) and is protected by all applicable copyright laws. Any unauthorized dissemination of this information is in violation of copyright laws and is strictly prohibited.\n\nCopyright 2021 California Regional MLS (Southern California). All rights reserved.",
+        "mlsSource": "CRMLS"
+    },
+    "breadCrumb": {
+        "state": {
+            "label": "California",
+            "id": "california"
+        },
+        "city": {
+            "label": "Palo Alto",
+            "id": "P02500000GAehHYDXAEG9iqD5qExUirTJaKqO1y6"
+        },
+        "stateOrProvince": "CA"
+    },
+    "titleAndMeta": {
+        "city": "Palo Alto",
+        "state": "CA",
+        "postalCode": "94306",
+        "mlsListingId": "ML81976945",
+        "address": "4100 Old Adobe Road"
+    },
+    "mlsLongName": "California Regional MLS (Southern California)",
+    "isSoldListing": false,
+    "source": "CRMLS",
+    "cookieInfo": {
+        "stateCode": "CA",
+        "state": "California",
+        "postalCode": "94306",
+        "county": "Santa Clara",
+        "entityType": "city",
+        "placeMasterId": "P02500000GAehHYDXAEG9iqD5qExUirTJaKqO1y6",
+        "placeDisplayName": "Palo Alto",
+        "city": "Palo Alto"
+    },
+    "listtracData": {
+        "brandCode": "CBR",
+        "mls": "ML81976945",
+        "zip": "94306",
+        "status": "PENDING",
+        "agentId": "no agent id",
+        "rfgListingId": "63THKW"
+    },
+    "hidePrice": false,
+    "propDetailsDisplayAttributionFontSizeSold": false,
+    "propDetailsDisplayDisclaimerFontSize": false,
+    "displayCompanyLeadFormContact": "Your message will be sent to a Coldwell Banker Agent"
+}
