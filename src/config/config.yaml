@@ -41,20 +41,43 @@ Authentication:
     ]
   RESTRICTED_TEMPLATES: []
 
+FeatureFlags:
+  ENABLE_AUTHENTICATION: false    # Stytch - when false, API becomes public
+  ENABLE_EMAIL_SERVICES: false    # Mandrill/Mailchimp email services
+  ENABLE_URL_SHORTENING: false    # Short.io URL shortening
+  ENABLE_WEB_SCRAPING: false      # All scraping services (Scrapfly + all scrapers)
+  ENABLE_GOOGLE_MAPS: false       # Google Maps API for address services
+  ENABLE_ELEVEN_LABS: true        # ElevenLabs TTS
+  ENABLE_ASSEMBLY_AI: false       # AssemblyAI transcription
+  ENABLE_OPENAI: true             # OpenAI API services
+  ENABLE_DIGITAL_OCEAN_STORAGE: true  # Digital Ocean Spaces storage
+
 Secret:
-  SHORTIO_API_KEY: "SHORT_IO"
-  JWT_SECRET_KEY: "JWT_SECRET"
-  STYTCH_SECRET_KEY: "STYTCH_SECRET"
-  MAILCHIMP_API_KEY: "Mandrill_API_Key"
-  OPENAI_API_KEY: "OPENAI_API_KEY"
-  ASSEMBLY_AI_TRANSCRIBER_API_KEY: "ASSEMBLY_AI_TRANSCRIBER_API_KEY"
-  ELEVEN_LABS_API_KEY: "Eleven_Labs_API_Key"
-  GOOGLE_MAPS_API_KEY: "GOOGLE_MAPS_API_KEY"
-  SCRAPFLY_API_KEY: "Scrapfly"
+  JWT_SECRET_KEY: "JWT_SECRET"                    # Keep existing
+  STYTCH_SECRET_KEY: "_STYTCH_SECRET"             # New env var
+  MANDRILL_API_KEY: "_MANDRILL_API_KEY"           # New env var (renamed from MAILCHIMP_API_KEY)
+  MAILCHIMP_API_KEY: "_MAILCHIMP_API_KEY"         # New env var (separate from Mandrill)
+  SHORTIO_API_KEY: "_SHORT_IO"                    # New env var
+  SCRAPFLY_API_KEY: "_SCRAPFLY_API_KEY"           # New env var
+  GOOGLE_MAPS_API_KEY: "_GOOGLE_MAPS_API_KEY"     # New env var
+  ELEVEN_LABS_API_KEY: "_ELEVEN_LABS_API_KEY"     # New env var
+  ASSEMBLY_AI_TRANSCRIBER_API_KEY: "_ASSEMBLY_AI_TRANSCRIBER_API_KEY"  # New env var
+  OPENAI_API_KEY: "_OPENAI_API_KEY"               # New env var
 
 Engines:
   TTS: "ElevenLabs" # Options - 'OpenAI', 'ElevenLabs'
   TRANSCRIBER: "AssemblyAI" # Options - 'OpenAI', 'AssemblyAI'
+
+Storage:
+  PROVIDER: "DigitalOcean"  # Options: "GCP", "DigitalOcean"
+  
+DigitalOcean:
+  Spaces:
+    REGION: "nyc3"
+    PROPERTIES_BUCKET: "kondo-properties"
+    TEMPLATES_BUCKET: "kondo-templates"
+    USER_BUCKET: "kondo-users"
+    CDN_ENABLED: true
 
 GCP:
   PROJECT_ID: "editora-prod"

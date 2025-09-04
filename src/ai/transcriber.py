@@ -29,14 +29,26 @@ class TrsanscriberBase(metaclass=abc.ABCMeta):
     
 class Transcriber():
     def __init__(self, max_char_per_segment:int):
+        # Check feature flags before initializing engines
         if settings.Engines.TRANSCRIBER == 'AssemblyAI':
-            self.engine = Transcriber_AssemblyAI(
-                max_char_per_segment=max_char_per_segment
-            )
+            if settings.FeatureFlags.ENABLE_ASSEMBLY_AI:
+                self.engine = Transcriber_AssemblyAI(
+                    max_char_per_segment=max_char_per_segment
+                )
+            else:
+                logger.warning("AssemblyAI transcriber disabled via feature flag - using mock transcriber")
+                self.engine = Transcriber_Mock(max_char_per_segment=max_char_per_segment)
         elif settings.Engines.TRANSCRIBER == 'OpenAI':
-            self.engine = Transcriber_OpenAI(
-                max_char_per_segment=max_char_per_segment
-            )
+            if settings.FeatureFlags.ENABLE_OPENAI:
+                self.engine = Transcriber_OpenAI(
+                    max_char_per_segment=max_char_per_segment
+                )
+            else:
+                logger.warning("OpenAI transcriber disabled via feature flag - using mock transcriber")
+                self.engine = Transcriber_Mock(max_char_per_segment=max_char_per_segment)
+        else:
+            logger.warning(f"Unknown transcriber engine '{settings.Engines.TRANSCRIBER}' - using mock transcriber")
+            self.engine = Transcriber_Mock(max_char_per_segment=max_char_per_segment)
         
     def generate_captions_from_voiceover(self, 
                                          voiceover_file_path:Path, 
@@ -50,12 +62,23 @@ class Transcriber():
 class Transcriber_AssemblyAI(TrsanscriberBase):
     def __init__(self, max_char_per_segment:int):
         self.max_char_per_segment = max_char_per_segment
+        if not settings.FeatureFlags.ENABLE_ASSEMBLY_AI:
+            logger.warning("Transcriber_AssemblyAI initialized but AssemblyAI is disabled")
+            self.transcriber = None
+            return
         aai.settings.api_key = secret_mgr.secret(settings.Secret.ASSEMBLY_AI_TRANSCRIBER_API_KEY)
         self.transcriber = aai.Transcriber()
     
     def generate_captions_from_voiceover(self, 
                                          voiceover_file_path:Path, 
                                          srt_file:_TemporaryFileWrapper):
+        if not settings.FeatureFlags.ENABLE_ASSEMBLY_AI or self.transcriber is None:
+            logger.error("AssemblyAI transcription called but service is disabled")
+            # Create empty SRT file
+            srt_file.write("")
+            srt_file.close()
+            return
+            
         try:
             transcript = self.transcriber.transcribe(str(voiceover_file_path))
             srt_payload = transcript.export_subtitles_srt(chars_per_caption=self.max_char_per_segment)
@@ -71,9 +94,20 @@ class Transcriber_AssemblyAI(TrsanscriberBase):
 class Transcriber_OpenAI(TrsanscriberBase):
     def __init__(self, max_char_per_segment:int):
         self.max_char_per_segment = max_char_per_segment
+        if not settings.FeatureFlags.ENABLE_OPENAI:
+            logger.warning("Transcriber_OpenAI initialized but OpenAI is disabled")
+            self.client = None
+            return
         self.client = OpenAI(api_key=secret_mgr.secret(settings.Secret.OPENAI_API_KEY))
         
     def generate_captions_from_script(self, script:str, duration:float, srt_file:_TemporaryFileWrapper):
+        if not settings.FeatureFlags.ENABLE_OPENAI or self.client is None:
+            logger.error("OpenAI transcription called but service is disabled")
+            # Create empty SRT file
+            srt_file.write("")
+            srt_file.close()
+            return
+            
         try:
             response = self.client.chat.completions.create(
                 model=settings.OpenAI.Narration.CHAT_MODEL,
@@ -215,6 +249,18 @@ class Transcriber_OpenAI(TrsanscriberBase):
             
         except Exception as e:
             logger.exception(e)
+
+class Transcriber_Mock(TrsanscriberBase):
+    """Mock transcriber for when transcription services are disabled"""
+    
+    def __init__(self, max_char_per_segment: int):
+        self.max_char_per_segment = max_char_per_segment
+    
+    def generate_captions_from_voiceover(self, voiceover_file_path: Path, srt_file: _TemporaryFileWrapper):
+        logger.info(f"[TRANSCRIBER_MOCK] Transcription request for file: '{voiceover_file_path}' (service disabled)")
+        # Create empty SRT file - this will result in videos without captions
+        srt_file.write("")
+        srt_file.close()
         
 def main():
     

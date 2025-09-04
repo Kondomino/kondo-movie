@@ -54,6 +54,12 @@ class Address:
         logger.info(f"[ADDRESS]   - Address Components: {len(self.address_components) if self.address_components else 0} components")
     
     def parse_address_auto_complete(self)->None:
+        # Check if Google Maps API is enabled
+        if not settings.FeatureFlags.ENABLE_GOOGLE_MAPS:
+            logger.warning(f"[ADDRESS] Google Maps API disabled - using basic address parsing for: '{self.input_address}'")
+            self._use_basic_address_parsing()
+            return
+            
         # Step 1: Find Place ID
         find_place_url = 'https://places.googleapis.com/v1/places:searchText'
         headers = {
@@ -66,41 +72,48 @@ class Address:
         }
 
         logger.info(f"[ADDRESS] Calling Google Places API with textQuery: '{self.input_address}'")
-        response = requests.post(find_place_url, headers=headers, json=data)
-        response.raise_for_status()  # Raises HTTPError for bad responses (4xx or 5xx)
-        result = response.json()
-        response_data = response.json()
-
-        logger.info(f"[ADDRESS] Google Places API response status: {response.status_code}")
-        logger.info(f"[ADDRESS] Google Places API response: {response_data}")
-
-        if 'places' in response_data and response_data['places']:
-            self.place_id = response_data['places'][0]['id']
-            logger.info(f"[ADDRESS] Found place_id: {self.place_id}")
-            
-            # Step 2: Get Place Details
-            base_url = f'https://places.googleapis.com/v1/places/{self.place_id}'
-            # Request headers
-            field_mask = f'{self.KEY_ID},{self.KEY_PRIMARY_TYPE},{self.KEY_TYPES},{self.KEY_FORMATTED_ADDRESS},{self.KEY_SHORT_FORMATTED_ADDRESS},{self.KEY_ADDRESS_COMPONENTS}'
-            headers = {
-                'Content-Type': 'application/json',
-                'X-Goog-Api-Key': secret_mgr.secret(settings.Secret.GOOGLE_MAPS_API_KEY),
-                'X-Goog-FieldMask': field_mask
-            }
-            
-            logger.info(f"[ADDRESS] Calling Google Places Details API for place_id: {self.place_id}")
-            # Step 2 : Fetch formatted address
-            response = requests.get(base_url, headers=headers)
+        try:
+            response = requests.post(find_place_url, headers=headers, json=data)
             response.raise_for_status()  # Raises HTTPError for bad responses (4xx or 5xx)
             result = response.json()
-            logger.info(f"[ADDRESS] Google Places Details API response: {result}")
-            
-            self.formatted_address = result[self.KEY_FORMATTED_ADDRESS]
-            self.short_formatted_address = result[self.KEY_SHORT_FORMATTED_ADDRESS]
-            self.address_components = result[self.KEY_ADDRESS_COMPONENTS]
+            response_data = response.json()
 
-            # Generate formatted addresses without country using consistent method
-            self._set_formatted_addresses_from_short_forms()
+            logger.info(f"[ADDRESS] Google Places API response status: {response.status_code}")
+            logger.info(f"[ADDRESS] Google Places API response: {response_data}")
+
+            if 'places' in response_data and response_data['places']:
+                self.place_id = response_data['places'][0]['id']
+                logger.info(f"[ADDRESS] Found place_id: {self.place_id}")
+                
+                # Step 2: Get Place Details
+                base_url = f'https://places.googleapis.com/v1/places/{self.place_id}'
+                # Request headers
+                field_mask = f'{self.KEY_ID},{self.KEY_PRIMARY_TYPE},{self.KEY_TYPES},{self.KEY_FORMATTED_ADDRESS},{self.KEY_SHORT_FORMATTED_ADDRESS},{self.KEY_ADDRESS_COMPONENTS}'
+                headers = {
+                    'Content-Type': 'application/json',
+                    'X-Goog-Api-Key': secret_mgr.secret(settings.Secret.GOOGLE_MAPS_API_KEY),
+                    'X-Goog-FieldMask': field_mask
+                }
+                
+                logger.info(f"[ADDRESS] Calling Google Places Details API for place_id: {self.place_id}")
+                # Step 2 : Fetch formatted address
+                response = requests.get(base_url, headers=headers)
+                response.raise_for_status()  # Raises HTTPError for bad responses (4xx or 5xx)
+                result = response.json()
+                logger.info(f"[ADDRESS] Google Places Details API response: {result}")
+                
+                self.formatted_address = result[self.KEY_FORMATTED_ADDRESS]
+                self.short_formatted_address = result[self.KEY_SHORT_FORMATTED_ADDRESS]
+                self.address_components = result[self.KEY_ADDRESS_COMPONENTS]
+
+                # Generate formatted addresses without country using consistent method
+                self._set_formatted_addresses_from_short_forms()
+            else:
+                logger.warning(f"[ADDRESS] No places found for address: '{self.input_address}' - falling back to basic parsing")
+                self._use_basic_address_parsing()
+        except Exception as e:
+            logger.error(f"[ADDRESS] Google Places API failed: {str(e)} - falling back to basic parsing")
+            self._use_basic_address_parsing()
             
             logger.info(f"[ADDRESS] Parsed address details:")
             logger.info(f"[ADDRESS]   - Formatted Address: {self.formatted_address}")
@@ -346,6 +359,35 @@ class Address:
                 unique_addresses.append(address)
                 
         return unique_addresses
+    
+    def _use_basic_address_parsing(self):
+        """
+        Fallback method for basic address parsing when Google Maps API is disabled.
+        Uses simple string manipulation to extract address components.
+        """
+        logger.info(f"[ADDRESS] Using basic address parsing for: '{self.input_address}'")
+        
+        # Set basic fields
+        self.place_id = None
+        self.formatted_address = self.input_address
+        self.primary_type = None
+        self.types = None
+        self.address_components = None
+        
+        # Try to create a reasonable short formatted address
+        # Split by comma and take first two parts (street + city)
+        parts = self.input_address.split(',')
+        if len(parts) >= 2:
+            self.short_formatted_address = f"{parts[0].strip()}, {parts[1].strip()}"
+            self.formatted_address_without_country = ', '.join(part.strip() for part in parts[:-1]) if len(parts) > 2 else self.input_address
+        else:
+            self.short_formatted_address = self.input_address
+            self.formatted_address_without_country = self.input_address
+        
+        logger.info(f"[ADDRESS] Basic parsing results:")
+        logger.info(f"[ADDRESS]   - Formatted Address: {self.formatted_address}")
+        logger.info(f"[ADDRESS]   - Short Formatted Address: {self.short_formatted_address}")
+        logger.info(f"[ADDRESS]   - Formatted Address without Country: {self.formatted_address_without_country}")
         
             
     def __str__(self):

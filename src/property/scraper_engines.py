@@ -8,6 +8,7 @@ and tenant-specific configurations.
 
 from typing import List, Dict, Any, Type
 from logger import logger
+from config.config import settings
 
 # Import all available scrapers
 from property.scrapers.daniel_gale import DanielGale
@@ -86,6 +87,11 @@ class ScraperEngineManager:
             List of instantiated scraper engines in priority order
         """
         logger.info(f"[SCRAPER_ENGINE_MANAGER] Getting engines for tenant_id: '{tenant_id}'")
+        
+        # Check if web scraping is enabled
+        if not settings.FeatureFlags.ENABLE_WEB_SCRAPING:
+            logger.warning(f"[SCRAPER_ENGINE_MANAGER] Web scraping disabled via feature flag - returning empty engine list")
+            return []
         
         # Check if tenant has specific configuration
         if tenant_id in cls.TENANT_ENGINE_CONFIG:

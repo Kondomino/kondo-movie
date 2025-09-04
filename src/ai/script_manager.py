@@ -12,12 +12,22 @@ from gcp.secret import secret_mgr
 class ScriptManager():
     
     def __init__(self):
+        if not settings.FeatureFlags.ENABLE_OPENAI:
+            logger.warning("ScriptManager initialized but OpenAI is disabled")
+            self.client = None
+            return
         self.client = OpenAI(api_key=secret_mgr.secret(settings.Secret.OPENAI_API_KEY))
 
     def generate_script(self, description:str):
+        if not settings.FeatureFlags.ENABLE_OPENAI or self.client is None:
+            logger.error("OpenAI script generation called but service is disabled")
+            # Return a fallback script
+            return f"Property description: {description[:100]}..." if len(description) > 100 else description
+            
         num_attempts = 0
         while True:
-            response = self.client.chat.completions.create(
+            try:
+                response = self.client.chat.completions.create(
                 model=settings.OpenAI.Narration.CHAT_MODEL,
                 messages=[
                     {
@@ -59,17 +69,21 @@ class ScriptManager():
                 }
             )
 
-            narration_script = response.choices[0].message.content
-            
-            script_len = len(narration_script)
-            if script_len <= settings.OpenAI.Narration.SCRIPT_MAX_CHARACTERS:
-                return narration_script
-            else:
-                if num_attempts > settings.OpenAI.Narration.MAX_GEN_ATTEMPTS:
-                    raise Exception('Script generation - Too many attempts. Exiting')
+                narration_script = response.choices[0].message.content
+                
+                script_len = len(narration_script)
+                if script_len <= settings.OpenAI.Narration.SCRIPT_MAX_CHARACTERS:
+                    return narration_script
                 else:
-                    logger.warning(f'Generated script exceeded char count. Allowed: {settings.OpenAI.Narration.SCRIPT_MAX_CHARACTERS}, Actual: {script_len}. Retrying')
-                    num_attempts += 1
+                    if num_attempts > settings.OpenAI.Narration.MAX_GEN_ATTEMPTS:
+                        logger.error('Script generation - Too many attempts. Returning fallback script')
+                        return f"Property description: {description[:100]}..." if len(description) > 100 else description
+                    else:
+                        logger.warning(f'Generated script exceeded char count. Allowed: {settings.OpenAI.Narration.SCRIPT_MAX_CHARACTERS}, Actual: {script_len}. Retrying')
+                        num_attempts += 1
+            except Exception as e:
+                logger.error(f"OpenAI script generation failed: {str(e)} - returning fallback script")
+                return f"Property description: {description[:100]}..." if len(description) > 100 else description
             
 def main():
     parser = argparse.ArgumentParser(description='AI Script Generator')

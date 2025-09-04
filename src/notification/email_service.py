@@ -9,27 +9,38 @@ from gcp.secret import secret_mgr
 from config.email_config_manager import email_config_manager
 from notification.email_templates import video_completion_template, video_failure_template, welcome_pilot_template, portal_is_ready_template
 
-MAILCHIMP_API_KEY = secret_mgr.secret(settings.Secret.MAILCHIMP_API_KEY)
+# Initialize email client conditionally
+MAILCHIMP_API_KEY = None
+if settings.FeatureFlags.ENABLE_EMAIL_SERVICES:
+    MAILCHIMP_API_KEY = secret_mgr.secret(settings.Secret.MANDRILL_API_KEY)
+else:
+    logger.warning("Email services disabled via feature flag - emails will be logged only")
 
 def send_mail(to: str, subject: str, html: str) -> dict:
-    mailchimp = mailchimp_transactional.Client(MAILCHIMP_API_KEY)
+    if not settings.FeatureFlags.ENABLE_EMAIL_SERVICES:
+        logger.info(f"[EMAIL_SERVICE] Email would be sent to {to} with subject '{subject}' (service disabled)")
+        logger.debug(f"[EMAIL_SERVICE] Email content: {html}")
+        return {"status": "logged", "reason": "email_services_disabled", "to": to, "subject": subject}
     
-    message = {
-        "from_email": settings.Notification.Email.EDITORA_INFO,
-        "from_name": "Editora",
-        "to": [
-            {
-                "email": to,
-                "type": "to",
-            }
-        ],
-        "subject": subject,
-        "html": html,
-    }
     try:
+        mailchimp = mailchimp_transactional.Client(MAILCHIMP_API_KEY)
+        
+        message = {
+            "from_email": settings.Notification.Email.EDITORA_INFO,
+            "from_name": "Editora",
+            "to": [
+                {
+                    "email": to,
+                    "type": "to",
+                }
+            ],
+            "subject": subject,
+            "html": html,
+        }
         response = mailchimp.messages.send({"message": message})
         return response
     except Exception as err:
+        logger.error(f"[EMAIL_SERVICE] Failed to send email to {to}: {str(err)}")
         raise err
 
 def send_video_completion_mail(to: str, user_name: str, video_name: str, video_link: str) -> dict:
