@@ -1,7 +1,7 @@
 services:
   property:
-    image: editora-v2-movie-maker
-    container_name: editora-v2-movie-maker
+    image: kondo-movie-maker
+    container_name: kondo-movie-maker
     build: 
       context: .
       dockerfile: Dockerfile

@@ -1,10 +1,15 @@
 from openai import OpenAI
 from gcp.secret import secret_mgr
+from logger import logger
 
 from config.config import settings
 
 class LineSplitter():
     def __init__(self):
+        if not settings.FeatureFlags.ENABLE_OPENAI:
+            logger.warning("LineSplitter initialized but OpenAI is disabled")
+            self.client = None
+            return
         self.client = OpenAI(api_key=secret_mgr.secret(settings.Secret.OPENAI_API_KEY))
         
     def intelligent_split(
@@ -23,6 +28,24 @@ class LineSplitter():
         Returns:
             str: A multi-line string with at most max_lines lines.
         """
+        
+        if not settings.FeatureFlags.ENABLE_OPENAI or self.client is None:
+            logger.warning("OpenAI line splitting called but service is disabled - using basic splitting")
+            # Fallback to basic line splitting
+            words = text.split()
+            lines = []
+            current_line = []
+            words_per_line = len(words) // max_lines + 1
+            
+            for i, word in enumerate(words):
+                current_line.append(word)
+                if len(current_line) >= words_per_line or i == len(words) - 1:
+                    lines.append(' '.join(current_line))
+                    current_line = []
+                    if len(lines) >= max_lines:
+                        break
+            
+            return '\n'.join(lines)
 
         try:
             response = self.client.chat.completions.create(
@@ -60,4 +83,19 @@ class LineSplitter():
             return response.choices[0].message.content.strip()
 
         except Exception as e:
-            return f"An error occurred: {e}"
+            logger.error(f"OpenAI line splitting failed: {str(e)} - using basic splitting")
+            # Fallback to basic line splitting
+            words = text.split()
+            lines = []
+            current_line = []
+            words_per_line = len(words) // max_lines + 1
+            
+            for i, word in enumerate(words):
+                current_line.append(word)
+                if len(current_line) >= words_per_line or i == len(words) - 1:
+                    lines.append(' '.join(current_line))
+                    current_line = []
+                    if len(lines) >= max_lines:
+                        break
+            
+            return '\n'.join(lines)

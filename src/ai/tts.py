@@ -12,10 +12,22 @@ from movie_maker.movie_model import MovieModel
 
 class TTS():
     def __init__(self):
+        # Check feature flags before initializing engines
         if settings.Engines.TTS == 'ElevenLabs':
-            self.engine = TTS_ElevenLabs()
+            if settings.FeatureFlags.ENABLE_ELEVEN_LABS:
+                self.engine = TTS_ElevenLabs()
+            else:
+                logger.warning("ElevenLabs TTS disabled via feature flag - using mock TTS engine")
+                self.engine = TTS_Mock()
         elif settings.Engines.TTS == 'OpenAI':
-            self.engine = TTS_OpenAI()
+            if settings.FeatureFlags.ENABLE_OPENAI:
+                self.engine = TTS_OpenAI()
+            else:
+                logger.warning("OpenAI TTS disabled via feature flag - using mock TTS engine")
+                self.engine = TTS_Mock()
+        else:
+            logger.warning(f"Unknown TTS engine '{settings.Engines.TTS}' - using mock TTS engine")
+            self.engine = TTS_Mock()
         
     def generate_voiceover(self, file_path:Path, 
                            narration:MovieModel.Configuration.Narration,
@@ -58,9 +70,17 @@ class TTSBase(metaclass=abc.ABCMeta):
     
 class TTS_OpenAI(TTSBase):
     def __init__(self):
+        if not settings.FeatureFlags.ENABLE_OPENAI:
+            logger.warning("TTS_OpenAI initialized but OpenAI is disabled")
+            self.client = None
+            return
         self.client = OpenAI(api_key=secret_mgr.secret(settings.Secret.OPENAI_API_KEY))
         
     def generate_voiceover(self, script:str, voice:str=None, output_format:Literal['mp3', 'wav']='wav')->Iterator[bytes]:
+        if not settings.FeatureFlags.ENABLE_OPENAI or self.client is None:
+            logger.error("OpenAI TTS called but service is disabled")
+            return iter([])
+            
         response = self.client.audio.speech.create(
             model=settings.OpenAI.Narration.TTS.MODEL,
             voice=voice if voice else settings.OpenAI.Narration.TTS.VOICE,
@@ -76,11 +96,19 @@ class TTS_ElevenLabs(TTSBase):
     }
     
     def __init__(self):
+        if not settings.FeatureFlags.ENABLE_ELEVEN_LABS:
+            logger.warning("TTS_ElevenLabs initialized but ElevenLabs is disabled")
+            self.client = None
+            return
         self.client = ElevenLabs(
             api_key=secret_mgr.secret(settings.Secret.ELEVEN_LABS_API_KEY)
         )
         
     def generate_voiceover(self, script:str, voice:str=None, output_format:Literal['mp3', 'wav']='wav')->Iterator[bytes]:
+        if not settings.FeatureFlags.ENABLE_ELEVEN_LABS or self.client is None:
+            logger.error("ElevenLabs TTS called but service is disabled")
+            return iter([])
+            
         kwargs = {
             'model': settings.ElevenLabs.TTS.MODEL,
             'voice': voice if voice else settings.ElevenLabs.TTS.VOICE,
@@ -95,6 +123,14 @@ class TTS_ElevenLabs(TTSBase):
         }
             
         return self.client.generate(**kwargs)
+
+class TTS_Mock(TTSBase):
+    """Mock TTS engine for when TTS services are disabled"""
+    
+    def generate_voiceover(self, script:str, voice:str=None, output_format:Literal['mp3', 'wav']='wav')->Iterator[bytes]:
+        logger.info(f"[TTS_MOCK] TTS request for script: '{script}' with voice: '{voice}' (service disabled)")
+        # Return empty audio data - this will result in silent videos
+        return iter([])
 
 def main():
     import argparse

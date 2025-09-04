@@ -786,6 +786,12 @@ class VideoActionsHandler:
         try:
             token = create_jwt({"user": self.user_data.id, "project": request.project_id, "version": request.version_id})
             original_url = f"{settings.Notification.VIDEO_RENDER_URL_PREFIX}/render-video?token={token}"
+            
+            # Check if URL shortening is enabled
+            if not settings.FeatureFlags.ENABLE_URL_SHORTENING:
+                logger.info(f"[VIDEO_ACTIONS] URL shortening disabled - returning original URL: {original_url}")
+                return GetShareableLinkResponse(message="Link generated! (URL shortening disabled)", link=original_url)
+            
             payload = {"originalURL": original_url, "domain": "l.editora.ai"}
             headers = {"Content-Type": "application/json", "Authorization": secret_mgr.secret(settings.Secret.SHORTIO_API_KEY)}
             try:
@@ -795,11 +801,14 @@ class VideoActionsHandler:
                                 timeout=None)
                 if resp.status_code == 200:
                     url = resp.json().get("shortURL")
+                    logger.info(f"[VIDEO_ACTIONS] Successfully shortened URL: {original_url} -> {url}")
                 else:    
                     error_msg = f"Failed to generate Short URL. Response Code : {resp.status_code}"
                     logger.warning(error_msg)
-                    raise Exception(error_msg)
-            except:
+                    logger.info(f"[VIDEO_ACTIONS] Falling back to original URL: {original_url}")
+                    url = original_url
+            except Exception as e:
+                logger.warning(f"[VIDEO_ACTIONS] Short.io API failed: {str(e)}, using original URL")
                 url = original_url
                 
             return GetShareableLinkResponse(message="Link generated!", link=url)

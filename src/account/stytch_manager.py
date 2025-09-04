@@ -11,13 +11,21 @@ from config.config import settings
 from gcp.secret import secret_mgr
 
 class StytchManager:
-    def __init__(self):        
+    def __init__(self):
+        if not settings.FeatureFlags.ENABLE_AUTHENTICATION:
+            logger.warning("StytchManager initialized but authentication is disabled")
+            self.client = None
+            return
+            
         self.client = stytch.Client(
             project_id=settings.Authentication.STYTCH_PROJECT_ID,
             secret=secret_mgr.secret(settings.Secret.STYTCH_SECRET_KEY)
         )
         
     def authenticate(self, session_token:str)->str:
+        if not settings.FeatureFlags.ENABLE_AUTHENTICATION or self.client is None:
+            raise HTTPException(status_code=500, detail="Authentication service is disabled")
+            
         response = self.client.sessions.authenticate(session_token=session_token)
         if not response:
             raise HTTPException(status_code=401, detail="Session token cannot be authorized!")
@@ -28,6 +36,10 @@ class StytchManager:
         return user_id
     
     def search(self, email:EmailStr)->dict:
+        if not settings.FeatureFlags.ENABLE_AUTHENTICATION or self.client is None:
+            logger.warning("Search called but authentication is disabled")
+            return None
+            
         response = self.client.users.search(
             query=SearchUsersQuery(
                 limit=1,
