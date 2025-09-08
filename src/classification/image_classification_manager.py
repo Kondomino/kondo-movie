@@ -9,10 +9,10 @@ import uuid
 import json
 from rich import print
 
-from gcp.db import db_client
 from config.config import settings
 from logger import logger
-from utils.session_utils import get_session_refs_by_ids
+from services.classification_service import classification_storage_service
+from services.session_service import unified_session_manager
 from gcp.storage import StorageManager
 from gcp.storage_model import CloudPath
 from classification.classification_model import (
@@ -24,42 +24,59 @@ from ai.image_analyzer import ImageAnalyzer
 class ImageClassificationManager():
     def __init__(self):
         self.model = self.load_real_estate_model_local()
+        self.classification_service = classification_storage_service
+        self.session_manager = unified_session_manager
         
     def save_real_estate_model(self, model: RealEstate):
         try:
-            document_id = settings.Classification.REAL_ESTATE_DOC_ID
-            doc_ref = db_client.collection(
-                settings.GCP.Firestore.CLASSIFICATION_COLLECTION_NAME
-            ).document(document_id=document_id)
-            doc = doc_ref.get()
-            if doc.exists:
-                logger.warning(f"Classification model {document_id} already exists. Overwriting record in DB")
-                
-            doc_ref.set(model.model_dump())
-            self.model = model
+            # For now, keep model configuration in Firestore since it's global config data
+            from database.db_manager import unified_db_manager
+            firestore_client = unified_db_manager.get_firestore_client()
             
-            logger.success(f"Saved classification model in Firestore. Name : {document_id}")
+            if firestore_client:
+                document_id = settings.Classification.REAL_ESTATE_DOC_ID
+                doc_ref = firestore_client.collection(
+                    settings.GCP.Firestore.CLASSIFICATION_COLLECTION_NAME
+                ).document(document_id=document_id)
+                doc = doc_ref.get()
+                if doc.exists:
+                    logger.warning(f"Classification model {document_id} already exists. Overwriting record in DB")
+                    
+                doc_ref.set(model.model_dump())
+                self.model = model
+                
+                logger.success(f"Saved classification model in database. Name : {document_id}")
+            else:
+                logger.warning("No database client available for saving classification model")
                     
         except Exception as e:
-            logger.exception(f"Failed to save classification model in Firestore DB: {e}")
+            logger.exception(f"Failed to save classification model in database: {e}")
             raise e
         
     def load_real_estate_model(self) -> RealEstate:
         try:
-            document_id = settings.Classification.REAL_ESTATE_DOC_ID
-            doc_ref = db_client.collection(
-                settings.GCP.Firestore.CLASSIFICATION_COLLECTION_NAME
-            ).document(document_id=document_id)
-            doc = doc_ref.get()
-            if not doc.exists:
-                logger.warning(f"Classification model {document_id} does not exist")
+            # For now, keep model configuration in Firestore since it's global config data
+            from database.db_manager import unified_db_manager
+            firestore_client = unified_db_manager.get_firestore_client()
+            
+            if firestore_client:
+                document_id = settings.Classification.REAL_ESTATE_DOC_ID
+                doc_ref = firestore_client.collection(
+                    settings.GCP.Firestore.CLASSIFICATION_COLLECTION_NAME
+                ).document(document_id=document_id)
+                doc = doc_ref.get()
+                if not doc.exists:
+                    logger.warning(f"Classification model {document_id} does not exist")
+                    return None
+                                
+                logger.info(f"Loaded classification model '{document_id}'")
+                return RealEstate(**doc.to_dict())
+            else:
+                logger.warning("No database client available for loading classification model")
                 return None
-                            
-            logger.info(f"Loaded classification model '{document_id}'")
-            return RealEstate(**doc.to_dict())
                         
         except Exception as e:
-            logger.exception(f"Failed to load classification model from Firestore DB: {e}")
+            logger.exception(f"Failed to load classification model from database: {e}")
             raise e
         
     def load_real_estate_model_local(self) -> RealEstate:
@@ -176,11 +193,13 @@ class ImageClassificationManager():
         return buckets
     
     def run_classification_for_project(self, user_id:str, project_id:str):
-        _, project_ref, _ = get_session_refs_by_ids(user_id=user_id, project_id=project_id)
-        
-        if not project_ref.get().exists:
+        # Check if project exists using service layer
+        if not self.classification_service.project_service.project_exists(user_id, project_id):
             logger.error(f"Unable to fetch project for user '{user_id}' and project '{project_id}'")
             return
+        
+        # Get session references for compatibility with existing storage operations
+        _, project_ref, _ = self.session_manager.get_session_refs_by_ids(user_id=user_id, project_id=project_id)
             
         image_repos = StorageManager.get_image_repos_for_project(
             user_id=user_id,
@@ -226,13 +245,19 @@ class ImageClassificationManager():
                     cloud_items.append(cloud_item)
                 image_buckets_cloud.buckets[category] = cloud_items
 
+            # Store classification results using service layer
             IMAGE_CLASSIFICATION_KEY = settings.Classification.IMAGE_CLASSIFICATION_KEY
-            project_dict = project_ref.get().to_dict()
-            if project_dict.get(IMAGE_CLASSIFICATION_KEY, None):
+            
+            # Check if classification already exists
+            if self.classification_service.get_image_classification(user_id, project_id):
                 logger.info(f"Images are already classified for project '{project_id}'. Overwriting")
             else:
                 logger.debug(f"New image classification run for project '{project_id}'")
-            project_ref.set({IMAGE_CLASSIFICATION_KEY: image_buckets_cloud.model_dump()}, merge=True)
+            
+            # Store results using classification service
+            self.classification_service.store_image_classification(
+                user_id, project_id, image_buckets_cloud.model_dump()
+            )
             
     def run_classification_for_files(self, image_file_paths: List[str]) -> ImageBuckets:
         # Step 1 - Label images

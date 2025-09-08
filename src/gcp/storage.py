@@ -632,8 +632,95 @@ class StorageManager():
             logger.error(f"[STORAGE] Failed to download {gs_url} to {local_file_path}: {e}")
             raise
 
-# Create a Firestore client
-cloud_storage_client = StorageManager().get_client()
+# Lazy-loaded GCP Storage client with feature flag support
+_gcp_storage_manager_instance = None
+
+def get_gcp_storage_manager():
+    """Get GCP Storage Manager with lazy initialization and feature flag support"""
+    global _gcp_storage_manager_instance
+    
+    logger.info("[GCP_STORAGE] get_gcp_storage_manager() called - checking feature flags...")
+    
+    # Check if GCP storage is enabled
+    if not settings.FeatureFlags.ENABLE_GCP_STORAGE:
+        logger.warning("[GCP_STORAGE] GCP storage disabled via feature flag")
+        return None
+    
+    # Check if storage provider is GCP or if it's needed as fallback
+    if hasattr(settings, 'Storage') and settings.Storage.PROVIDER != "GCP":
+        if settings.FeatureFlags.ENABLE_DIGITAL_OCEAN_STORAGE:
+            logger.warning(f"[GCP_STORAGE] Storage provider is '{settings.Storage.PROVIDER}' and Digital Ocean is enabled - GCP storage should only be fallback")
+        else:
+            logger.info(f"[GCP_STORAGE] Storage provider is '{settings.Storage.PROVIDER}' but Digital Ocean disabled - allowing GCP storage as fallback")
+    
+    # Lazy initialization only if needed
+    if _gcp_storage_manager_instance is None:
+        try:
+            logger.info("[GCP_STORAGE] Initializing GCP StorageManager...")
+            _gcp_storage_manager_instance = StorageManager()
+            logger.info("[GCP_STORAGE] GCP StorageManager initialized successfully")
+        except Exception as e:
+            logger.exception(f"[GCP_STORAGE] Failed to initialize GCP StorageManager: {e}")
+            return None
+    else:
+        logger.info("[GCP_STORAGE] Using existing GCP StorageManager instance")
+    
+    return _gcp_storage_manager_instance
+
+
+class LazyGCPStorageClient:
+    """Lazy GCP Storage client that respects feature flags"""
+    
+    def __getattr__(self, name):
+        """Delegate attribute access to the real storage client"""
+        logger.info(f"[GCP_STORAGE] LazyGCPStorageClient.__getattr__() called for attribute: {name}")
+        
+        manager = get_gcp_storage_manager()
+        if manager is None:
+            logger.error(f"[GCP_STORAGE] GCP Storage Manager not available for attribute '{name}'")
+            raise RuntimeError("GCP Storage Manager is not available (failed to initialize or disabled)")
+        
+        client = manager.get_client()
+        return getattr(client, name)
+    
+    def __call__(self, *args, **kwargs):
+        """Make it callable if needed"""
+        logger.info("[GCP_STORAGE] LazyGCPStorageClient.__call__() called")
+        
+        manager = get_gcp_storage_manager()
+        if manager is None:
+            logger.error("[GCP_STORAGE] GCP Storage Manager not available for call")
+            raise RuntimeError("GCP Storage Manager is not available (failed to initialize or disabled)")
+        
+        client = manager.get_client()
+        return client(*args, **kwargs)
+    
+    def bucket(self, bucket_name):
+        """Most common method - get bucket"""
+        logger.info(f"[GCP_STORAGE] LazyGCPStorageClient.bucket() called for: {bucket_name}")
+        
+        manager = get_gcp_storage_manager()
+        if manager is None:
+            logger.error(f"[GCP_STORAGE] GCP Storage Manager not available for bucket: {bucket_name}")
+            raise RuntimeError("GCP Storage Manager is not available (failed to initialize or disabled)")
+        
+        client = manager.get_client()
+        return client.bucket(bucket_name)
+    
+    def get_bucket(self, bucket_name):
+        """Another common method - get bucket with existence check"""
+        logger.info(f"[GCP_STORAGE] LazyGCPStorageClient.get_bucket() called for: {bucket_name}")
+        
+        manager = get_gcp_storage_manager()
+        if manager is None:
+            logger.error(f"[GCP_STORAGE] GCP Storage Manager not available for get_bucket: {bucket_name}")
+            raise RuntimeError("GCP Storage Manager is not available (failed to initialize or disabled)")
+        
+        client = manager.get_client()
+        return client.get_bucket(bucket_name)
+
+# Backward compatibility: cloud_storage_client behaves like the original but respects feature flags
+cloud_storage_client = LazyGCPStorageClient()
 
 ####
 

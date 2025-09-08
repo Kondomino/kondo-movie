@@ -1,0 +1,27 @@
+services:
+  property:
+    image: kondo-movie-maker
+    container_name: kondo-movie-maker-prod-db
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    volumes:
+      - ./secrets:/secrets:ro  # Mount secrets as read-only
+    ports:
+      - 8080:8080
+    env_file:
+      - .env.prod  # Use the .env.prod file you created
+    environment:
+      - ENVIRONMENT=prod  # Force production environment
+    networks:
+      - kondo-network-prod
+    # No local postgres service - we'll connect to Render's cloud database
+    depends_on: []  # No dependencies since we're using external database
+
+networks:
+  kondo-network-prod:
+    driver: bridge
+    name: kondo-network-prod
+
+# No volumes section since we're not running local postgres

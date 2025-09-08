@@ -51,6 +51,9 @@ FeatureFlags:
   ENABLE_ASSEMBLY_AI: false       # AssemblyAI transcription
   ENABLE_OPENAI: true             # OpenAI API services
   ENABLE_DIGITAL_OCEAN_STORAGE: true  # Digital Ocean Spaces storage
+  ENABLE_GCP_STORAGE: false       # Google Cloud Storage (legacy/fallback)
+  ENABLE_DATABASE: true           # Database connectivity
+  ENABLE_POSTGRESQL: true         # PostgreSQL database support
 
 Secret:
   JWT_SECRET_KEY: "JWT_SECRET"                    # Keep existing
@@ -70,6 +73,26 @@ Engines:
 
 Storage:
   PROVIDER: "DigitalOcean"  # Options: "GCP", "DigitalOcean"
+
+Database:
+  PROVIDER: "PostgreSQL"  # Options: "Firestore", "PostgreSQL"
+
+PostgreSQL:
+  DEV:
+    HOST: "${DB_HOST}"
+    PORT: "${DB_PORT}"
+    DATABASE: "${DB_NAME}"
+    USER: "${DB_USER}"
+    PASSWORD: "${DB_PASSWORD}"
+    SSL_REQUIRED: false
+  PROD:
+    DATABASE_URL: "${RENDER_INTERNAL_URL}"
+    HOSTNAME: "${RENDER_HOSTNAME}"
+    PORT: "${RENDER_DB_PORT}"
+    DATABASE: "${RENDER_DB}"
+    USER: "${RENDER_USR}"
+    PASSWORD: "${RENDER_PWD}"
+    SSL_REQUIRED: true
   
 DigitalOcean:
   Spaces:

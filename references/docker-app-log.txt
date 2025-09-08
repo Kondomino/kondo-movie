@@ -1,0 +1,114 @@
+2025-09-08 14:00:16.514 | 2025-09-08 17:00:16.512 | INFO     | database.database_manager:setup:34 - [DATABASE_MANAGER] Initializing PostgreSQL database for dev environment
+2025-09-08 14:00:16.514 | 2025-09-08 17:00:16.514 | INFO     | database.database_manager:_get_database_url:138 - [DATABASE_MANAGER] Development configuration from settings:
+2025-09-08 14:00:16.514 | 2025-09-08 17:00:16.514 | INFO     | database.database_manager:_get_database_url:139 - [DATABASE_MANAGER]   HOST: kondo-postgres
+2025-09-08 14:00:16.514 | 2025-09-08 17:00:16.514 | INFO     | database.database_manager:_get_database_url:140 - [DATABASE_MANAGER]   PORT: 5432
+2025-09-08 14:00:16.515 | 2025-09-08 17:00:16.514 | INFO     | database.database_manager:_get_database_url:141 - [DATABASE_MANAGER]   USER: postgres
+2025-09-08 14:00:16.515 | 2025-09-08 17:00:16.514 | INFO     | database.database_manager:_get_database_url:142 - [DATABASE_MANAGER]   PASSWORD: ***
+2025-09-08 14:00:16.515 | 2025-09-08 17:00:16.515 | INFO     | database.database_manager:_get_database_url:143 - [DATABASE_MANAGER]   DATABASE: kondo
+2025-09-08 14:00:16.515 | 2025-09-08 17:00:16.515 | INFO     | database.database_manager:_get_database_url:144 - [DATABASE_MANAGER]   SSL_REQUIRED: False (ssl_mode: disable)
+2025-09-08 14:00:16.515 | 2025-09-08 17:00:16.515 | INFO     | database.database_manager:_get_database_url:147 - [DATABASE_MANAGER] Database URL: postgresql://postgres:***@kondo-postgres:5432/kondo?sslmode=disable
+2025-09-08 14:00:16.515 | 2025-09-08 17:00:16.515 | INFO     | database.database_manager:_setup_postgresql:51 - [DATABASE_MANAGER] Connecting to PostgreSQL (dev)
+2025-09-08 14:00:16.585 | 2025-09-08 17:00:16.585 | INFO     | database.database_manager:_setup_postgresql:74 - [DATABASE_MANAGER] PostgreSQL connection established successfully
+2025-09-08 14:00:16.585 | 2025-09-08 17:00:16.585 | INFO     | database.db_manager:__init__:32 - [UNIFIED_DB_MANAGER] Initialized with provider: PostgreSQL, PostgreSQL enabled: True
+2025-09-08 14:00:16.586 | 2025-09-08 17:00:16.585 | WARNING  | database.db_manager:get_db_client:130 - [UNIFIED_DB_MANAGER] get_db_client() called with PostgreSQL active - use get_session() instead
+2025-09-08 14:00:16.596 | 2025-09-08 17:00:16.596 | WARNING  | account.authentication:<module>:22 - Authentication disabled via feature flag - API running in public mode
+2025-09-08 14:00:20.697 | Traceback (most recent call last):
+2025-09-08 14:00:20.704 |   File "/app/.venv/bin/uvicorn", line 8, in <module>
+2025-09-08 14:00:20.704 |     sys.exit(main())
+2025-09-08 14:00:20.704 |              ~~~~^^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/click/core.py", line 1157, in __call__
+2025-09-08 14:00:20.704 |     return self.main(*args, **kwargs)
+2025-09-08 14:00:20.704 |            ~~~~~~~~~^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/click/core.py", line 1078, in main
+2025-09-08 14:00:20.704 |     rv = self.invoke(ctx)
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/click/core.py", line 1434, in invoke
+2025-09-08 14:00:20.704 |     return ctx.invoke(self.callback, **ctx.params)
+2025-09-08 14:00:20.704 |            ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/click/core.py", line 783, in invoke
+2025-09-08 14:00:20.704 |     return __callback(*args, **kwargs)
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/uvicorn/main.py", line 412, in main
+2025-09-08 14:00:20.704 |     run(
+2025-09-08 14:00:20.704 |     ~~~^
+2025-09-08 14:00:20.704 |         app,
+2025-09-08 14:00:20.704 |         ^^^^
+2025-09-08 14:00:20.704 |     ...<45 lines>...
+2025-09-08 14:00:20.704 |         h11_max_incomplete_event_size=h11_max_incomplete_event_size,
+2025-09-08 14:00:20.704 |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |     )
+2025-09-08 14:00:20.704 |     ^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/uvicorn/main.py", line 579, in run
+2025-09-08 14:00:20.704 |     server.run()
+2025-09-08 14:00:20.704 |     ~~~~~~~~~~^^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/uvicorn/server.py", line 65, in run
+2025-09-08 14:00:20.704 |     return asyncio.run(self.serve(sockets=sockets))
+2025-09-08 14:00:20.704 |            ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |   File "/usr/local/lib/python3.13/asyncio/runners.py", line 195, in run
+2025-09-08 14:00:20.704 |     return runner.run(main)
+2025-09-08 14:00:20.704 |            ~~~~~~~~~~^^^^^^
+2025-09-08 14:00:20.704 |   File "/usr/local/lib/python3.13/asyncio/runners.py", line 118, in run
+2025-09-08 14:00:20.704 |     return self._loop.run_until_complete(task)
+2025-09-08 14:00:20.704 |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+2025-09-08 14:00:20.704 |   File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/uvicorn/server.py", line 69, in serve
+2025-09-08 14:00:20.704 |     await self._serve(sockets)
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/uvicorn/server.py", line 76, in _serve
+2025-09-08 14:00:20.704 |     config.load()
+2025-09-08 14:00:20.704 |     ~~~~~~~~~~~^^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/uvicorn/config.py", line 434, in load
+2025-09-08 14:00:20.704 |     self.loaded_app = import_from_string(self.app)
+2025-09-08 14:00:20.704 |                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/uvicorn/importer.py", line 19, in import_from_string
+2025-09-08 14:00:20.704 |     module = importlib.import_module(module_str)
+2025-09-08 14:00:20.704 |   File "/usr/local/lib/python3.13/importlib/__init__.py", line 88, in import_module
+2025-09-08 14:00:20.704 |     return _bootstrap._gcd_import(name[level:], package, level)
+2025-09-08 14:00:20.704 |            ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |   File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+2025-09-08 14:00:20.704 |   File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+2025-09-08 14:00:20.704 |   File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+2025-09-08 14:00:20.704 |   File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+2025-09-08 14:00:20.704 |   File "<frozen importlib._bootstrap_external>", line 1026, in exec_module
+2025-09-08 14:00:20.704 |   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+2025-09-08 14:00:20.704 |   File "/src/main.py", line 11, in <module>
+2025-09-08 14:00:20.704 |     from account.account_actions import AccountActionsHandler
+2025-09-08 14:00:20.704 |   File "//src/account/account_actions.py", line 9, in <module>
+2025-09-08 14:00:20.704 |     from notification.email_service import send_welcome_pilot_mail
+2025-09-08 14:00:20.704 |   File "//src/notification/email_service.py", line 8, in <module>
+2025-09-08 14:00:20.704 |     from gcp.secret import secret_mgr
+2025-09-08 14:00:20.704 |   File "//src/gcp/secret.py", line 62, in <module>
+2025-09-08 14:00:20.704 |     secret_mgr = SecretManager()
+2025-09-08 14:00:20.704 |   File "//src/gcp/secret.py", line 18, in __new__
+2025-09-08 14:00:20.704 |     cls._instance.init()
+2025-09-08 14:00:20.704 |     ~~~~~~~~~~~~~~~~~~^^
+2025-09-08 14:00:20.704 |   File "//src/gcp/secret.py", line 26, in init
+2025-09-08 14:00:20.704 |     self.client = secretmanager.SecretManagerServiceClient(credentials=cred)
+2025-09-08 14:00:20.704 |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/google/cloud/secretmanager_v1/services/secret_manager_service/client.py", line 687, in __init__
+2025-09-08 14:00:20.704 |     self._transport = transport_init(
+2025-09-08 14:00:20.704 |                       ~~~~~~~~~~~~~~^
+2025-09-08 14:00:20.704 |         credentials=credentials,
+2025-09-08 14:00:20.704 |         ^^^^^^^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |     ...<7 lines>...
+2025-09-08 14:00:20.704 |         api_audience=self._client_options.api_audience,
+2025-09-08 14:00:20.704 |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |     )
+2025-09-08 14:00:20.704 |     ^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/google/cloud/secretmanager_v1/services/secret_manager_service/transports/grpc.py", line 162, in __init__
+2025-09-08 14:00:20.704 |     super().__init__(
+2025-09-08 14:00:20.704 |     ~~~~~~~~~~~~~~~~^
+2025-09-08 14:00:20.704 |         host=host,
+2025-09-08 14:00:20.704 |         ^^^^^^^^^^
+2025-09-08 14:00:20.704 |     ...<6 lines>...
+2025-09-08 14:00:20.704 |         api_audience=api_audience,
+2025-09-08 14:00:20.704 |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |     )
+2025-09-08 14:00:20.704 |     ^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/google/cloud/secretmanager_v1/services/secret_manager_service/transports/base.py", line 103, in __init__
+2025-09-08 14:00:20.704 |     credentials, _ = google.auth.default(
+2025-09-08 14:00:20.704 |                      ~~~~~~~~~~~~~~~~~~~^
+2025-09-08 14:00:20.704 |         **scopes_kwargs, quota_project_id=quota_project_id
+2025-09-08 14:00:20.704 |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-09-08 14:00:20.704 |     )
+2025-09-08 14:00:20.704 |     ^
+2025-09-08 14:00:20.704 |   File "/app/.venv/lib/python3.13/site-packages/google/auth/_default.py", line 697, in default
+2025-09-08 14:00:20.704 |     raise exceptions.DefaultCredentialsError(_CLOUD_SDK_MISSING_CREDENTIALS)
+2025-09-08 14:00:20.704 | google.auth.exceptions.DefaultCredentialsError: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.

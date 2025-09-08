@@ -1,16 +1,23 @@
 
-from google.cloud.firestore_v1.document import DocumentReference
-
-from utils.session_utils import *
+from logger import logger
+from services.project_service import project_service
+from services.classification_service import classification_storage_service
+from services.session_service import unified_session_manager
 from project.project_backfill import *
-from classification.image_classification_manager import ImageClassificationManager
 from classification.unified_classification_manager import UnifiedClassificationManager
 
 class ProjectManager():
     def __init__(self, user_id:str, project_id:str):
         self.user_id = user_id
-        self.project_id = project_id        
-        self.user_ref, self.project_ref, _ = get_session_refs_by_ids(user_id=user_id, project_id=project_id)
+        self.project_id = project_id
+        self.project_service = project_service
+        self.classification_service = classification_storage_service
+        self.session_manager = unified_session_manager
+        
+        # Maintain backward compatibility for existing code that expects project_ref
+        self.user_ref, self.project_ref, _ = self.session_manager.get_session_refs_by_ids(
+            user_id=user_id, project_id=project_id
+        )
         
     def new_project(self, project_name:str, property_id:str=None)->dict:
         project = {
@@ -19,20 +26,26 @@ class ProjectManager():
             "property_id": property_id, 
             "excluded_images": []
         }
-        self.project_ref.set(project)
+        
+        # Use service layer for database operations
+        created_project = self.project_service.create_project(self.user_id, self.project_id, project)
+        
+        # Backfill operations still use project_ref for compatibility with existing backfill code
         backfill_version_stats(project_ref=self.project_ref)
         backfill_media_signed_urls(user_id=self.user_id, project_ref=self.project_ref)
         
+        return created_project or project
+        
     def media_updated(self):
-        # Retrieve the current project document
-        project_doc = self.project_ref.get()
-        if not project_doc.exists:
+        # Check if project exists using service layer
+        if not self.project_service.project_exists(self.user_id, self.project_id):
             logger.info(f"Project '{self.project_id}' doesn't exist. Creating one")
             self.new_project(
                 project_name='Generating Project',
                 property_id=None
             )
         else:
+            # Backfill operations still use project_ref for compatibility
             backfill_media_signed_urls(user_id=self.user_id, project_ref=self.project_ref, force=True)
         
         # Use unified classification manager instead of direct image classification
@@ -43,7 +56,7 @@ class ProjectManager():
             logger.info(f"[PROJECT_MANAGER] Running unified classification for project {self.project_id}")
             classification_results = unified_classifier.classify_project_media(self.user_id, self.project_id)
             
-            # Store unified classification results in Firestore
+            # Store unified classification results using service layer
             if classification_results:
                 self._store_unified_classification_results(classification_results)
         else:
@@ -51,7 +64,7 @@ class ProjectManager():
     
     def _store_unified_classification_results(self, results):
         """
-        Store unified classification results in Firestore
+        Store unified classification results using database service layer
         
         Args:
             results: UnifiedClassificationResults object
@@ -84,19 +97,25 @@ class ProjectManager():
                 if results.unified_buckets:
                     classification_data["unified_buckets"] = results.unified_buckets
             
-            # Update project document
-            self.project_ref.set(classification_data, merge=True)
-            logger.info(f"[PROJECT_MANAGER] Stored unified classification results for project {self.project_id}")
+            # Use classification service for database-agnostic storage
+            success = self.classification_service.store_unified_classification(
+                self.user_id, self.project_id, classification_data
+            )
+            
+            if success:
+                logger.info(f"[PROJECT_MANAGER] Stored unified classification results for project {self.project_id}")
+            else:
+                logger.error(f"[PROJECT_MANAGER] Failed to store unified classification results for project {self.project_id}")
             
         except Exception as e:
             logger.error(f"[PROJECT_MANAGER] Failed to store unified classification results: {e}")
         
     def fetch_signed_urls_for_images(self, images: list) -> list[dict]:
-
         # Check if the signed URLs are up to date 1st and backfill if necessary before fetching
         backfill_media_signed_urls(user_id=self.user_id, project_ref=self.project_ref)
 
-        project_data = self.project_ref.get().to_dict() or {}
+        # Get project data using service layer
+        project_data = self.project_service.get_project(self.user_id, self.project_id) or {}
         master_list = project_data.get("media_signed_urls", {}).get('media',[])
         signed_images = []
         for gs_url in images:

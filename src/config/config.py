@@ -3,6 +3,11 @@ from pydantic import BaseModel, create_model
 import yaml
 from pathlib import Path
 import re
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 def load_yaml(file_path: str) -> dict:
     config_path = Path(file_path)
@@ -36,17 +41,29 @@ def interpolate_config(config: Dict[str, Any], parent_keys: list = None, visited
     def resolve_variable(var_name: str, current_config: Dict[str, Any]) -> Any:
         """
         Resolves the value of a variable given its name.
-        Supports dot notation for nested keys.
+        Supports both environment variables and dot notation for nested keys.
         
         :param var_name: The name of the variable to resolve.
         :param current_config: The current configuration dictionary.
         :return: The value of the variable.
         """
+        # First try to get from environment variables
+        env_value = os.getenv(var_name)
+        if env_value is not None:
+            # Try to convert to appropriate type
+            if env_value.isdigit():
+                return int(env_value)
+            elif env_value.lower() in ('true', 'false'):
+                return env_value.lower() == 'true'
+            else:
+                return env_value
+        
+        # Fallback to nested config lookup
         keys = var_name.split('.')
         value = current_config
         for key in keys:
             if key not in value:
-                raise ValueError(f"Variable '{var_name}' not found in configuration.")
+                raise ValueError(f"Variable '{var_name}' not found in configuration or environment variables.")
             value = value[key]
         return value
     
@@ -173,7 +190,23 @@ def generate_config_model(config_data: dict) -> Type[BaseModel]:
     root_model = generate_pydantic_model("AppConfig", config_data)
     return root_model
 
-CONFIG_FILE_PATH = 'src/config/config.yaml'
+# Determine config file path based on current working directory
+import os
+from pathlib import Path
+
+# Find config file relative to this file's location
+current_file_dir = Path(__file__).parent  # This is src/config/
+config_file_path = current_file_dir / 'config.yaml'
+
+if config_file_path.exists():
+    CONFIG_FILE_PATH = str(config_file_path)
+else:
+    # Fallback to old logic for backward compatibility
+    current_dir = os.getcwd()
+    if current_dir.endswith('/src'):
+        CONFIG_FILE_PATH = 'config/config.yaml'
+    else:
+        CONFIG_FILE_PATH = 'src/config/config.yaml'
 
 # Load YAML configuration
 config_data = load_yaml(CONFIG_FILE_PATH)

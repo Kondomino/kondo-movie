@@ -6,9 +6,13 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runner
-    volumes:
-      - ./secrets:/secrets:ro  # Mount secrets as read-only
     ports:
       - 8080:8080
     env_file:
       - .env
+    networks:
+      - kondo-network
+
+networks:
+  kondo-network:
+    external: true
