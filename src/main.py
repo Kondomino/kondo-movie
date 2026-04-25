@@ -468,3 +468,50 @@ async def make_movie(
     if action_response.result.state != ActionStatus.State.SUCCESS:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     return action_response
+
+
+############################################################
+# JOB LIFECYCLE — placeholder routes for the async pipeline
+############################################################
+# These endpoints are part of the contract documented in
+# references/kondo/architecture/video-tool-plan.html (section 4). They
+# return 501 today; they will be wired up when the arq worker + job
+# state machine land in a follow-up PR. Documenting the URLs here lets
+# kondos-api implement against the agreed surface without waiting on
+# the worker integration.
+
+@app.get('/jobs/{job_id}/status')
+async def get_job_status(job_id: str):
+    """
+    Return job status (queued|processing|done|failed) + progress 0–100 +
+    output URL when ready. Used by kondos-api as a polling fallback if
+    the webhook callback is missed.
+
+    Currently 501 — implementation pending arq worker integration.
+    """
+    raise HTTPException(
+        status_code=501,
+        detail=(
+            f"Job-status polling is not yet implemented (job_id={job_id}). "
+            "This endpoint will land with the arq worker integration. "
+            "Until then, /make_movie remains synchronous and returns the "
+            "final result inline."
+        ),
+    )
+
+
+@app.delete('/jobs/{job_id}')
+async def cancel_job(job_id: str):
+    """
+    Cancel an in-flight render job. Kills the arq task, removes the
+    queue entry, and best-effort cleans up any partial artifacts.
+
+    Currently 501 — implementation pending arq worker integration.
+    """
+    raise HTTPException(
+        status_code=501,
+        detail=(
+            f"Job cancellation is not yet implemented (job_id={job_id}). "
+            "This endpoint will land with the arq worker integration."
+        ),
+    )
