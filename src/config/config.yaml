@@ -12,7 +12,6 @@ Authentication:
       "https://app.editora.ai",
     ]
   JWT_ALGORITHM: "HS256"
-  STYTCH_PROJECT_ID: "project-test-0d489013-9387-4607-b3e6-ceae2ee6b07c"
   SignedURL:
     GET_EXPIRY_IN_HOURS: 24
     PUT_EXPIRY_IN_MINUTES: 2
@@ -42,7 +41,7 @@ Authentication:
   RESTRICTED_TEMPLATES: []
 
 FeatureFlags:
-  ENABLE_AUTHENTICATION: false    # Stytch - when false, API becomes public
+  ENABLE_AUTHENTICATION: false    # Auth dep is now a 501 stub; auth is owned by kondos-api
   ENABLE_EMAIL_SERVICES: false    # Mandrill/Mailchimp email services
   ENABLE_URL_SHORTENING: false    # Short.io URL shortening
   ENABLE_WEB_SCRAPING: false      # All scraping services (Scrapfly + all scrapers)
@@ -57,7 +56,6 @@ FeatureFlags:
 
 Secret:
   JWT_SECRET_KEY: "JWT_SECRET"                    # Keep existing
-  STYTCH_SECRET_KEY: "_STYTCH_SECRET"             # New env var
   MANDRILL_API_KEY: "_MANDRILL_API_KEY"           # New env var (renamed from MAILCHIMP_API_KEY)
   MAILCHIMP_API_KEY: "_MAILCHIMP_API_KEY"         # New env var (separate from Mandrill)
   SHORTIO_API_KEY: "_SHORT_IO"                    # New env var
