@@ -20,6 +20,7 @@ from video.video_processor import VideoProcessor
 from config.email_config_model import GetEmailConfigsResponse, UpdateEmailConfigsRequest, UpdateEmailConfigsResponse
 from config.email_config_manager import email_config_manager
 from utils.admin_utils import is_admin
+from notification.engine_webhook import fire_webhook
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -454,8 +455,34 @@ async def make_movie(
     response: Response,
 ):
     action_response = MovieActionsHandler().make_movie(request=request)
-    if action_response.result.state != ActionStatus.State.SUCCESS:
+    success = action_response.result.state == ActionStatus.State.SUCCESS
+    if not success:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    # Fire lifecycle webhook to kondos-api if requested. Best-effort —
+    # never fails the response. Skipped silently when webhook_url is None.
+    if request.webhook_url:
+        if success:
+            payload = {
+                "phase": "done",
+                "progress": 100,
+                "output_url": action_response.story.movie_path if action_response.story else None,
+            }
+            # `output_url` is required by kondos-api when phase=done; if for some
+            # reason story is missing on a SUCCESS state, downgrade to a failed
+            # callback so the receiver doesn't crash on validation.
+            if not payload["output_url"]:
+                payload = {"phase": "failed", "progress": 100, "error": "Render reported success but movie_path is empty"}
+        else:
+            payload = {
+                "phase": "failed",
+                "progress": 100,
+                "error": action_response.result.reason or "Engine reported failure (no reason given)",
+            }
+        # Strip None values — kondos-api's class-validator rejects null on optional URL fields.
+        payload = {k: v for k, v in payload.items() if v is not None}
+        fire_webhook(request.webhook_url, payload)
+
     return action_response
 
 # Endpoint for making a movie

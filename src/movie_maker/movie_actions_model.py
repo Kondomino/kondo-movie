@@ -37,7 +37,13 @@ class MakeMovieRequest(BaseModel):
     config : MovieModel.Configuration = Field(
         default_factory=MovieModel.Configuration, description='User configuration to make movie'
     )
-    
+    webhook_url : Optional[str] = Field(
+        default=None,
+        description='If set, kondo-movie POSTs a lifecycle payload here when the render completes. '
+                    'Receiver auths via X-Internal-Token (KONDO_WEBHOOK_TOKEN env on this side, '
+                    'KONDO_MOVIE_WEBHOOK_SECRET on the kondos-api side — same secret).'
+    )
+
     @field_validator('template', mode='after')
     def validate_template(cls, value: str) -> str:
         if value == "":
