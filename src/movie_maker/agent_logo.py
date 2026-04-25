@@ -20,19 +20,11 @@ class AgentLogoManager():
         orientation_str = "landscape" if orientation == MovieModel.Configuration.Orientation.Landscape else "portrait"
         logo_path = f"{self.user_id}/logos/agent_white.png"
         bucket_id = settings.GCP.Storage.USER_BUCKET
-        
-        print(f"LOGO 🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳")
-        print(f"orientation: {orientation}")
-        print(f"orientation_str: {orientation_str}")
-        print(f"self.user_id: {self.user_id}")
-        print(f"🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳")
 
         # Get the image from GCP bucket
         storage_manager = StorageManager()
         cloud_path = CloudPath(bucket_id=bucket_id, path=Path(logo_path))
 
-        print(f"cloud_path: {cloud_path}")
-        
         # Download to a temporary file
         with NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
             StorageManager.load_blob(cloud_path=cloud_path, dest_file=Path(temp_file.name))
