@@ -14,7 +14,6 @@ from botocore.exceptions import ClientError, NoCredentialsError
 from logger import logger
 from config.config import settings
 from digitalocean.storage_model import CloudPath
-from utils.session_utils import get_session_refs_by_ids
 
 class DigitalOceanStorageManager:
     """

@@ -14,7 +14,11 @@ from google.oauth2 import service_account
 from logger import logger
 from config.config import settings
 from gcp.storage_model import CloudPath
-from utils.session_utils import get_session_refs_by_ids
+
+# NOTE: `from utils.session_utils import get_session_refs_by_ids` is imported
+# lazily inside the methods that need it, to avoid forcing a DB connection at
+# module-load time for callers that only want to use the GCS surface (signed
+# URLs, raw upload/download). Same pattern as `movie_maker/edl_manager.py`.
 
 STORAGE_SERVICE_ACCOUNT_KEY_FILE_PATH = 'secrets/editora-prod-f0da3484f1a0.json'
 
@@ -103,6 +107,7 @@ class StorageManager():
     
     @staticmethod
     def get_image_repos_for_project(user_id:str, project_id:str)->list[str]:
+        from utils.session_utils import get_session_refs_by_ids
         _, project_ref, _ = get_session_refs_by_ids(user_id=user_id, project_id=project_id)
         
         project_doc = project_ref.get()
@@ -180,6 +185,7 @@ class StorageManager():
         Returns list of GCS paths containing scene clips
         """
         try:
+            from utils.session_utils import get_session_refs_by_ids
             _, project_ref, _ = get_session_refs_by_ids(user_id=user_id, project_id=project_id)
             
             project_doc = project_ref.get()
