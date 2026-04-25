@@ -1,21 +1,19 @@
 """
 Smoke test: the 3 EDL families locked for v1 (city_beat, dream_pop, sonoma)
-parse cleanly via the Pydantic `EDL` model.
+parse cleanly via `EDLManager.load_edl_from_file` — the production code path.
 
-Deliberately bypasses `EDLManager.load_edl_from_file` because that module
-also imports `gcp.db` -> `logger` -> `config.config` which fails at import
-time without a populated env (DB_HOST, etc). For a smoke test that only
-needs to validate JSON shape, going directly through the Pydantic model
-keeps the test hermetic and fast — no env, no DB, no config interpolation.
-
-Run with:
-    poetry run pytest tests/test_active_edls_smoke.py -v
+Pre-lazy-import refactor, this test had to bypass `EDLManager` and go through
+the Pydantic model directly because importing `edl_manager` triggered a real
+Firestore connection at module load time. After moving `from gcp.db import
+db_client` inside the methods that need it, importing `EDLManager` no longer
+forces a DB connection, and we can validate the actual production loader.
 """
 
 from pathlib import Path
 
 import pytest
 
+from movie_maker.edl_manager import EDLManager
 from movie_maker.edl_model import EDL
 
 
@@ -35,7 +33,9 @@ ACTIVE_EDLS = [
 def _load(flavor: str, edl_name: str) -> EDL:
     path = TEMPLATES_ROOT / flavor / f"{edl_name}.json"
     assert path.exists(), f"missing EDL JSON: {path}"
-    return EDL.model_validate_json(json_data=path.read_text(encoding="utf-8"))
+    edl = EDLManager.load_edl_from_file(edl_file_path=path)
+    assert edl is not None, f"{flavor}/{edl_name}: load_edl_from_file returned None"
+    return edl
 
 
 @pytest.mark.parametrize("edl_name", ACTIVE_EDLS)
@@ -52,3 +52,18 @@ def test_no_title_edl_parses(edl_name: str) -> None:
     assert edl.name, f"{edl_name}: missing name"
     assert edl.fps > 0, f"{edl_name}: invalid fps {edl.fps}"
     assert edl.clips, f"{edl_name}: empty clips"
+
+
+def test_load_edl_from_file_does_not_touch_db():
+    """
+    Production-path validation that the lazy import works as advertised:
+    `load_edl_from_file` is pure file+Pydantic and must not transitively
+    require `gcp.db.db_client`. If a future refactor pulls db_client back
+    into module scope (or inadvertently into this method), this test will
+    catch it because the dummy DB env vars set in conftest cannot
+    actually serve a Firestore connection — the import would error before
+    file loading starts.
+    """
+    sample = TEMPLATES_ROOT / "with_title" / "sonoma.json"
+    edl = EDLManager.load_edl_from_file(edl_file_path=sample)
+    assert isinstance(edl, EDL)
