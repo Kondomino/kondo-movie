@@ -15,29 +15,10 @@ Authentication:
   SignedURL:
     GET_EXPIRY_IN_HOURS: 24
     PUT_EXPIRY_IN_MINUTES: 2
-  ADMINS:
-    [
-      "claptonjoey@gmail.com", 
-      "deborahpirro.pilot@gmail.com",
-      "irenenictas.pilot@gmail.com",
-      "contato@kondomino.com.br",
-      "souto.victor@gmail.com",
-      "victor.souto@joinplank.com",
-      "editora.internal@gmail.com",
-      "Edson.neto@joinplank.com",
-      "edson.netoxx@gmail.com",
-      "watsonsalari.demo@gmail.com",
-      "jennacooper.trial@gmail.com",
-      "natan.tavares@joinplank.com",
-      # "michellecohan.trial@gmail.com",
-      # "tager.pilot@gmail.com",
-      # "shelton.trial@gmail.com",
-      # "Tager.pilot@gmail.com",
-      # "JadeDevitt.Pilot@gmail.com",
-      # "Shelton.Pilot@gmail.com",
-      # "Cara.Sadownick.Pilot@gmail.com",
-      "editora.pilot@gmail.com"
-    ]
+  # ADMINS list removed — admin status is owned by kondos-api
+  # (users.is_admin column + JWT claim). kondo-movie no longer maintains
+  # its own admin directory. See utils/admin_utils.py for the deprecation
+  # stub that any remaining callers fall through.
   RESTRICTED_TEMPLATES: []
 
 FeatureFlags:
