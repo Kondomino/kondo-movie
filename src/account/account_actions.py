@@ -7,7 +7,6 @@ from account.account_actions_model import *
 from account.account_model import *
 from gcp.db import db_client
 from notification.email_service import send_welcome_pilot_mail
-from account.stytch_manager import stytch_client
 from notification.email_service import send_portal_is_ready_mail
 
 class AccountActionsHandler:
@@ -192,21 +191,16 @@ class AccountActionsHandler:
             raise HTTPException(status_code=500, detail=f"Error occurred while updating user tenant for ID '{user_id}'")
 
     def check_user(self, request: CheckUserRequest) -> CheckUserResponse:
-        
-        query={
-            "email": request.email
-        }
-        try:
-            stytch_user_info = stytch_client.search(email=request.email)
-            
-            if stytch_user_info:
-                return CheckUserResponse(found=True, user=stytch_user_info)
-            else:
-                return CheckUserResponse(found=False)
-            
-        except Exception as e:
-            logger.exception(e)
-            raise HTTPException(status_code=500, detail=f"Stytch failed to find user for email '{request.email}'")
+        # Previously did a Stytch directory lookup. With Stytch purged and auth
+        # ownership moved to kondos-api, kondo-movie no longer has a user
+        # directory to search. Callers should query kondos-api instead.
+        raise HTTPException(
+            status_code=501,
+            detail=(
+                "check_user is no longer supported in kondo-movie. "
+                "User lookups now go through kondos-api."
+            ),
+        )
 
     def delete_user(self, user_id: str) -> DeleteUserResponse:
         try:
