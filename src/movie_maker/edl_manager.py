@@ -7,14 +7,21 @@ from typing import Any
 from rich import print
 
 from movie_maker.edl_model import EDL, Duration
-from gcp.db import db_client
 from config.config import settings
 from logger import logger
+
+# NOTE: `gcp.db.db_client` is imported lazily inside the methods that need it
+# (Firestore-backed read/write paths only). Importing it at module level forces
+# the whole config interpolation + DB connection chain to happen on any
+# `from movie_maker.edl_manager import ...`, which makes file-only operations
+# like `load_edl_from_file` impossible to use without a populated env. See
+# Apêndice B in references/kondo/architecture/video-tool-plan.html.
 
 
 class EDLManager():
     @staticmethod
     def get_collection_ref(with_title:bool)->Any:
+        from gcp.db import db_client
         if with_title:
             collection_ref = db_client.collection(settings.GCP.Firestore.Templates.TEMPLATES_COLLECTION_NAME)\
                 .document(settings.GCP.Firestore.Templates.WITH_TITLE_DOCUMENT_NAME)\
@@ -23,11 +30,12 @@ class EDLManager():
             collection_ref = db_client.collection(settings.GCP.Firestore.Templates.TEMPLATES_COLLECTION_NAME)\
                 .document(settings.GCP.Firestore.Templates.NO_TITLE_DOCUMENT_NAME)\
                     .collection(settings.GCP.Firestore.Templates.EDLS_COLLECTION_NAME)
-                        
+
         return collection_ref
-    
+
     @staticmethod
     def get_doc_ref(edl_id:str, with_title:bool)->Any:
+        from gcp.db import db_client
         if with_title:
             doc_ref = db_client.collection(settings.GCP.Firestore.Templates.TEMPLATES_COLLECTION_NAME)\
                 .document(settings.GCP.Firestore.Templates.WITH_TITLE_DOCUMENT_NAME)\
@@ -38,7 +46,7 @@ class EDLManager():
                 .document(settings.GCP.Firestore.Templates.NO_TITLE_DOCUMENT_NAME)\
                     .collection(settings.GCP.Firestore.Templates.EDLS_COLLECTION_NAME)\
                         .document(edl_id.lower())
-                        
+
         return doc_ref
         
     @staticmethod
