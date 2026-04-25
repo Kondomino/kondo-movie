@@ -126,11 +126,11 @@ def main():
     notification_type_group.add_argument('-s', '--success', action='store_true', help='Success')
     notification_type_group.add_argument('-f', '--failure', action='store_true', help='Failure')
     
-    to = 'kishan.jay@editora.ai'
+    to = 'contato@kondomino.com.br'
     user_name = 'Kishan Jay'
     video_name = '123 Park Ave'
     video_link = "https://storage.googleapis.com/editora-v2-users/user-test-91821539-9f1f-40d2-b93c-a0ce69126ae3/177a3af7-7260-49e7-af0f-a39df123e00e/a90371f8-61d4-43cf-92f3-c8661c0bf573/tmpwnr5n7xq.mp4?GoogleAccessId=firebase-adminsdk-52sf1%40editora-prod.iam.gserviceaccount.com&Expires=1739985749&Signature=HqOCggawCTsAeLxNYItn5%2FzXN269f4XuHQgl%2BWy8hcY9RkYY6zqVrFHlcplrvmcygvxtZu2fQSu3o%2BEMlmAMBtBD%2FMPoTdZ6mHC8JwF9d0Ps6vAj73QCGkiu12XelILtdyFuhe8TiMXxi03Y%2BDwa7JG3LP5uL9RsjXXthCAtcq7ZNervrwQJToZWcrCvw6K6af4bCjWND%2BGZAT%2B%2BdgBQSw%2FtACff%2FbWoqfIt%2BhpHHRFD3qGGoUMuPksap3hR%2BDjeoEhlYt3ld8%2FA1P1i32Ww%2FDoGpY80E5HFuHetindnLoKo904QX3OqaCevtaK38%2B%2BePgCxQevtu5ZlVSzYcgXXqw%3D%3D"
-    refer_url = 'https://editora.ai'
+    refer_url = 'https://kondomino.com.br'
     
     args = parser.parse_args()
     

@@ -21,7 +21,7 @@ Authentication:
       "claptonjoey@gmail.com", 
       "deborahpirro.pilot@gmail.com",
       "irenenictas.pilot@gmail.com",
-      "julie@editora.ai",
+      "contato@kondomino.com.br",
       "souto.victor@gmail.com",
       "victor.souto@joinplank.com",
       "editora.internal@gmail.com",
@@ -258,8 +258,8 @@ MovieMaker:
 Notification:
   VIDEO_RENDER_URL_PREFIX: "https://editora-v2-movie-maker-all-in-one-1095143658629.us-central1.run.app/api/v1"
   Email:
-    EDITORA_INFO: "info@editora.ai"
-    EDITORA_SUPPORT: "support@editora.ai"
+    EDITORA_INFO: "contato@kondomino.com.br"
+    EDITORA_SUPPORT: "contato@kondomino.com.br"
 
 
 Tenants:

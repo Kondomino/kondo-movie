@@ -1,5 +1,4 @@
 # movie_actions.py
-import concurrent.futures
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from pathlib import Path
@@ -196,9 +195,6 @@ class MovieActionsHandler:
             # Determine how many shots needed from EDL + config
             min_shots = MovieMaker.image_clip_count(edl=edl, config=request.config)
 
-            print("🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷🇧🇷")
-            print(f"min_shots: {min_shots}")
-
             # 2) Fetch images to a temp folder
             with TemporaryDirectory() as images_folder:
                 (
@@ -216,18 +212,6 @@ class MovieActionsHandler:
                     images_path_l2c_mapping=images_path_l2c_mapping,
                     images_path_c2l_mapping=images_path_c2l_mapping,
                 )
-
-                # # 3B) Spawn of job to run selection for all templates for future use
-                # status = self._generate_and_store_for_all_edls(
-                #     classification_mgr=classification_mgr,
-                #     image_buckets_local=image_buckets_local,
-                #     images_path_l2c_mapping=images_path_l2c_mapping,
-                #     project_ref=project_ref
-                # )
-                # if status.state == ActionStatus.State.SUCCESS:
-                #     logger.info("Images preselected for all templates!")
-                # else:
-                #     logger.error(f"Failed to preselect images for all templates: {status.reason}")
 
                 # 4) Determine final ordered images
                 ordered_images = self._generate_ordered_images(
@@ -561,81 +545,6 @@ class MovieActionsHandler:
         return classification_mgr.run_selection(
             buckets=image_buckets, num_clips=len(edl.clips)
         )
-
-    def _generate_and_store_for_all_edls(
-        self,
-        classification_mgr: ImageClassificationManager,
-        image_buckets_local: ImageBuckets,
-        images_path_l2c_mapping: Dict[str, str],
-        project_ref: Any,
-    ) -> ActionStatus:
-        """
-        1) Runs selection for each EDL in parallel (non-blocking for others if you call this in a separate thread).
-        2) Waits for all selections to finish.
-        3) Converts local file paths to cloud URIs.
-        4) Updates Firestore exactly once with the final map of EDL -> list of cloud paths.
-
-        Returns an ActionStatus indicating success/failure.
-        """
-        project_doc = project_ref.get()
-
-        # Simply return if preselection already exists
-        if (
-            project_doc.exists
-            and settings.Classification.IMAGE_CLASSIFICATION_KEY
-            in (project_dict := project_doc.to_dict())
-            and settings.Classification.PRESELECTION_KEY
-            in project_dict[settings.Classification.IMAGE_CLASSIFICATION_KEY]
-        ):
-            return ActionStatus(state=ActionStatus.State.SUCCESS)
-
-        # Step A: Prepare concurrency for each EDL
-        images_by_edl = {}  # { edl_name: [list_of_local_paths], ... }
-
-        edls = EDLManager.load_all_edls()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future_map = {}
-            for edl in edls:
-                future = executor.submit(
-                    self._run_selection_for_edl,
-                    edl,
-                    classification_mgr,
-                    image_buckets_local,
-                )
-                future_map[future] = edl.name
-
-            # Step B: Collect results as they complete
-            for future in concurrent.futures.as_completed(future_map):
-                edl_name = future_map[future]
-                try:
-                    selected_local_paths = future.result()
-                    images_by_edl[edl_name] = selected_local_paths
-                except Exception as exc:
-                    logger.error(f"Selection failed for EDL '{edl_name}': {exc}")
-                    return ActionStatus(
-                        state=ActionStatus.State.FAILURE,
-                        reason=f"Failed to run selection for EDL '{edl_name}': {exc}",
-                    )
-
-        # Step C: Convert local -> cloud URIs for all EDLs
-        # Example structure: { edl_id: ["gs://...", "gs://..."] }
-        edl_selections_cloud = {}
-        for edl_name, local_paths in images_by_edl.items():
-            cloud_paths = [
-                images_path_l2c_mapping.get(path, path) for path in local_paths
-            ]
-            edl_selections_cloud[edl_name] = cloud_paths
-
-        # Step D: Single Firestore update
-        preselection_key = f"{settings.Classification.IMAGE_CLASSIFICATION_KEY}.{settings.Classification.PRESELECTION_KEY}"
-        try:
-            project_ref.update({preselection_key: edl_selections_cloud})
-            logger.info("Template pre-selections stored in Firestore:")
-        except Exception as e:
-            logger.exception("Failed to update Firestore with EDL selections")
-            return ActionStatus(state=ActionStatus.State.FAILURE, reason=str(e))
-
-        return ActionStatus(state=ActionStatus.State.SUCCESS)
 
     # --------------------------------------------------------------------------
     # Firestore helpers
