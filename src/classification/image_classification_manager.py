@@ -20,6 +20,11 @@ from classification.classification_model import (
     ImageBuckets
 )
 from ai.image_analyzer import ImageAnalyzer
+from classification.classification_cache_client import (
+    hash_image_file,
+    get_classification,
+    upsert_classification,
+)
 
 class ImageClassificationManager():
     def __init__(self):
@@ -99,15 +104,50 @@ class ImageClassificationManager():
         )
                         
     def label_image(self, image_file_path: str) -> ImageBuckets.ImageInfo:
+        # Cache lookup first — avoids paying GCP Vision for an image we've
+        # seen before (sha256 of bytes is the key). Falls through silently
+        # to the live path on miss / cache outage / kondos-api unreachable.
+        image_hash: Optional[str] = None
+        try:
+            image_hash = hash_image_file(image_file_path)
+            cached = get_classification(image_hash)
+            if cached and isinstance(cached.get('labels'), list):
+                logger.debug(f"[classification] cache hit for {image_file_path}")
+                return ImageBuckets.ImageInfo(
+                    category='',
+                    uri=image_file_path,
+                    labels=[
+                        ImageBuckets.ImageInfo.Label(
+                            score=lbl.get('score', ''),
+                            description=lbl.get('description', ''),
+                        )
+                        for lbl in cached['labels']
+                    ],
+                    score=max(len(cached['labels']), 1),
+                )
+        except (OSError, ValueError) as e:
+            # Hash compute failure means we can't cache. Don't hard-fail —
+            # just continue to the live path and skip caching the result.
+            logger.warning(f"[classification] could not hash {image_file_path}: {e}")
+            image_hash = None
+
         image_analyzer = ImageAnalyzer()
-        
+
         response = image_analyzer.analyze_image_from_uri(
-            image_file_path=image_file_path, 
+            image_file_path=image_file_path,
             num_features=settings.Classification.MAX_LABELS
         )
-        
+
         image_labels = image_analyzer.labels(response=response)
-                    
+
+        # Cache write (best-effort; failures logged inside the client).
+        if image_hash:
+            upsert_classification(
+                image_hash=image_hash,
+                classification={'labels': image_labels},
+                source='gcp_vision',
+            )
+
         return ImageBuckets.ImageInfo(
             category='',
             uri=image_file_path,
@@ -115,7 +155,7 @@ class ImageClassificationManager():
                 ImageBuckets.ImageInfo.Label(
                     score=image_label['score'],
                     description=image_label['description']
-                ) 
+                )
                 for image_label in image_labels
             ],
             score = max(len(image_labels), 1)
