@@ -51,6 +51,7 @@ FeatureFlags:
   ENABLE_ASSEMBLY_AI: false       # AssemblyAI transcription
   ENABLE_OPENAI: true             # OpenAI API services
   ENABLE_DIGITAL_OCEAN_STORAGE: true  # Digital Ocean Spaces storage
+  ENABLE_CLOUDFLARE_R2_STORAGE: false # Cloudflare R2 storage (target for Kondomino)
   ENABLE_GCP_STORAGE: false       # Google Cloud Storage (legacy/fallback)
   ENABLE_DATABASE: true           # Database connectivity
   ENABLE_POSTGRESQL: true         # PostgreSQL database support
@@ -72,7 +73,7 @@ Engines:
   TRANSCRIBER: "AssemblyAI" # Options - 'OpenAI', 'AssemblyAI'
 
 Storage:
-  PROVIDER: "DigitalOcean"  # Options: "GCP", "DigitalOcean"
+  PROVIDER: "DigitalOcean"  # Options: "GCP", "DigitalOcean", "CloudflareR2"
 
 Database:
   PROVIDER: "PostgreSQL"  # Options: "Firestore", "PostgreSQL"
@@ -101,6 +102,16 @@ DigitalOcean:
     TEMPLATES_BUCKET: "kondo-templates"
     USER_BUCKET: "kondo-users"
     CDN_ENABLED: true
+
+Cloudflare:
+  R2:
+    PROPERTIES_BUCKET: "kondo-properties"
+    TEMPLATES_BUCKET: "kondo-templates"
+    USER_BUCKET: "kondo-users"
+    # Endpoint, credentials and (optional) public URL prefix come from env:
+    # CLOUDFLARE_R2_ENDPOINT, CLOUDFLARE_R2_KEY_ID, CLOUDFLARE_R2_ACCESS_KEY,
+    # CLOUDFLARE_R2_PUBLIC_URL (optional, for CDN-style serving via custom domain
+    # or pub-<id>.r2.dev). Names match kondos-api convention.
 
 GCP:
   PROJECT_ID: "editora-prod"
