@@ -108,6 +108,11 @@ class MakeMovieRequest(BaseModel):
                     'Receiver auths via X-Internal-Token (KONDO_WEBHOOK_TOKEN env on this side, '
                     'KONDO_MOVIE_WEBHOOK_SECRET on the kondos-api side — same secret).'
     )
+    agent_name : Optional[str] = Field(
+        default=None,
+        description='Display name for the agent presenting the video. In the v2 stateless flow this '
+                    'comes straight from the request; pre-stateless flows looked it up from Firestore.'
+    )
 
     @field_validator('template', mode='after')
     def validate_template(cls, value: str) -> str:
@@ -159,6 +164,7 @@ def v2_to_legacy_request(v2: MakeMovieRequestV2) -> 'MakeMovieRequest':
         template=v2.edl_id,
         config=config,
         webhook_url=v2.webhook_url,
+        agent_name=v2.agent.name,
     )
 
 

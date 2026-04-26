@@ -79,19 +79,47 @@ class EDLManager():
             logger.exception(e)
             return None
     
+    # Bundled-template root: `<repo>/library/templates/{with_title|no_title}/{edl_id}.json`.
+    # `library/` sits next to `src/`, so we go up three from this file
+    # (movie_maker → src → repo root) and join.
+    _TEMPLATES_ROOT = Path(__file__).resolve().parent.parent.parent / "library" / "templates"
+
     @staticmethod
-    def load_edl(edl_id:str, with_title:bool)->EDL:
-        try:
-            doc_ref = EDLManager.get_doc_ref(edl_id=edl_id, with_title=with_title)
-            doc = doc_ref.get()
-            if not doc.exists:
-                logger.error(f"Unable to fetch EDL template '{edl_id}'")
-                return None
-                
-            return EDL.model_validate(obj=doc.to_dict())
-        except Exception as e:
-            logger.exception(f"Failed to load EDL: {e}")
-            raise e
+    def _resolve_template_file(edl_id: str, with_title: bool, orientation: str = "landscape") -> Path | None:
+        """
+        Map (edl_id, with_title, orientation) → on-disk path. We try the bare
+        edl_id first (sonoma.json, big_sur.json, …) and fall back to the
+        orientation-suffixed form (city_beat_landscape.json) since some
+        EDL families have separate landscape/portrait templates.
+        """
+        sub = "with_title" if with_title else "no_title"
+        base_dir = EDLManager._TEMPLATES_ROOT / sub
+        candidates = [
+            base_dir / f"{edl_id.lower()}.json",
+            base_dir / f"{edl_id.lower()}_{orientation.lower()}.json",
+        ]
+        for path in candidates:
+            if path.is_file():
+                return path
+        return None
+
+    @staticmethod
+    def load_edl(edl_id: str, with_title: bool, orientation: str = "landscape") -> EDL:
+        """
+        Load an EDL by id from the bundled template files. The engine is
+        stateless (no Firestore) — templates ship with the image.
+        Returns None if the requested edl_id has no matching JSON file.
+        """
+        template_file = EDLManager._resolve_template_file(
+            edl_id=edl_id, with_title=with_title, orientation=orientation,
+        )
+        if template_file is None:
+            logger.error(
+                f"EDL '{edl_id}' (with_title={with_title}, orientation={orientation}) not found "
+                f"under {EDLManager._TEMPLATES_ROOT}"
+            )
+            return None
+        return EDLManager.load_edl_from_file(template_file)
             
     @staticmethod
     def load_all_edls(with_title:bool) -> list[EDL]:
