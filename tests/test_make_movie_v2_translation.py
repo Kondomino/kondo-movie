@@ -121,6 +121,12 @@ def test_v2_accepts_optional_logo_urls():
     assert legacy.request_id.user.id == "42"
 
 
+def test_translation_passes_agent_name_through():
+    legacy = v2_to_legacy_request(_v2())
+    # Stateless flow: agent name comes from the request, no Firestore lookup.
+    assert legacy.agent_name == "Maria Silva"
+
+
 def test_v2_music_url_is_captured_but_not_yet_mapped():
     # Forward-compat: music_url is part of the contract but the engine
     # doesn't yet have a per-render music override. The translation

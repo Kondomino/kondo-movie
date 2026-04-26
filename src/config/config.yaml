@@ -79,14 +79,18 @@ DigitalOcean:
     REGION: "nyc3"
     PROPERTIES_BUCKET: "kondo-properties"
     TEMPLATES_BUCKET: "kondo-templates"
-    USER_BUCKET: "kondo-users"
+    # Matches kondos-api DIGITAL_OCEAN_STORAGE_BUCKET so rendered videos
+    # land in the same bucket the front-end already serves from.
+    USER_BUCKET: "kondo-spaces-storage"
     CDN_ENABLED: true
 
 Cloudflare:
   R2:
     PROPERTIES_BUCKET: "kondo-properties"
     TEMPLATES_BUCKET: "kondo-templates"
-    USER_BUCKET: "kondo-users"
+    # Matches kondos-api CLOUDFLARE_R2_STORAGE_BUCKET — single source of truth
+    # for media (uploads + rendered outputs) once we cut over to R2 fully.
+    USER_BUCKET: "kondo-media"
     # Endpoint, credentials and (optional) public URL prefix come from env:
     # CLOUDFLARE_R2_ENDPOINT, CLOUDFLARE_R2_KEY_ID, CLOUDFLARE_R2_ACCESS_KEY,
     # CLOUDFLARE_R2_PUBLIC_URL (optional, for CDN-style serving via custom domain
