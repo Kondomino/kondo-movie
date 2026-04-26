@@ -6,7 +6,72 @@ from datetime import datetime
 
 from utils.common_models import ActionStatus, Session
 from movie_maker.movie_model import MovieModel
-    
+
+
+# ---------------------------------------------------------------------------
+# v2 contract — proxied identity from kondos-api
+# ---------------------------------------------------------------------------
+# These models mirror the request shape produced by kondos-api's
+# VideoEngineClient. The engine accepts v2 at the route boundary and
+# translates to the legacy MakeMovieRequest before invoking the existing
+# handler — so internal Firestore/Movie pipeline code keeps working
+# unchanged while the public contract moves to proxied identity.
+
+class MakeMovieAgent(BaseModel):
+    id: int = Field(..., description="kondos-api agent id (proxied identity).")
+    name: str = Field(..., description="Agent display name; used for end card.")
+    logo_url: Optional[str] = Field(default=None, description="Agent brand logo URL.")
+
+
+class MakeMovieKondo(BaseModel):
+    id: int = Field(..., description="kondos-api kondo id (the property/condo).")
+    address: str = Field(..., description="Kondo address; used for narration grounding.")
+    brokerage_logo_url: Optional[str] = Field(default=None, description="Brokerage logo URL.")
+
+
+class MakeMovieCapabilities(BaseModel):
+    duration_max_seconds: int = Field(..., description="Max render duration enforced by engine.")
+    images_max: int = Field(..., description="Max number of input images allowed.")
+    captions_enabled: bool = Field(..., description="Whether captions should be burned in.")
+
+
+class MakeMovieRequestV2(BaseModel):
+    """
+    Proxied-identity request from kondos-api. All identity (user/project)
+    is supplied by the upstream service — the engine does not authenticate
+    end-users directly. Authentication between services uses the
+    X-Internal-Token shared secret on the route layer.
+    """
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema, _):
+            schema["additionalProperties"] = True
+
+    job_id: str = Field(..., description="kondos-api-issued job id; used as the version_id internally.")
+    agent: MakeMovieAgent
+    kondo: MakeMovieKondo
+    media_urls: list[str] = Field(..., description="Ordered list of input media URLs (R2/S3/https).")
+    description: str = Field(..., description="Brief from agent — used as narration script.")
+    edl_id: str = Field(..., description="EDL family: city_beat | dream_pop | sonoma in v1.")
+    voice_id: Optional[str] = Field(default=None, description="ElevenLabs voice id; null = engine default.")
+    music_url: Optional[str] = Field(default=None, description="Music override URL; null = EDL default.")
+    webhook_url: str = Field(..., description="Lifecycle callback target on kondos-api.")
+    capabilities: MakeMovieCapabilities
+
+    @field_validator('job_id', 'edl_id', 'description', 'webhook_url', mode='after')
+    def _non_empty(cls, value: str) -> str:
+        if not value or not value.strip():
+            raise ValueError("Field cannot be empty")
+        return value
+
+    @model_validator(mode='after')
+    def _validate_media(self) -> Self:
+        if not self.media_urls:
+            raise ValueError("media_urls cannot be empty")
+        return self
+
+
 class MakeMovieRequest(BaseModel):
     class Config:
         # Customize the schema to set additionalProperties to true
@@ -52,10 +117,51 @@ class MakeMovieRequest(BaseModel):
     
     @model_validator(mode='after')
     def validate_input(self) -> Self:
-        if not self.image_repos and not self.ordered_images:                
+        if not self.image_repos and not self.ordered_images:
             raise ValueError("Missing image source")
         return self
-    
+
+
+def v2_to_legacy_request(v2: MakeMovieRequestV2) -> 'MakeMovieRequest':
+    """
+    Translate the proxied-identity v2 contract into the engine's internal
+    legacy MakeMovieRequest. The Session is synthesized from the upstream
+    ids: user_id=str(agent.id), project_id=str(kondo.id), version_id=job_id.
+
+    Side-effect note: this synthesizes Firestore docs under those ids when
+    the legacy handler runs. That's acceptable for the v1 contract bridge —
+    full statelessness is a later PR. The translation is deterministic.
+
+    music_url is accepted by v2 but not yet routed into the engine's
+    MovieModel (no per-render music override exists). It's captured for
+    forward-compat once the EDL system grows that knob.
+    """
+    session = Session(
+        user=Session.UserInfo(id=str(v2.agent.id)),
+        project=Session.ProjectInfo(id=str(v2.kondo.id)),
+        version=Session.VersionInfo(id=v2.job_id),
+    )
+
+    config = MovieModel.Configuration(
+        narration=MovieModel.Configuration.Narration(
+            enabled=True,
+            voice=v2.voice_id,
+            script=v2.description,
+            captions=v2.capabilities.captions_enabled,
+        ),
+    )
+
+    return MakeMovieRequest(
+        request_id=session,
+        image_repos=None,
+        ordered_images=list(v2.media_urls),
+        excluded_images=None,
+        template=v2.edl_id,
+        config=config,
+        webhook_url=v2.webhook_url,
+    )
+
+
 class Story(BaseModel):
     template : str = Field(
         ..., description='EDL used to make movie'
