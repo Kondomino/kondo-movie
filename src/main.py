@@ -448,40 +448,44 @@ app.include_router(v1_router)
 # MOVIE MAKER APIs
 ##################
 
-# Endpoint for making a movie
+# Endpoint for making a movie. Accepts the v2 proxied-identity contract
+# from kondos-api; translates to the engine's legacy MakeMovieRequest and
+# runs through the existing handler pipeline. The legacy shape is no
+# longer accepted at the boundary — there are no remaining callers using
+# the Editora payload.
 @app.post('/make_movie', response_model=MakeMovieResponse)
 async def make_movie(
-    request: MakeMovieRequest,
+    request: MakeMovieRequestV2,
     response: Response,
 ):
-    action_response = MovieActionsHandler().make_movie(request=request)
+    legacy_request = v2_to_legacy_request(request)
+    action_response = MovieActionsHandler().make_movie(request=legacy_request)
     success = action_response.result.state == ActionStatus.State.SUCCESS
     if not success:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-    # Fire lifecycle webhook to kondos-api if requested. Best-effort —
-    # never fails the response. Skipped silently when webhook_url is None.
-    if request.webhook_url:
-        if success:
-            payload = {
-                "phase": "done",
-                "progress": 100,
-                "output_url": action_response.story.movie_path if action_response.story else None,
-            }
-            # `output_url` is required by kondos-api when phase=done; if for some
-            # reason story is missing on a SUCCESS state, downgrade to a failed
-            # callback so the receiver doesn't crash on validation.
-            if not payload["output_url"]:
-                payload = {"phase": "failed", "progress": 100, "error": "Render reported success but movie_path is empty"}
-        else:
-            payload = {
-                "phase": "failed",
-                "progress": 100,
-                "error": action_response.result.reason or "Engine reported failure (no reason given)",
-            }
-        # Strip None values — kondos-api's class-validator rejects null on optional URL fields.
-        payload = {k: v for k, v in payload.items() if v is not None}
-        fire_webhook(request.webhook_url, payload)
+    # Fire lifecycle webhook to kondos-api. v2 contract makes webhook_url
+    # required, so this always runs. Best-effort — never fails the response.
+    if success:
+        payload = {
+            "phase": "done",
+            "progress": 100,
+            "output_url": action_response.story.movie_path if action_response.story else None,
+        }
+        # `output_url` is required by kondos-api when phase=done; if for some
+        # reason story is missing on a SUCCESS state, downgrade to a failed
+        # callback so the receiver doesn't crash on validation.
+        if not payload["output_url"]:
+            payload = {"phase": "failed", "progress": 100, "error": "Render reported success but movie_path is empty"}
+    else:
+        payload = {
+            "phase": "failed",
+            "progress": 100,
+            "error": action_response.result.reason or "Engine reported failure (no reason given)",
+        }
+    # Strip None values — kondos-api's class-validator rejects null on optional URL fields.
+    payload = {k: v for k, v in payload.items() if v is not None}
+    fire_webhook(request.webhook_url, payload)
 
     return action_response
 
