@@ -260,86 +260,12 @@ class StorageManager:
             blob.delete()
 
     # ------------------------------------------------------------------
-    # Project-specific helpers (URL prefix differs per provider)
+    # Project-aware helpers (get_*_repos_for_project, gen_signed_urls_for_bucket)
+    # were Editora-era — they read project state from Firestore to derive
+    # bucket prefixes per user/project. Removed in PR k4 alongside the
+    # Firestore purge: kondos-api now owns project state and tells the
+    # engine which URLs to fetch directly via the v2 contract.
     # ------------------------------------------------------------------
-
-    def get_image_repos_for_project(self, user_id: str, project_id: str) -> List[str]:
-        """Get image storage paths for a project"""
-        try:
-            from utils.session_utils import get_session_refs_by_ids
-            _, project_ref, _ = get_session_refs_by_ids(user_id=user_id, project_id=project_id)
-
-            project_doc = project_ref.get()
-            if not project_doc.exists:
-                logger.error(f"Unable to fetch project for user '{user_id}' and project '{project_id}'")
-                return []
-
-            property_id = project_doc.to_dict().get("property_id", None)
-            prefix = self._provider_url_prefix()
-
-            image_repos = []
-            if property_id:
-                image_repos.append(f"{prefix}{self._buckets['properties']}/{property_id}/Images")
-
-            image_repos.append(f"{prefix}{self._buckets['users']}/{user_id}/{project_id}/images")
-            return image_repos
-
-        except Exception as e:
-            logger.exception(f"Failed to get image repos for project {project_id}: {e}")
-            return []
-
-    def get_video_repos_for_project(self, user_id: str, project_id: str) -> List[str]:
-        """Get video storage paths for a project"""
-        try:
-            prefix = self._provider_url_prefix()
-            return [
-                f"{prefix}{self._buckets['users']}/{user_id}/{project_id}/videos",
-                f"{prefix}{self._buckets['users']}/{user_id}/{project_id}/scene_clips",
-            ]
-        except Exception as e:
-            logger.exception(f"Failed to get video repos for project {project_id}: {e}")
-            return []
-
-    def gen_signed_urls_for_bucket(self, storage_location: str, excluded_urls: List[str] = [],
-                                  file_types: List[str] = None):
-        """Generate signed URLs for files in a storage location"""
-        try:
-            parsed = self.parse_storage_url(storage_location)
-            bucket = parsed["bucket_name"]
-            prefix = parsed["file_name"]
-
-            objects = self.list_objects(bucket, prefix)
-            signed_urls = []
-
-            if file_types is None:
-                file_types = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.mp4', '.mov', '.webm', '.m4v']
-
-            current_time = dt.datetime.now(tz=ZoneInfo(settings.General.TIMEZONE))
-            expiry_delta = dt.timedelta(hours=settings.Authentication.SignedURL.GET_EXPIRY_IN_HOURS)
-            signature_expiry = current_time + expiry_delta
-
-            url_prefix = self._provider_url_prefix()
-            for obj in objects:
-                key = obj['Key']
-                obj_url = f"{url_prefix}{bucket}/{key}"
-
-                if obj_url in excluded_urls:
-                    continue
-                if file_types and not any(key.lower().endswith(ext) for ext in file_types):
-                    continue
-
-                signed_url = self.generate_signed_url_for_view(bucket, key)
-                signed_urls.append({
-                    "file_name": key,
-                    "signed_url": signed_url,
-                    "storage_url": obj_url,
-                })
-
-            return signed_urls, signature_expiry
-
-        except Exception as e:
-            logger.exception(f"Failed to generate signed URLs for {storage_location}: {e}")
-            return [], None
 
 
 # Create the unified storage manager instance
