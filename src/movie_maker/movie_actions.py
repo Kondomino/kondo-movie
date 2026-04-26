@@ -24,6 +24,7 @@ from project.project_stats_manager import ProjectStatsManager
 
 from classification.image_classification_manager import ImageClassificationManager
 from classification.classification_model import ImageBuckets
+from movie_maker.image_fetch import download_http_image, suffix_from_url, is_http_url
 
 
 class MovieActionsHandler:
@@ -312,13 +313,26 @@ class MovieActionsHandler:
                 str(file) for file in Path(images_folder).rglob("*") if file.is_file()
             ]
         else:
-            # If user has an ordered list, copy each image individually
-            for gs_path in request.ordered_images:
-                cloud_path = CloudPath.from_path(gs_path)
-                filename = f"{uuid.uuid4()}{cloud_path.path.suffix}"
-                local_path = os.path.join(images_folder, filename)
-                StorageManager.load_blob(cloud_path=cloud_path, dest_file=local_path)
-                images_path_l2c_mapping[local_path] = cloud_path.full_path()
+            # If user has an ordered list, copy each image individually.
+            # Two URL forms are supported:
+            #   - gs://bucket/path  → existing GCP code path (legacy Editora flow)
+            #   - http(s)://...     → public/signed URL (kondos-api flow,
+            #                         R2 / DO Spaces / any S3-compatible host)
+            # The l2c mapping uses the original URL string as the "cloud
+            # back-reference" — Story.used_images echoes it to kondos-api
+            # so the receiver can correlate.
+            for source_url in request.ordered_images:
+                if is_http_url(source_url):
+                    filename = f"{uuid.uuid4()}{suffix_from_url(source_url)}"
+                    local_path = os.path.join(images_folder, filename)
+                    download_http_image(source_url, local_path)
+                    images_path_l2c_mapping[local_path] = source_url
+                else:
+                    cloud_path = CloudPath.from_path(source_url)
+                    filename = f"{uuid.uuid4()}{cloud_path.path.suffix}"
+                    local_path = os.path.join(images_folder, filename)
+                    StorageManager.load_blob(cloud_path=cloud_path, dest_file=local_path)
+                    images_path_l2c_mapping[local_path] = cloud_path.full_path()
                 loaded_local_paths.append(local_path)
 
         return images_path_l2c_mapping, images_path_c2l_mapping, loaded_local_paths
