@@ -22,30 +22,19 @@ Authentication:
   RESTRICTED_TEMPLATES: []
 
 FeatureFlags:
-  ENABLE_AUTHENTICATION: false    # Auth dep is now a 501 stub; auth is owned by kondos-api
-  ENABLE_EMAIL_SERVICES: false    # Mandrill/Mailchimp email services
-  ENABLE_URL_SHORTENING: false    # Short.io URL shortening
-  ENABLE_WEB_SCRAPING: false      # All scraping services (Scrapfly + all scrapers)
-  ENABLE_GOOGLE_MAPS: false       # Google Maps API for address services
+  # Engine is stateless; no DB, no auth, no email/scraping/maps/url-shortening.
+  # Only the AI vendors and the storage provider stay configurable.
   ENABLE_ELEVEN_LABS: true        # ElevenLabs TTS
   ENABLE_ASSEMBLY_AI: false       # AssemblyAI transcription
-  ENABLE_OPENAI: true             # OpenAI API services
-  ENABLE_DIGITAL_OCEAN_STORAGE: true  # Digital Ocean Spaces storage
-  ENABLE_CLOUDFLARE_R2_STORAGE: false # Cloudflare R2 storage (target for Kondomino)
-  ENABLE_GCP_STORAGE: false       # Google Cloud Storage (legacy/fallback)
-  ENABLE_DATABASE: true           # Database connectivity
-  ENABLE_POSTGRESQL: true         # PostgreSQL database support
+  ENABLE_OPENAI: true             # OpenAI narration script generation
+  ENABLE_DIGITAL_OCEAN_STORAGE: true  # Digital Ocean Spaces (current default)
+  ENABLE_CLOUDFLARE_R2_STORAGE: false # Cloudflare R2 (target for Kondomino)
+  ENABLE_GCP_STORAGE: false       # Google Cloud Storage (legacy)
 
 Secret:
-  JWT_SECRET_KEY: "JWT_SECRET"                    # Keep existing
-  MANDRILL_API_KEY: "_MANDRILL_API_KEY"           # New env var (renamed from MAILCHIMP_API_KEY)
-  MAILCHIMP_API_KEY: "_MAILCHIMP_API_KEY"         # New env var (separate from Mandrill)
-  SHORTIO_API_KEY: "_SHORT_IO"                    # New env var
-  SCRAPFLY_API_KEY: "_SCRAPFLY_API_KEY"           # New env var
-  GOOGLE_MAPS_API_KEY: "_GOOGLE_MAPS_API_KEY"     # New env var
-  ELEVEN_LABS_API_KEY: "_ELEVEN_LABS_API_KEY"     # New env var
-  ASSEMBLY_AI_TRANSCRIBER_API_KEY: "_ASSEMBLY_AI_TRANSCRIBER_API_KEY"  # New env var
-  OPENAI_API_KEY: "_OPENAI_API_KEY"               # New env var
+  ELEVEN_LABS_API_KEY: "_ELEVEN_LABS_API_KEY"
+  ASSEMBLY_AI_TRANSCRIBER_API_KEY: "_ASSEMBLY_AI_TRANSCRIBER_API_KEY"
+  OPENAI_API_KEY: "_OPENAI_API_KEY"
 
 Engines:
   TTS: "ElevenLabs" # Options - 'OpenAI', 'ElevenLabs'
@@ -54,26 +43,6 @@ Engines:
 Storage:
   PROVIDER: "DigitalOcean"  # Options: "GCP", "DigitalOcean", "CloudflareR2"
 
-Database:
-  PROVIDER: "PostgreSQL"  # Options: "Firestore", "PostgreSQL"
-
-PostgreSQL:
-  DEV:
-    HOST: "${DB_HOST}"
-    PORT: "${DB_PORT}"
-    DATABASE: "${DB_NAME}"
-    USER: "${DB_USER}"
-    PASSWORD: "${DB_PASSWORD}"
-    SSL_REQUIRED: false
-  PROD:
-    DATABASE_URL: "${RENDER_INTERNAL_URL}"
-    HOSTNAME: "${RENDER_HOSTNAME}"
-    PORT: "${RENDER_DB_PORT}"
-    DATABASE: "${RENDER_DB}"
-    USER: "${RENDER_USR}"
-    PASSWORD: "${RENDER_PWD}"
-    SSL_REQUIRED: true
-  
 DigitalOcean:
   Spaces:
     REGION: "nyc3"
@@ -97,22 +66,11 @@ Cloudflare:
     # or pub-<id>.r2.dev). Names match kondos-api convention.
 
 GCP:
+  # Project + bucket naming retained for the legacy gs:// branch in
+  # _fetch_images. Firestore config removed — the engine no longer
+  # reads/writes Firestore (PR k4). If GCS goes fully cold we can drop
+  # this section too.
   PROJECT_ID: "editora-prod"
-  Firestore:
-    DB: "editora-v2"
-    PROPERTIES_COLLECTION_NAME: "properties"
-    CLASSIFICATION_COLLECTION_NAME: "classification"
-    USERS_COLLECTION_NAME: "users"
-    PROJECTS_COLLECTION_NAME: "projects"
-    VERSIONS_COLLECTION_NAME: "versions"
-    SCHEMA_COLLECTION_NAME: "schema"
-    VOICEOVER_COLLECTION_NAME: "voiceover"
-    Templates:
-      TEMPLATES_COLLECTION_NAME: "templates"
-      EDLS_COLLECTION_NAME: "edls"
-      NO_TITLE_DOCUMENT_NAME: "no_title"
-      WITH_TITLE_DOCUMENT_NAME: "with_title"
-
   Storage:
     PROPERTIES_BUCKET: "editora-v2-properties"
     TEMPLATES_BUCKET: "editora-v2-templates"

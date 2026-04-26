@@ -11,12 +11,8 @@ from rich import print
 
 from config.config import settings
 from logger import logger
-from services.classification_service import classification_storage_service
-from services.session_service import unified_session_manager
-from gcp.storage import StorageManager
-from gcp.storage_model import CloudPath
 from classification.classification_model import (
-    RealEstate, HeroSelectionEnum, ImageSequence, 
+    RealEstate, HeroSelectionEnum, ImageSequence,
     ImageBuckets
 )
 from ai.image_analyzer import ImageAnalyzer
@@ -29,61 +25,7 @@ from classification.classification_cache_client import (
 class ImageClassificationManager():
     def __init__(self):
         self.model = self.load_real_estate_model_local()
-        self.classification_service = classification_storage_service
-        self.session_manager = unified_session_manager
-        
-    def save_real_estate_model(self, model: RealEstate):
-        try:
-            # For now, keep model configuration in Firestore since it's global config data
-            from database.db_manager import unified_db_manager
-            firestore_client = unified_db_manager.get_firestore_client()
-            
-            if firestore_client:
-                document_id = settings.Classification.REAL_ESTATE_DOC_ID
-                doc_ref = firestore_client.collection(
-                    settings.GCP.Firestore.CLASSIFICATION_COLLECTION_NAME
-                ).document(document_id=document_id)
-                doc = doc_ref.get()
-                if doc.exists:
-                    logger.warning(f"Classification model {document_id} already exists. Overwriting record in DB")
-                    
-                doc_ref.set(model.model_dump())
-                self.model = model
-                
-                logger.success(f"Saved classification model in database. Name : {document_id}")
-            else:
-                logger.warning("No database client available for saving classification model")
-                    
-        except Exception as e:
-            logger.exception(f"Failed to save classification model in database: {e}")
-            raise e
-        
-    def load_real_estate_model(self) -> RealEstate:
-        try:
-            # For now, keep model configuration in Firestore since it's global config data
-            from database.db_manager import unified_db_manager
-            firestore_client = unified_db_manager.get_firestore_client()
-            
-            if firestore_client:
-                document_id = settings.Classification.REAL_ESTATE_DOC_ID
-                doc_ref = firestore_client.collection(
-                    settings.GCP.Firestore.CLASSIFICATION_COLLECTION_NAME
-                ).document(document_id=document_id)
-                doc = doc_ref.get()
-                if not doc.exists:
-                    logger.warning(f"Classification model {document_id} does not exist")
-                    return None
-                                
-                logger.info(f"Loaded classification model '{document_id}'")
-                return RealEstate(**doc.to_dict())
-            else:
-                logger.warning("No database client available for loading classification model")
-                return None
-                        
-        except Exception as e:
-            logger.exception(f"Failed to load classification model from database: {e}")
-            raise e
-        
+
     def load_real_estate_model_local(self) -> RealEstate:
         logger.info("Loaded Real Estate classification model LOCALLY")
         
@@ -232,73 +174,6 @@ class ImageClassificationManager():
 
         return buckets
     
-    def run_classification_for_project(self, user_id:str, project_id:str):
-        # Check if project exists using service layer
-        if not self.classification_service.project_service.project_exists(user_id, project_id):
-            logger.error(f"Unable to fetch project for user '{user_id}' and project '{project_id}'")
-            return
-        
-        # Get session references for compatibility with existing storage operations
-        _, project_ref, _ = self.session_manager.get_session_refs_by_ids(user_id=user_id, project_id=project_id)
-            
-        image_repos = StorageManager.get_image_repos_for_project(
-            user_id=user_id,
-            project_id=project_id
-        )
-        
-        images_path_l2c_mapping = {}
-        images_path_c2l_mapping = {}
-        loaded_local_paths = []
-        
-        with TemporaryDirectory() as images_folder:
-            for repo in image_repos:
-                cloud_path = CloudPath.from_path(repo)
-                subfolder_uuid = str(uuid.uuid4())
-                images_subfolder = os.path.join(images_folder, subfolder_uuid)
-                os.makedirs(images_subfolder, exist_ok=True)
-
-                sub_l2c, sub_c2l = StorageManager.load_blobs(
-                    cloud_path=cloud_path, 
-                    dest_dir=images_subfolder,
-                    excluded_files=project_ref.get().to_dict().get('excluded_images', None)
-                )
-                images_path_l2c_mapping.update(sub_l2c)
-                images_path_c2l_mapping.update(sub_c2l)
-
-            loaded_local_paths = [
-                str(file) for file in Path(images_folder).rglob("*") if file.is_file()
-            ]
-            
-            image_buckets_local = self.run_classification_for_files(
-                image_file_paths=loaded_local_paths
-            )
-            
-            if not image_buckets_local:
-                return
-            
-            image_buckets_cloud = ImageBuckets(buckets={})
-            for category, item_list in image_buckets_local.buckets.items():
-                cloud_items = []
-                for item in item_list:
-                    cloud_uri = images_path_l2c_mapping.get(item.uri, item.uri)
-                    cloud_item = ImageBuckets.Item(uri=cloud_uri, score=item.score)
-                    cloud_items.append(cloud_item)
-                image_buckets_cloud.buckets[category] = cloud_items
-
-            # Store classification results using service layer
-            IMAGE_CLASSIFICATION_KEY = settings.Classification.IMAGE_CLASSIFICATION_KEY
-            
-            # Check if classification already exists
-            if self.classification_service.get_image_classification(user_id, project_id):
-                logger.info(f"Images are already classified for project '{project_id}'. Overwriting")
-            else:
-                logger.debug(f"New image classification run for project '{project_id}'")
-            
-            # Store results using classification service
-            self.classification_service.store_image_classification(
-                user_id, project_id, image_buckets_cloud.model_dump()
-            )
-            
     def run_classification_for_files(self, image_file_paths: List[str]) -> ImageBuckets:
         # Step 1 - Label images
         if not image_file_paths:
