@@ -69,9 +69,15 @@ RUN playwright install --with-deps
 COPY src src
 COPY tests tests
 
-# Copy fonts and update font cache
-COPY library/fonts/ /usr/share/fonts/
+# Copy bundled assets to /library/* — the engine resolves
+# `Path(__file__).resolve().parent.parent.parent / "library" / ...` for
+# templates + fonts at runtime, which in the Fly image lands at the
+# filesystem root. Also seed system fonts so PIL/MoviePy can find
+# them via fc-cache.
+COPY library/templates/ /library/templates/
+COPY library/fonts/     /library/fonts/
 COPY library/notification/ /library/notification/
+COPY library/fonts/     /usr/share/fonts/
 RUN fc-cache -fv
 
 ENV PYTHONPATH='src'
