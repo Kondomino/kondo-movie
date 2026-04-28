@@ -155,12 +155,20 @@ class MovieActionsHandler:
                     loaded_local_paths,
                 ) = self._fetch_images(images_folder, request)
 
-                # Classify locally — per-image cache (kondos-api HTTP)
-                # handles dedup across renders.
+                # Classification is dead work on the v2 path (request.ordered_images
+                # is populated; _generate_ordered_images returns those URLs as-is
+                # without consulting buckets). Skip the GCP Vision call entirely
+                # to avoid the 15s/render ADC-discovery latency and the noisy
+                # per-image errors. Legacy `image_repos` flow still classifies
+                # because it actually needs the buckets.
+                # See `project_classification_noise.md` for the design rationale.
                 classification_mgr = ImageClassificationManager()
-                image_buckets_local = classification_mgr.run_classification_for_files(
-                    image_file_paths=loaded_local_paths
-                )
+                if request.ordered_images:
+                    image_buckets_local = None  # not consulted on the v2 path
+                else:
+                    image_buckets_local = classification_mgr.run_classification_for_files(
+                        image_file_paths=loaded_local_paths
+                    )
 
                 ordered_images = self._generate_ordered_images(
                     request,
