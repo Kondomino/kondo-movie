@@ -15,7 +15,14 @@ from gcp.secret import secret_mgr
 
 register_heif_opener()
 
-VISION_SERVICE_ACCOUNT_KEY_FILE_PATH = 'secrets/editora-prod-f0da3484f1a0.json'
+# Path to a GCP service-account JSON key file for Cloud Vision. Vision
+# is only invoked from the legacy classification path; the v2 engine
+# path uses the kondos-api `KondoImageClassifications` cache, which
+# short-circuits before this client is constructed. Override via
+# GCP_SERVICE_ACCOUNT_KEY_PATH if classification needs to run locally.
+VISION_SERVICE_ACCOUNT_KEY_FILE_PATH = os.getenv(
+    "GCP_SERVICE_ACCOUNT_KEY_PATH", ""
+)
 
 class ImageAnalyzer():
     def __init__(self):

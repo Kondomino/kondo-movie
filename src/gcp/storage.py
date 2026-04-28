@@ -20,7 +20,14 @@ from gcp.storage_model import CloudPath
 # module-load time for callers that only want to use the GCS surface (signed
 # URLs, raw upload/download). Same pattern as `movie_maker/edl_manager.py`.
 
-STORAGE_SERVICE_ACCOUNT_KEY_FILE_PATH = 'secrets/editora-prod-f0da3484f1a0.json'
+# Path to a GCP service-account JSON key file. The legacy GCS adapter
+# only runs when Storage.PROVIDER=GCP; for kondomino's CloudflareR2
+# default this code never executes, so an unset/missing key is fine and
+# falls through to ADC. Override via GCP_SERVICE_ACCOUNT_KEY_PATH if you
+# reactivate the adapter on a host that has the JSON locally.
+STORAGE_SERVICE_ACCOUNT_KEY_FILE_PATH = os.getenv(
+    "GCP_SERVICE_ACCOUNT_KEY_PATH", ""
+)
 
 class StorageManager():
 

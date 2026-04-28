@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "editora-v2-movie-maker"
+name = "kondo-movie"
 version = "0.1.0"
-description = "Video engine for Editora"
-authors = ["Kishan Jayaraman <kishan.jay@editora.ai>", "Victor Souto | Plank <souto.victor@gmail.com>"]
+description = "Video engine for Kondomino — stateless renderer driven by kondos-api"
+authors = ["Victor Souto <souto.victor@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

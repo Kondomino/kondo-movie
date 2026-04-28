@@ -5,11 +5,11 @@ Authentication:
   ALLOWED_ORIGINS:
     [
       "http://localhost:3000",
-      "https://editora-v2-frontend-perf-1095143658629.us-central1.run.app",
-      "https://editora-v2-frontend-staging-1095143658629.us-central1.run.app",
-      "https://editora-v2-frontend-1095143658629.us-central1.run.app",
-      "https://beta.editora.ai",
-      "https://app.editora.ai",
+      "http://localhost:3003",
+      "https://kondomino.com.br",
+      "https://www.kondomino.com.br",
+      "https://api.kondomino.com.br",
+      "https://media.kondomino.com.br",
     ]
   JWT_ALGORITHM: "HS256"
   SignedURL:
@@ -68,15 +68,18 @@ Cloudflare:
     # or pub-<id>.r2.dev). Names match kondos-api convention.
 
 GCP:
-  # Project + bucket naming retained for the legacy gs:// branch in
-  # _fetch_images. Firestore config removed — the engine no longer
-  # reads/writes Firestore (PR k4). If GCS goes fully cold we can drop
-  # this section too.
-  PROJECT_ID: "editora-prod"
+  # Placeholder values for the legacy gs:// branch in `_fetch_images` and
+  # the GCS adapter in `gcp/storage.py`. The v2 path doesn't reach this
+  # code (Storage.PROVIDER=CloudflareR2, ENABLE_GCP_STORAGE=false); these
+  # values exist only to keep imports and config validation happy. If the
+  # GCS adapter is ever reactivated, set GCP.PROJECT_ID to a real project
+  # and provision the buckets — names below match the kondos-api
+  # conventions.
+  PROJECT_ID: "kondomino"
   Storage:
-    PROPERTIES_BUCKET: "editora-v2-properties"
-    TEMPLATES_BUCKET: "editora-v2-templates"
-    USER_BUCKET: "editora-v2-users"
+    PROPERTIES_BUCKET: "kondo-properties"
+    TEMPLATES_BUCKET: "kondo-templates"
+    USER_BUCKET: "kondo-media"
 
 OpenAI:
   Narration:
@@ -197,8 +200,13 @@ MovieMaker:
       LINE_SIZE: 76
       FONT_MARGIN: [0, 2]
   Watermark:
+    # The bundled watermark file is not currently shipped in library/logo/.
+    # Watermark is silently disabled in v1 — `MovieModel.config.watermark`
+    # defaults to `false` so the asset path is never resolved. Re-enabling
+    # the feature requires adding a kondomino watermark PNG under
+    # library/logo/ and matching this filename.
     STORAGE_DIR_PREFIX: "logo"
-    EDITORA: "editora_ai_watermark.png"
+    DEFAULT: "kondomino_watermark.png"
     PIXEL_OFFSET_WIDTH_LANDSCAPE: 74
     PIXEL_OFFSET_HEIGHT_LANDSCAPE: 74
     SIZE_BY_HEIGHT_LANDSCAPE: 38
@@ -210,44 +218,8 @@ MovieMaker:
     LETTER_SPACING: 10
 
 Notification:
-  VIDEO_RENDER_URL_PREFIX: "https://editora-v2-movie-maker-all-in-one-1095143658629.us-central1.run.app/api/v1"
   Email:
-    EDITORA_INFO: "contato@kondomino.com.br"
-    EDITORA_SUPPORT: "contato@kondomino.com.br"
-
-
-Tenants:
-  DEFAULT_TENANT_ID: "editora"
-  TENANTS:
-    editora:
-      id: "editora"
-      name: "Editora AI"
-      url: "https://editora.ai"
-    jenna_cooper_la:
-      id: "jenna_cooper_la" 
-      name: "Jenna Cooper LA"
-      url: "https://jennacooperla.com/"
-    daniel_gale:
-      id: "daniel_gale"
-      name: "Daniel Gale"
-      url: "https://www.sothebysrealty.com/danielgalesir/eng"
-    coldwell_banker:
-      id: "coldwell_banker"
-      name: "Coldwell Banker"
-      url: "https://www.coldwellbanker.com/"
-    compass:
-      id: "compass"
-      name: "Compass"
-      url: "https://www.compass.com/"
-    corcoran_group:
-      id: "corcoran_group"
-      name: "Corcoran Group"
-      url: "https://www.corcoran.com/"
-    zillow:
-      id: "zillow"
-      name: "Zillow"
-      url: "https://www.zillow.com/"
-    watson_salari_group:
-      id: "watson_salari_group"
-      name: "Watson Salari Group" 
-      url: "https://watsonsalari.com/"
+    SENDER: "contato@kondomino.com.br"
+# Tenants block removed — multi-tenant Editora-era feature with zero callers
+# in the kondomino engine. Re-add if multi-tenancy comes back as a real
+# feature with a real consumer.

@@ -26,7 +26,7 @@ def send_mail(to: str, subject: str, html: str) -> dict:
         mailchimp = mailchimp_transactional.Client(MAILCHIMP_API_KEY)
         
         message = {
-            "from_email": settings.Notification.Email.EDITORA_INFO,
+            "from_email": settings.Notification.Email.SENDER,
             "from_name": "Editora",
             "to": [
                 {
