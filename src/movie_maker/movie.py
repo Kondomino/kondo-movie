@@ -14,6 +14,7 @@ from movie_maker.captions import CaptionsManager
 from movie_maker.watermark import Watermark
 from ai.tts import TTS
 from gcp.storage import StorageManager, CloudPath
+from movie_maker.image_fetch import download_http_image, is_http_url, suffix_from_url
 
 
 class MovieMaker:
@@ -68,16 +69,22 @@ class MovieMaker:
 
             if movie_model.config.music:
                 if edl.soundtrack_uri:
-                    # Get extension from soundtrack URI
-                    soundtrack_ext = Path(str(edl.soundtrack_uri)).suffix
+                    soundtrack_url = str(edl.soundtrack_uri)
+                    if is_http_url(soundtrack_url):
+                        soundtrack_ext = suffix_from_url(soundtrack_url) or ".mp3"
+                    else:
+                        soundtrack_ext = Path(soundtrack_url).suffix
                     with NamedTemporaryFile(
                         delete=False, suffix=soundtrack_ext
                     ) as music_file:
                         music_file_path = music_file.name
-                        StorageManager.load_blob(
-                            cloud_path=CloudPath.from_path(str(edl.soundtrack_uri)),
-                            dest_file=Path(music_file_path),
-                        )
+                        if is_http_url(soundtrack_url):
+                            download_http_image(soundtrack_url, music_file_path)
+                        else:
+                            StorageManager.load_blob(
+                                cloud_path=CloudPath.from_path(soundtrack_url),
+                                dest_file=Path(music_file_path),
+                            )
                 else:
                     logger.warning(
                         f"EDL '{edl.name}' doesn't have a soundtrack associated with it"

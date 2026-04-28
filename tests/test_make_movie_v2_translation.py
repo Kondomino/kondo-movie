@@ -61,7 +61,8 @@ def test_translation_maps_edl_id_to_template_and_webhook():
     assert legacy.webhook_url == "https://api.kondomino.com.br/internal/video-webhook"
 
 
-def test_translation_builds_narration_from_description_and_voice():
+def test_translation_builds_narration_from_description_and_voice(monkeypatch):
+    monkeypatch.setenv("NARRATION_ACTIVE", "true")
     legacy = v2_to_legacy_request(_v2())
     narration = legacy.config.narration
     assert narration is not None
@@ -71,7 +72,8 @@ def test_translation_builds_narration_from_description_and_voice():
     assert narration.captions is False
 
 
-def test_translation_respects_captions_flag():
+def test_translation_respects_captions_flag(monkeypatch):
+    monkeypatch.setenv("NARRATION_ACTIVE", "true")
     legacy = v2_to_legacy_request(
         _v2(capabilities=MakeMovieCapabilities(
             duration_max_seconds=60,
@@ -82,11 +84,37 @@ def test_translation_respects_captions_flag():
     assert legacy.config.narration.captions is True
 
 
-def test_translation_voice_id_optional():
+def test_translation_voice_id_optional(monkeypatch):
+    monkeypatch.setenv("NARRATION_ACTIVE", "true")
     legacy = v2_to_legacy_request(_v2(voice_id=None))
     assert legacy.config.narration.voice is None
     # script still mandatory and present
     assert legacy.config.narration.script.startswith("Belo apartamento")
+
+
+def test_translation_disables_narration_when_flag_off(monkeypatch):
+    # NARRATION_ACTIVE=false (or unset) → narration is force-disabled
+    # regardless of what the v2 caller sent for description/voice/captions.
+    monkeypatch.setenv("NARRATION_ACTIVE", "false")
+    legacy = v2_to_legacy_request(
+        _v2(capabilities=MakeMovieCapabilities(
+            duration_max_seconds=60,
+            images_max=12,
+            captions_enabled=True,
+        )),
+    )
+    narration = legacy.config.narration
+    assert narration.enabled is False
+    assert narration.script == ""
+    assert narration.captions is False
+
+
+def test_translation_narration_off_when_env_unset(monkeypatch):
+    # Defensive default: missing env var means narration off.
+    monkeypatch.delenv("NARRATION_ACTIVE", raising=False)
+    legacy = v2_to_legacy_request(_v2())
+    assert legacy.config.narration.enabled is False
+    assert legacy.config.narration.script == ""
 
 
 def test_v2_rejects_empty_media_urls():

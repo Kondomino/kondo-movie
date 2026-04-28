@@ -1,3 +1,5 @@
+import os
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional
 from typing_extensions import Self
@@ -6,6 +8,14 @@ from datetime import datetime
 
 from utils.common_models import ActionStatus, Session
 from movie_maker.movie_model import MovieModel
+
+
+def _is_narration_active() -> bool:
+    # Master kill-switch for the narration pipeline. When NARRATION_ACTIVE
+    # is not "true" the engine skips TTS regardless of what the caller
+    # passed for description/voice_id. Defaults to off so a missing env
+    # var keeps the engine cheap (no ElevenLabs spend).
+    return os.getenv("NARRATION_ACTIVE", "false").strip().lower() == "true"
 
 
 # ---------------------------------------------------------------------------
@@ -147,12 +157,13 @@ def v2_to_legacy_request(v2: MakeMovieRequestV2) -> 'MakeMovieRequest':
         version=Session.VersionInfo(id=v2.job_id),
     )
 
+    narration_enabled = _is_narration_active()
     config = MovieModel.Configuration(
         narration=MovieModel.Configuration.Narration(
-            enabled=True,
+            enabled=narration_enabled,
             voice=v2.voice_id,
-            script=v2.description,
-            captions=v2.capabilities.captions_enabled,
+            script=v2.description if narration_enabled else "",
+            captions=v2.capabilities.captions_enabled if narration_enabled else False,
         ),
     )
 

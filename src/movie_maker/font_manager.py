@@ -6,6 +6,9 @@ from movie_maker.edl_model import ClipTypeEnum
 from tempfile import NamedTemporaryFile
 import os
 
+_BUNDLED_FONTS_DIR = Path(__file__).resolve().parents[2] / "library" / "fonts"
+
+
 class FontManager:
     def __init__(self, user_id: str):
         self.user_id = user_id
@@ -35,7 +38,11 @@ class FontManager:
             ClipTypeEnum.TITLE: settings.MovieMaker.EndTitles.Main.Font.NAME,
             ClipTypeEnum.PRESENTS: settings.MovieMaker.EndTitles.Main.Font.NAME,
         }
-        return default_fonts.get(clip_type, settings.MovieMaker.EndTitles.Main.Font.NAME)
+        name = default_fonts.get(clip_type, settings.MovieMaker.EndTitles.Main.Font.NAME)
+        # Resolve to absolute path under library/fonts/ so PIL can load it.
+        # The bare filename only worked when GCP fonts bucket was reachable;
+        # with the engine stateless we always fall through to bundled fonts.
+        return str(_BUNDLED_FONTS_DIR / name)
     
     def get_font_path(self, clip_type: ClipTypeEnum) -> str:
         """Get font path for clip type, with fallback to default font"""

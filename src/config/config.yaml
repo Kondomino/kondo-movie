@@ -28,8 +28,10 @@ FeatureFlags:
   ENABLE_ASSEMBLY_AI: false       # AssemblyAI transcription
   ENABLE_OPENAI: true             # OpenAI narration script generation
   ENABLE_DIGITAL_OCEAN_STORAGE: true  # Digital Ocean Spaces (current default)
-  ENABLE_CLOUDFLARE_R2_STORAGE: false # Cloudflare R2 (target for Kondomino)
+  ENABLE_CLOUDFLARE_R2_STORAGE: true  # Cloudflare R2 (target for Kondomino)
   ENABLE_GCP_STORAGE: false       # Google Cloud Storage (legacy)
+  ENABLE_EMAIL_SERVICES: false    # Mailchimp/Mandrill email — dead path, kept as `false` so LazySecretManager falls through to env-var lookup
+
 
 Secret:
   ELEVEN_LABS_API_KEY: "_ELEVEN_LABS_API_KEY"
@@ -41,7 +43,7 @@ Engines:
   TRANSCRIBER: "AssemblyAI" # Options - 'OpenAI', 'AssemblyAI'
 
 Storage:
-  PROVIDER: "DigitalOcean"  # Options: "GCP", "DigitalOcean", "CloudflareR2"
+  PROVIDER: "CloudflareR2"  # Options: "GCP", "DigitalOcean", "CloudflareR2"
 
 DigitalOcean:
   Spaces:
