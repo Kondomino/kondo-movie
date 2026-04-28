@@ -1,0 +1,58 @@
+# fly.toml for kondo-movie — v1 launch deploy.
+#
+# Companion app to kondos-api. Both run on Fly.io in gru (São Paulo)
+# for low-latency between the two and to media.kondomino.com.br (R2
+# is global so region matters less for the storage roundtrip).
+#
+# Sizing notes:
+#   - The render uses MoviePy + ffmpeg, which is CPU-bound. 1 shared
+#     CPU is enough at v1 volume (~5 renders/hour); bump to
+#     performance-2x once concurrent renders > 5/h sustained.
+#   - 1GB memory because moviepy frame buffers are chunky for a
+#     1080p 60s mp4. 512MB OOM'd in early local tests.
+#   - auto_stop+auto_start: machine sleeps when idle (zero cost),
+#     wakes on first request. Render-side cold start is ~5s.
+#
+# Health: GET / returns the welcome JSON without touching DB or
+# external services, so the health probe is a pure readiness check.
+
+app = 'kondo-movie'
+primary_region = 'gru'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[env]
+  ENVIRONMENT = 'prod'
+  DEPLOYMENT = 'flyio'
+  PORT = '8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+
+  # Renders take ~60s and block the worker. Cap concurrency so a
+  # second render forces a fly machine spin-up rather than queueing
+  # behind the first.
+  [http_service.concurrency]
+    type = 'requests'
+    soft_limit = 2
+    hard_limit = 4
+
+[checks]
+  [checks.health]
+    port = 8080
+    type = 'http'
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '60s'
+    path = '/'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '1gb'
+  cpus = 1
+  memory_mb = 1024
