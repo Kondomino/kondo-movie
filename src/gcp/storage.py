@@ -1,9 +1,5 @@
 from pathlib import Path
-import argparse
 import os
-import datetime as dt
-from zoneinfo import ZoneInfo
-from typing import Any
 
 from google.cloud import storage
 from google import auth
@@ -444,75 +440,3 @@ class LazyGCPStorageClient:
 
 # Backward compatibility: cloud_storage_client behaves like the original but respects feature flags
 cloud_storage_client = LazyGCPStorageClient()
-
-####
-
-# For testing purposes only
-def main():
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Cloud Storage Manager')
-
-    action_group = parser.add_mutually_exclusive_group(required=True)
-    action_group.add_argument('-u', '--upload', action='store_true', help='upload to cloud')
-    action_group.add_argument('-d', '--download', action='store_true', help='download from cloud')
-    
-
-    parser.add_argument('-b', '--bucket_id', required=True, type=str, help='Bucket ID')
-    parser.add_argument('-c', '--cloud_path', required=True, type=Path, help='Cloud path prefix')
-    
-    parser.add_argument('-l', '--local_path', required=True, type=Path, help='File/Dir to upload from / download to')
-    
-    args = parser.parse_args()
-    
-    excluded_gs_urls = ['gs://editora-v2-properties/ChIJ8XMK2vy6j4ARfTn_3aRjtgs/Images/image36.jpg', 
-                        'gs://editora-v2-properties/ChIJ8XMK2vy6j4ARfTn_3aRjtgs/Images/image1.jpg',
-                        'gs://editora-v2-properties/ChIJ8XMK2vy6j4ARfTn_3aRjtgs/Images/image2.jpg']
-    
-    try:
-        cloud_path = CloudPath(
-            bucket_id=args.bucket_id,
-            path=Path(args.cloud_path)
-        )
-        if args.upload:
-            if args.local_path.is_dir():
-                StorageManager.save_blobs(source_dir=args.local_path, path=cloud_path)
-            else:
-                StorageManager.save_blob(source_file=args.local_path, path=cloud_path)
-        elif args.download:
-            if args.local_path.is_dir():
-                l2c_mapping, c2l_mapping = StorageManager.load_blobs(cloud_path=cloud_path, dest_dir=args.local_path, excluded_files=excluded_gs_urls)
-                
-                from pprint import pformat
-                logger.success(pformat(l2c_mapping))
-                logger.success(pformat(c2l_mapping))
-            else:
-                StorageManager.load_blob(cloud_path=cloud_path, dest_file=args.local_path)
-                
-    except Exception as e:
-        logger.exception(e)
-        
-        
-def main2():
-    user_id = 'user-test-91821539-9f1f-40d2-b93c-a0ce69126ae3'
-    project_id = '139684e7-6e37-4244-aa10-880d89ff94b4'
-    
-    image_repos = StorageManager.get_image_repos_for_project(
-        user_id=user_id,
-        project_id=project_id
-    )
-    
-    from rich import print
-    print(image_repos)
-    
-    images = [img for repo in image_repos \
-        for img in StorageManager.gen_signed_urls_for_bucket(storage_location=repo)][0]
-    print(images)
-    
-def main3():
-    bucket_name = 'editora-v2-users'
-    StorageManager.bucket_metadata(bucket_name=bucket_name)
-    StorageManager.set_cors_policy(bucket_name=bucket_name)
-    StorageManager.bucket_metadata(bucket_name=bucket_name)
-
-if __name__ == '__main__':
-    main()
