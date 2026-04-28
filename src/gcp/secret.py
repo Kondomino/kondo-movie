@@ -6,7 +6,13 @@ from google.api_core.exceptions import NotFound
 from config.config import settings
 from logger import logger
 
-SECRETS_SERVICE_ACCOUNT_KEY_FILE_PATH = 'secrets/editora-prod-561a04f0decd.json'
+# Path to a GCP service-account JSON key file. The Secret Manager
+# adapter only runs when ENABLE_EMAIL_SERVICES=true (LazySecretManager
+# falls through to env-var lookup otherwise). Override via
+# GCP_SERVICE_ACCOUNT_KEY_PATH if you reactivate Secret Manager.
+SECRETS_SERVICE_ACCOUNT_KEY_FILE_PATH = os.getenv(
+    "GCP_SERVICE_ACCOUNT_KEY_PATH", ""
+)
 
 class SecretManager():
     

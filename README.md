@@ -1,275 +1,96 @@
-# editora-v2-movie-maker
-Video engine for Editora
+# kondo-movie
 
-## Docker - Local installation steps
-1) docker build -t editora-v2-movie-maker .
+Stateless video engine for [Kondomino](https://kondomino.com.br). Renders cinematic property reels from images + an EDL template, called from `kondos-api` via the v2 `/make_movie` contract.
 
-2) docker compose up
-OR
-2) 
-docker compose up -d (Detached mode: Run containers in the background)
-docker compose down
+The engine is invoked by the platform — agents never hit it directly. It owns no state: identity, jobs, video versions, and image classifications all live in `kondos-api`'s Postgres. The engine receives a payload, renders an MP4 to Cloudflare R2, fires a lifecycle webhook, and forgets.
 
-# Shell access
-3) docker exec -it editora-v2-movie-maker bin/bash
+## Local dev
 
-## Architecture Overview
+Requires Python 3.12 + Poetry.
 
-### System Components
+```bash
+poetry install
+cp .env.template .env  # fill in storage creds + KONDOS_API_URL + tokens
+cd src && poetry run uvicorn main:app --reload --port 8080
+```
+
+`kondos-api` should be reachable at `KONDOS_API_URL` (defaults to `localhost:3003`) for the image-classification cache. Without it, classification falls back to a per-image Cloud Vision call (which silently no-ops without GCP credentials).
+
+## HTTP surface
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/` | Health |
+| `POST` | `/make_movie` | Render entry point (v2 proxied-identity contract) |
+| `GET` | `/jobs/{id}/status` | **501** — placeholder for arq integration |
+| `DELETE` | `/jobs/{id}` | **501** — placeholder for arq integration |
+
+`POST /make_movie` accepts `MakeMovieRequestV2` (see `src/movie_maker/movie_actions_model.py`):
+
+```json
+{
+  "job_id": "...",
+  "agent": { "id": 5, "name": "...", "logo_url": "..." },
+  "kondo": { "id": 239, "address": "...", "brokerage_logo_url": "..." },
+  "media_urls": ["https://media.kondomino.com.br/..."],
+  "description": "...",
+  "edl_id": "city_beat | dream_pop | sonoma",
+  "voice_id": "...",
+  "music_url": null,
+  "webhook_url": "https://api.kondomino.com.br/internal/...",
+  "capabilities": { "duration_max_seconds": 60, "images_max": 12, "captions_enabled": false }
+}
+```
+
+The route translates v2 → legacy `MakeMovieRequest`, runs `MovieActionsHandler.make_movie()`, and POSTs `{ phase: "done"|"failed", progress: 100, output_url|error }` to `webhook_url` with the `X-Internal-Token` shared secret.
+
+## Feature flags
+
+Set in `.env`; read at runtime.
+
+| Flag | Default | Effect |
+|---|---|---|
+| `NARRATION_ACTIVE` | `false` | When `false`, the engine skips ElevenLabs entirely. v1 ships silent (music + image clips + text overlays). Flip to `true` once a paid TTS plan is in place. |
+| `Storage.PROVIDER` (config.yaml) | `CloudflareR2` | Storage backend. `DigitalOcean` and `GCP` legacy adapters still in tree but inactive. |
+
+## Repository layout
 
 ```
-editora-v2-movie-maker/
+kondo-movie/
 ├── src/
-│   ├── account/           # User account management
-│   ├── ai/               # AI services integration
-│   ├── classification/   # Image classification and analysis
-│   ├── movie_maker/      # Core video generation engine
-│   ├── notification/     # Email and alert systems
-│   ├── property/         # Property data management
-│   ├── video/           # Video processing and storage
-│   ├── gcp/             # Google Cloud Platform integrations
-│   └── utils/           # Shared utilities
-└── library/
-    ├── fonts/           # Typography assets
-    ├── templates/       # Video templates
-    └── notification/    # Email templates
+│   ├── ai/                 # OpenAI + Cloud Vision adapters (legacy classification path)
+│   ├── classification/     # Image classification + bucketing (cold on v2 path)
+│   ├── cloudflare/         # R2 storage adapter (S3-compat)
+│   ├── digitalocean/       # DO Spaces storage adapter (S3-compat)
+│   ├── gcp/                # GCS storage + Secret Manager + Vision adapters (legacy, off by default)
+│   ├── movie_maker/        # Core renderer: EDL parsing → MoviePy compose → upload
+│   ├── notification/       # Email module (orphaned; kondos-api owns email now)
+│   ├── classification_cache_client.py  # HTTP client for kondos-api's classifications cache
+│   ├── config/             # YAML + env loader
+│   ├── storage_manager.py  # Provider-aware storage facade
+│   └── main.py             # FastAPI route layer
+├── library/
+│   ├── fonts/              # Bundled fonts for text overlays
+│   └── templates/          # 45 EDL JSONs (3 active, 42 inactive — flag pending)
+├── playground/             # Dev/test scripts (e2e harness for rio-by-yoo lives here)
+├── scripts/                # One-shot ops scripts (R2 upload, classification seed)
+└── tests/                  # Pytest suite
 ```
 
-### Core Components
+## Running tests
 
-1. **Video Generation Engine** (`movie_maker/`)
-   - `MovieMaker`: Main orchestrator for video creation
-   - `VideoGenerator`: Handles video clip generation and composition
-   - `AudioHandler`: Manages background music and voiceover
-   - `CaptionsManager`: Handles subtitle generation and overlay
-   - `Effects`: Implements video transitions and effects
-   - `EDLManager`: Manages Edit Decision Lists (templates)
+```bash
+poetry run pytest tests/ -q
+```
 
-2. **AI Services** (`ai/`, `classification/`)
-   - Image classification and analysis
-   - AI-powered narration generation
-   - Smart image selection and ordering
-   - Template recommendations
+The suite covers the v2→legacy translation, the classification cache HTTP client, the engine webhook, the R2 adapter, the EDL loader, and the active-EDL smoke test.
 
-3. **Property Management** (`property/`)
-   - Property data models
-   - MLS integration
-   - Property image management
-   - Property metadata handling
+## Active EDLs (v1)
 
-4. **Media Processing**
-   - Image processing and optimization
-   - Video encoding and compression
-   - Audio processing and mixing
-   - Watermark application
+Three families, five JSON files: `city_beat_landscape`, `city_beat_portrait`, `dream_pop_landscape`, `dream_pop_portrait`, `sonoma`. The other 42 EDLs in `library/templates/` are inactive in v1 and pending an `is_active=false` flag pass.
 
-### Technical Architecture
+Soundtracks are R2-hosted under `https://media.kondomino.com.br/music/library/`. Re-running `scripts/upload_music_library_to_r2.py` is idempotent if the local library changes.
 
-1. **Frontend Integration**
-   - RESTful API endpoints
-   - FastAPI backend framework
-   - JSON-based request/response models
-   - Swagger/OpenAPI documentation
+## Architecture context
 
-2. **Backend Services**
-   - Containerized microservices (Docker)
-   - Asynchronous task processing
-   - Cloud storage integration
-   - Database management (Firestore)
-
-3. **Storage Layer**
-   - Google Cloud Storage for media files
-   - Firestore for metadata and configurations
-   - Local caching system
-   - Temporary file management
-
-4. **Processing Pipeline**
-   ```
-   Input → Classification → Template Selection → Media Processing → Video Generation → Delivery
-   ```
-
-### Key Features
-
-1. **Template System**
-   - Customizable video templates
-   - Edit Decision List (EDL) based composition
-   - Dynamic text overlay support
-   - Transition effects library
-
-2. **Media Management**
-   - Automatic image selection
-   - Smart cropping and resizing
-   - Format conversion
-   - Quality optimization
-
-3. **Audio System**
-   - Background music integration
-   - AI voiceover generation
-   - Audio mixing and balancing
-   - Caption synchronization
-
-4. **Output Customization**
-   - Multiple resolution support (Portrait/Landscape)
-   - Configurable video quality
-   - Custom watermarking
-   - End title customization
-
-### Infrastructure
-
-1. **Cloud Services**
-   - Google Cloud Platform
-   - Cloud Storage
-   - Firestore Database
-   - Cloud Functions (optional)
-
-2. **Development Environment**
-   - Docker containerization
-   - Python 3.x runtime
-   - FastAPI framework
-   - MoviePy for video processing
-
-3. **Monitoring & Logging**
-   - Structured logging system
-   - Performance monitoring
-   - Error tracking
-   - Usage analytics
-
-### Security Features
-
-1. **Authentication & Authorization**
-   - Token-based authentication
-   - Role-based access control
-   - API key management
-   - Secure credential storage
-
-2. **Data Protection**
-   - Encrypted storage
-   - Secure file handling
-   - Temporary file cleanup
-   - Access logging
-
-### Scalability Considerations
-
-1. **Performance Optimization**
-   - Parallel processing
-   - Resource pooling
-   - Caching strategies
-   - Load balancing
-
-2. **Resource Management**
-   - Dynamic resource allocation
-   - Memory optimization
-   - Storage cleanup
-   - Connection pooling
-
-## FastAPI Endpoints Reference
-
-### Root
-- **GET /**
-  - Description: Welcome message
-  - Response: `{ "message": "Welcome to the MovieMaker Service API" }`
-
-### API v1 (prefix: `/api/v1`)
-
-#### General
-- **GET /**
-  - Description: API root
-  - Response: `{ "message": "User actions service API" }`
-
-#### Account APIs
-- **GET `/user-details/{user_id}`**
-  - Path: `user_id` (str)
-  - Response Model: `FetchUserDetailsResponse`
-- **POST `/signup`**
-  - Body: `SignupRequest`
-  - Response Model: `SignupResponse`
-- **PATCH `/update-details/{user_id}`**
-  - Path: `user_id` (str)
-  - Body: `UpdateUserDetailsRequest`
-  - Response Model: `UpdateUserDetailsResponse`
-- **POST `/check-user`**
-  - Body: `CheckUserRequest`
-  - Response Model: `CheckUserResponse`
-- **GET `/delete-user/{user_id}`**
-  - Path: `user_id` (str)
-  - Response Model: `DeleteUserResponse`
-
-#### Property APIs
-- **POST `/fetch-property-details`**
-  - Body: `FetchPropertyDetailsRequest`
-  - Response Model: `FetchPropertyDetailsResponse`
-- **POST `/fetch_property`**
-  - Body: `FetchPropertyRequest`
-  - Response Model: `FetchPropertyResponse`
-
-#### Video Management APIs
-- **GET `/fetch-edls`**
-  - Response Model: `FetchEDLSResponse`
-- **GET `/fetch-voices`**
-  - Response Model: `FetchVoicesResponse`
-- **POST `/new-media-uploaded`**
-  - Body: `NewMediaUploadedRequest`
-  - Response Model: `NewMediaUploadedResponse`
-- **POST `/delete-media-files`**
-  - Body: `DeleteMediaFilesRequest`
-  - Response Model: `DeleteMediaFilesResponse`
-- **POST `/create-video`**
-  - Body: `CreateVideoRequest`
-  - Response Model: `CreateVideoResponse`
-- **GET `/fetch-video-list`**
-  - Response Model: `FetchVideosResponse`
-- **GET `/fetch-all-projects-slim`**
-  - Response Model: `FetchAllProjectsSlimResponse`
-- **GET `/fetch-project/{project_id}`**
-  - Path: `project_id` (str)
-  - Response Model: `FetchProjectResponse`
-- **POST `/fetch-project-images`**
-  - Body: `FetchProjectImagesRequest`
-  - Response Model: `FetchProjectImagesResponse`
-- **POST `/generate-signed-url`**
-  - Body: `GenerateSignedUrlRequest`
-  - Response Model: `GenerateSignedUrlResponse`
-- **POST `/update-project`**
-  - Body: `UpdateProjectRequest`
-  - Response Model: `UpdateProjectResponse`
-- **POST `/delete-project`**
-  - Body: `DeleteProjectRequest`
-  - Response Model: `DeleteProjectResponse`
-- **POST `/delete-video`**
-  - Body: `DeleteVideoRequest`
-  - Response Model: `DeleteVideoResponse`
-- **POST `/download-video`**
-  - Body: `DownloadVideoRequest`
-  - Response Model: `DownloadVideoResponse`
-- **GET `/render-video?token={token}`**
-  - Query: `token` (str)
-  - Response: Redirect to URL from `RenderVideoResponse`
-- **POST `/favourite`**
-  - Body: `ToggleFavouriteRequest`
-  - Response Model: `ToggleFavouriteResponse`
-- **POST `/fetch-used-images`**
-  - Body: `FetchUsedImagesRequest`
-  - Response Model: `FetchUsedImagesResponse`
-- **POST `/update-view`**
-  - Body: `UpdateViewRequest`
-  - Response Model: `UpdateViewResponse`
-- **POST `/exclude-media-files`**
-  - Body: `ExcludeMediaFilesRequest`
-  - Response Model: `ExcludeMediaFilesResponse`
-- **POST `/get-shareable-link`**
-  - Body: `GetShareableLinkRequest`
-  - Response Model: `GetShareableLinkResponse`
-- **POST `/get-video-data`**
-  - Body: `GetVideoDataRequest`
-  - Response Model: `GetVideoDataResponse`
-- **POST `/preselect-images`**
-  - Body: `PreselectImagesRequest`
-  - Response Model: `PreselectImagesResponse`
-
-### Movie Maker Endpoints (no prefix)
-- **POST `/make_movie`**
-  - Body: `MakeMovieRequest`
-  - Response Model: `MakeMovieResponse`
-- **POST `/preselect_images`**
-  - Body: `PreselectForTemplateRequest`
-  - Response Model: `PreselectForTemplateResponse`
+The engine was forked from Editora's `editora-v2-movie-maker` and progressively hardened for kondomino: Stytch + account module purged (PR #6), R2 adapter added (PR #5), `gs://` + http(s) image fetching (PR #15), Firestore writes removed from the hot loop (PR #16), Editora-era code deleted (PR #17), v2 proxied-identity contract (PR #14), silent-render path with `NARRATION_ACTIVE` flag (PR #18). The full integration plan and phase history live at `references/kondo/architecture/video-tool-plan.html` (sibling repo).

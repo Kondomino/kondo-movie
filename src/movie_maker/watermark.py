@@ -16,7 +16,7 @@ class Watermark():
         storage_mgr = StorageManager()
         with NamedTemporaryFile() as watermark_file:
             bucket_id = settings.GCP.Storage.TEMPLATES_BUCKET
-            path = f"{settings.MovieMaker.Watermark.STORAGE_DIR_PREFIX}/{settings.MovieMaker.Watermark.EDITORA}"
+            path = f"{settings.MovieMaker.Watermark.STORAGE_DIR_PREFIX}/{settings.MovieMaker.Watermark.DEFAULT}"
             cloud_path = CloudPath(
                 bucket_id=bucket_id,
                 path=Path(path)
