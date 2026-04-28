@@ -1,7 +1,7 @@
 
 {
     "name": "Sonoma",
-    "soundtrack_uri": "gs://editora-v2-templates/music/SONOMA_NO_TITLE.wav",
+    "soundtrack_uri": "https://media.kondomino.com.br/music/library/cool-lounge-403501.mp3",
     "fps": 30,
     "rank": 3,
     "clips": [

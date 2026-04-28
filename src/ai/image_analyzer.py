@@ -20,13 +20,16 @@ VISION_SERVICE_ACCOUNT_KEY_FILE_PATH = 'secrets/editora-prod-f0da3484f1a0.json'
 class ImageAnalyzer():
     def __init__(self):
         self.openai_client = OpenAI(api_key=secret_mgr.secret(settings.Secret.OPENAI_API_KEY))
-        
-        cred = service_account.Credentials.from_service_account_file(VISION_SERVICE_ACCOUNT_KEY_FILE_PATH) \
-            if os.path.exists(VISION_SERVICE_ACCOUNT_KEY_FILE_PATH) \
+        self._vision_client = None
+
+    @property
+    def vision_client(self):
+        if self._vision_client is None:
+            cred = service_account.Credentials.from_service_account_file(VISION_SERVICE_ACCOUNT_KEY_FILE_PATH) \
+                if os.path.exists(VISION_SERVICE_ACCOUNT_KEY_FILE_PATH) \
                 else None
-        self.vision_client = vision.ImageAnnotatorClient(
-            credentials=cred
-        )
+            self._vision_client = vision.ImageAnnotatorClient(credentials=cred)
+        return self._vision_client
         
     def labels(self, response: vision.AnnotateImageResponse)->list[dict]:
 
