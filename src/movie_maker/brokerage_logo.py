@@ -1,117 +1,75 @@
-from moviepy import ImageClip, ColorClip
-from gcp.storage import StorageManager, CloudPath
-from pathlib import Path
+from moviepy import ColorClip
 from config.config import settings
-from logger import logger
-from movie_maker.edl_model import Clip, ClipTypeEnum, Duration
+from movie_maker.edl_model import Clip
 from movie_maker.effects import Effects
 from movie_maker.edl_manager import EDLUtils
 from movie_maker.movie_model import MovieModel
-from tempfile import NamedTemporaryFile
+
 
 class BrokerageLogoManager():
-    def __init__(self, resolution:tuple, fps:int, user_id:str):
+    """
+    Brokerage-logo clip generator.
+
+    v1 status: HARD-DISCONNECTED per Victor 2026-04-28. Kondomino's
+    branding is platform-level (single tenant); we don't render
+    brokerage marks on the videos in v1. The legacy implementation
+    fetched `gs://editora-v2-users/{user_id}/brokerage-assets/landscape.png`
+    from the GCS USER_BUCKET — that whole path is gone. Re-enables when
+    multi-tenant branding lands (no concrete plan today).
+
+    `_get_logo_path` raises `FileNotFoundError` cleanly so the
+    `try/except` at `video_generation._generate_multiple_clips` skips
+    the BrokerageLogo clip without a noisy GCP traceback.
+    """
+
+    def __init__(self, resolution: tuple, fps: int, user_id: str):
         self.resolution = resolution
         self.fps = fps
         self.user_id = user_id
-        
-    def _get_logo_path(self, orientation:MovieModel.Configuration.Orientation) -> str:
-        """Get the brokerage logo path from GCP bucket based on orientation"""
-        orientation_str = "landscape" if orientation == MovieModel.Configuration.Orientation.Landscape else "portrait"
-        # logo_path = f"{self.user_id}/brokerage-assets/{orientation_str}.png"
-        logo_path = f"{self.user_id}/brokerage-assets/landscape.png"
-        bucket_id = settings.GCP.Storage.USER_BUCKET
-        
-        # Get the image from GCP bucket
-        storage_manager = StorageManager()
-        cloud_path = CloudPath(bucket_id=bucket_id, path=Path(logo_path))
-        
-        # Download to a temporary file
-        with NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
-            StorageManager.load_blob(cloud_path=cloud_path, dest_file=Path(temp_file.name))
-            return temp_file.name
-        
-    def generate_brokerage_logo(self, clip_start_time:float, edl_clip:Clip, orientation:MovieModel.Configuration.Orientation)->tuple[list, float]:
-        brokerage_logo_clips = []
+
+    def _get_logo_path(self, orientation: MovieModel.Configuration.Orientation) -> str:
+        # Disconnected in v1 — see class docstring.
+        raise FileNotFoundError(
+            "Brokerage logo is disabled in v1 (kondomino-only branding)"
+        )
+
+    def generate_brokerage_logo(
+        self,
+        clip_start_time: float,
+        edl_clip: Clip,
+        orientation: MovieModel.Configuration.Orientation,
+    ) -> tuple[list, float]:
+        """
+        Background-only fallback path for the standalone BrokerageLogo
+        clip type. Returns the background ColorClip + transition frames;
+        the actual logo overlay is skipped because `_get_logo_path`
+        raises unconditionally in v1.
+        """
+        brokerage_logo_clips: list = []
         clip_duration = EDLUtils.duration_to_seconds(duration=edl_clip.duration, fps=self.fps)
-        
         RESOLUTION = self.resolution
-        
-        # Step 1 - Add pre-transition frame
-        if edl_clip.transition_in and edl_clip.transition_in.transition_frame == True:
+
+        if edl_clip.transition_in and edl_clip.transition_in.transition_frame is True:
             black_frame, clip_start_time = Effects.black_frame(
-                fps=self.fps, 
-                resolution=RESOLUTION, 
-                start_time=clip_start_time
+                fps=self.fps, resolution=RESOLUTION, start_time=clip_start_time
             )
             brokerage_logo_clips.append(black_frame)
-            
-        # Step 2 - Add background clip
+
         background_clip = ColorClip(
             size=RESOLUTION,
-            color=settings.MovieMaker.EndTitles.General.BG_COLOR
+            color=settings.MovieMaker.EndTitles.General.BG_COLOR,
         ).with_start(clip_start_time).with_duration(clip_duration)
-        background_clip = Effects.apply_transition(clip=background_clip, edl_clip=edl_clip, fps=self.fps)
-        
-        # Step 3 - Add brokerage logo
-        try:
-            logo_path = self._get_logo_path(orientation)
-            logo_clip = ImageClip(logo_path)
-            
-            # Calculate logo position and size
-            # Keep aspect ratio and fit within margins
-            logo_width, logo_height = logo_clip.size
-            aspect_ratio = logo_width / logo_height
-            
-            # Calculate max dimensions based on resolution and margins
-            max_width = RESOLUTION[0] - 2*settings.MovieMaker.EndTitles.Geometry.Landscape.H_MARGIN \
-                if RESOLUTION[0] > RESOLUTION[1] \
-                    else RESOLUTION[0] - 2*settings.MovieMaker.EndTitles.Geometry.Portrait.H_MARGIN
-            max_height = RESOLUTION[1] - 2*settings.MovieMaker.EndTitles.Geometry.Landscape.V_MARGIN \
-                if RESOLUTION[0] > RESOLUTION[1] \
-                    else RESOLUTION[1] - 2*settings.MovieMaker.EndTitles.Geometry.Portrait.V_MARGIN
-            
-            # Calculate new dimensions maintaining aspect ratio
-            if logo_width / max_width > logo_height / max_height:
-                new_width = max_width
-                new_height = new_width / aspect_ratio
-            else:
-                new_height = max_height
-                new_width = new_height * aspect_ratio
-                
-            # Resize logo
-            logo_clip = logo_clip.resized(height=new_height, width=new_width)
-            
-            # Center logo
-            x_pos = (RESOLUTION[0] - new_width) / 2
-            y_pos = (RESOLUTION[1] - new_height) / 2
-            
-            # Set clip properties
-            logo_clip = logo_clip.with_start(clip_start_time).with_duration(clip_duration
-            ).with_position((x_pos, y_pos))
-            
-            # Add transitions if necessary
-            logo_clip = Effects.apply_transition(clip=logo_clip, edl_clip=edl_clip, fps=self.fps)
-            
-            # Step 4 - Append background & logo clips
-            brokerage_logo_clips.append(background_clip)
-            brokerage_logo_clips.append(logo_clip)
-            
-        except Exception as e:
-            logger.error(f"Failed to load brokerage logo: {e}")
-            # If logo loading fails, just use the background
-            brokerage_logo_clips.append(background_clip)
-        
-        # Step 5 - Update start time
+        background_clip = Effects.apply_transition(
+            clip=background_clip, edl_clip=edl_clip, fps=self.fps
+        )
+        brokerage_logo_clips.append(background_clip)
+
         clip_start_time += clip_duration
-            
-        # Step 6 - Add post-transition frame
-        if edl_clip.transition_out and edl_clip.transition_out.transition_frame == True:
+
+        if edl_clip.transition_out and edl_clip.transition_out.transition_frame is True:
             black_frame, clip_start_time = Effects.black_frame(
-                fps=self.fps, 
-                resolution=RESOLUTION, 
-                start_time=clip_start_time
+                fps=self.fps, resolution=RESOLUTION, start_time=clip_start_time
             )
             brokerage_logo_clips.append(black_frame)
-        
-        return brokerage_logo_clips, clip_start_time 
+
+        return brokerage_logo_clips, clip_start_time
