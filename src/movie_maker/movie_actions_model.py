@@ -62,14 +62,21 @@ class MakeMovieRequestV2(BaseModel):
     agent: MakeMovieAgent
     kondo: MakeMovieKondo
     media_urls: list[str] = Field(..., description="Ordered list of input media URLs (R2/S3/https).")
-    description: str = Field(..., description="Brief from agent — used as narration script.")
+    description: Optional[str] = Field(
+        default=None,
+        description="Brief from agent — used as narration script when narration is enabled. "
+                    "Optional: kondos-api now accepts videos without a description (PR #20, "
+                    "2026-04-29), and the engine drops the script entirely when "
+                    "NARRATION_ACTIVE is off, so the field has no load-bearing role at request "
+                    "time. Translator (v2_to_legacy_request) coerces None → empty string.",
+    )
     edl_id: str = Field(..., description="EDL family: city_beat | dream_pop | sonoma in v1.")
     voice_id: Optional[str] = Field(default=None, description="ElevenLabs voice id; null = engine default.")
     music_url: Optional[str] = Field(default=None, description="Music override URL; null = EDL default.")
     webhook_url: str = Field(..., description="Lifecycle callback target on kondos-api.")
     capabilities: MakeMovieCapabilities
 
-    @field_validator('job_id', 'edl_id', 'description', 'webhook_url', mode='after')
+    @field_validator('job_id', 'edl_id', 'webhook_url', mode='after')
     def _non_empty(cls, value: str) -> str:
         if not value or not value.strip():
             raise ValueError("Field cannot be empty")
@@ -158,11 +165,15 @@ def v2_to_legacy_request(v2: MakeMovieRequestV2) -> 'MakeMovieRequest':
     )
 
     narration_enabled = _is_narration_active()
+    # description may be None (kondos-api makes it optional in CreateVideoDto).
+    # Coerce to empty string before handing off to the legacy MovieModel, which
+    # expects a string. When narration is disabled the script is dropped anyway.
+    description_text = v2.description or ""
     config = MovieModel.Configuration(
         narration=MovieModel.Configuration.Narration(
             enabled=narration_enabled,
             voice=v2.voice_id,
-            script=v2.description if narration_enabled else "",
+            script=description_text if narration_enabled else "",
             captions=v2.capabilities.captions_enabled if narration_enabled else False,
         ),
     )
