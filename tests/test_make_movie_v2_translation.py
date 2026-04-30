@@ -129,8 +129,38 @@ def test_v2_rejects_blank_required_strings():
         _v2(edl_id="   ")
     with pytest.raises(Exception):
         _v2(webhook_url="")
-    with pytest.raises(Exception):
-        _v2(description="")
+
+
+def test_v2_accepts_missing_or_empty_description(monkeypatch):
+    # description is optional now (kondos-api PR #20 made it optional in
+    # CreateVideoDto). Engine accepts None, empty string, or whitespace.
+    monkeypatch.setenv("NARRATION_ACTIVE", "true")
+    # Constructed via the helper (description="") — passes validation.
+    legacy_blank = v2_to_legacy_request(_v2(description=""))
+    assert legacy_blank.config.narration.script == ""
+    legacy_none = v2_to_legacy_request(_v2(description=None))
+    assert legacy_none.config.narration.script == ""
+
+
+def test_v2_omitting_description_field_entirely():
+    # Mirrors the prod payload that broke 2026-04-30: kondos-api ships a
+    # request with no `description` key at all. With description optional,
+    # this must validate successfully.
+    payload = dict(
+        job_id="job-abc-123",
+        agent=MakeMovieAgent(id=42, name="Maria Silva"),
+        kondo=MakeMovieKondo(id=7001, address="Rua das Palmeiras, 123"),
+        media_urls=["https://cdn.example.com/m1.jpg"],
+        edl_id="city_beat",
+        webhook_url="https://api.kondomino.com.br/internal/video-webhook",
+        capabilities=MakeMovieCapabilities(
+            duration_max_seconds=60, images_max=12, captions_enabled=False,
+        ),
+    )
+    v2 = MakeMovieRequestV2(**payload)
+    assert v2.description is None
+    legacy = v2_to_legacy_request(v2)
+    assert legacy.config.narration.script == ""
 
 
 def test_v2_accepts_optional_logo_urls():
