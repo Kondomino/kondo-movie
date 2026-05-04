@@ -415,7 +415,7 @@
             "seconds": 22,
             "frames": 14
           },
-          "clip_type": "Address",
+          "clip_type": "KondoAddress",
           "fade_in": {
             "frames": 0
           },
@@ -426,6 +426,30 @@
           "font_size": 63,
           "transform": {
             "y_offset": 65,
+            "x_offset": null,
+            "scale": null
+          }
+        },
+        {
+          "end": {
+            "seconds": 24,
+            "frames": 2
+          },
+          "start": {
+            "seconds": 22,
+            "frames": 14
+          },
+          "clip_type": "KondoLocality",
+          "fade_in": {
+            "frames": 0
+          },
+          "fade_out": {
+            "frames": 5
+          },
+          "position": "center",
+          "font_size": 35,
+          "transform": {
+            "y_offset": 165,
             "x_offset": null,
             "scale": null
           }

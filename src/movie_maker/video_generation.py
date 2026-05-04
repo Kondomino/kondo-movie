@@ -140,6 +140,8 @@ class VideoGenerator:
                 ClipTypeEnum.AGENT_NAME,
                 ClipTypeEnum.ADDRESS,
                 ClipTypeEnum.PROPERTY_LOCATION,
+                ClipTypeEnum.KONDO_ADDRESS,
+                ClipTypeEnum.KONDO_LOCALITY,
                 ClipTypeEnum.OCCASION_TEXT,
                 ClipTypeEnum.OCCASION_SUBTITLE,
             ]:
@@ -185,6 +187,21 @@ class VideoGenerator:
                         # Generic fallback for when sub_title is None
                         text: str = "PROPERTY DETAILS"
                         logger.warning("Using generic fallback for PROPERTY_LOCATION clip: sub_title is None")
+                elif multiple_clip.clip_type == ClipTypeEnum.KONDO_ADDRESS:
+                    # Real-address overlay (post-intro scenes). Skip silently
+                    # when the kondo has no usable address — better to omit
+                    # the overlay than to render a "PROPERTY ADDRESS" placeholder.
+                    line1 = getattr(self.movie_model, "kondo_address_line1", None)
+                    if not line1:
+                        continue
+                    text = expand_abbreviations(line1, ABBREVIATIONS)
+                elif multiple_clip.clip_type == ClipTypeEnum.KONDO_LOCALITY:
+                    # Locality (city + state) — rendered smaller below KONDO_ADDRESS.
+                    # Skip silently when missing.
+                    line2 = getattr(self.movie_model, "kondo_address_line2", None)
+                    if not line2:
+                        continue
+                    text = line2
                 elif multiple_clip.clip_type == ClipTypeEnum.OCCASION_TEXT:
                     # Handle occasion text from config - renders occasion.occasion
                     if (self.movie_model.config.occasion and 

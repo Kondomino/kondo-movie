@@ -37,6 +37,31 @@ class MakeMovieKondo(BaseModel):
     id: int = Field(..., description="kondos-api kondo id (the property/condo).")
     address: str = Field(..., description="Kondo address; used for narration grounding.")
     brokerage_logo_url: Optional[str] = Field(default=None, description="Brokerage logo URL.")
+    name: Optional[str] = Field(
+        default=None,
+        description=(
+            "Kondo display name (e.g. 'Aretê Búzios'). Rendered as the sub_title "
+            "below 'No Condomínio' on the marketing-intro scene. Optional for "
+            "back-compat — old kondos-api callers pre-2026-05-04 don't send it; "
+            "translator falls back to suppressing the intro overlay."
+        ),
+    )
+    address_line1: Optional[str] = Field(
+        default=None,
+        description=(
+            "Line 1 of the real-address overlay shown on later scenes (e.g. "
+            "'Manguinhos, Rua das Pedras' — neighborhood + simplified street, "
+            "no number). Optional; absent → KondoAddress clips skip silently."
+        ),
+    )
+    address_line2: Optional[str] = Field(
+        default=None,
+        description=(
+            "Line 2 of the real-address overlay (locality, e.g. 'Búzios, RJ'). "
+            "Rendered smaller below address_line1. Optional; absent → "
+            "KondoLocality clips skip silently."
+        ),
+    )
 
 
 class MakeMovieCapabilities(BaseModel):
@@ -130,6 +155,20 @@ class MakeMovieRequest(BaseModel):
         description='Display name for the agent presenting the video. In the v2 stateless flow this '
                     'comes straight from the request; pre-stateless flows looked it up from Firestore.'
     )
+    kondo_address_line1 : Optional[str] = Field(
+        default=None,
+        description=(
+            "Line 1 of the real-address overlay rendered by KondoAddress clips on "
+            "later scenes. Plumbed through from MakeMovieRequestV2.kondo.address_line1."
+        ),
+    )
+    kondo_address_line2 : Optional[str] = Field(
+        default=None,
+        description=(
+            "Line 2 of the real-address overlay (locality) rendered by KondoLocality "
+            "clips. Plumbed through from MakeMovieRequestV2.kondo.address_line2."
+        ),
+    )
 
     @field_validator('template', mode='after')
     def validate_template(cls, value: str) -> str:
@@ -169,6 +208,21 @@ def v2_to_legacy_request(v2: MakeMovieRequestV2) -> 'MakeMovieRequest':
     # Coerce to empty string before handing off to the legacy MovieModel, which
     # expects a string. When narration is disabled the script is dropped anyway.
     description_text = v2.description or ""
+
+    # Build the marketing-intro overlay ("No Condomínio" / kondo name) from
+    # the upstream kondo identity. Suppressed when the kondo doesn't carry
+    # a name — the EDL still renders the scene, just without the title
+    # overlay (engine falls back to the existing PROPERTY_ADDRESS placeholder
+    # logic, which old callers also relied on).
+    end_titles = (
+        MovieModel.Configuration.EndTitles(
+            main_title="No Condomínio",
+            sub_title=v2.kondo.name,
+        )
+        if v2.kondo.name
+        else None
+    )
+
     config = MovieModel.Configuration(
         narration=MovieModel.Configuration.Narration(
             enabled=narration_enabled,
@@ -176,6 +230,7 @@ def v2_to_legacy_request(v2: MakeMovieRequestV2) -> 'MakeMovieRequest':
             script=description_text if narration_enabled else "",
             captions=v2.capabilities.captions_enabled if narration_enabled else False,
         ),
+        end_titles=end_titles,
     )
 
     return MakeMovieRequest(
@@ -187,6 +242,8 @@ def v2_to_legacy_request(v2: MakeMovieRequestV2) -> 'MakeMovieRequest':
         config=config,
         webhook_url=v2.webhook_url,
         agent_name=v2.agent.name,
+        kondo_address_line1=v2.kondo.address_line1,
+        kondo_address_line2=v2.kondo.address_line2,
     )
 
 
