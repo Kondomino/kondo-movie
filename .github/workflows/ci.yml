@@ -1,0 +1,67 @@
+name: CI/CD
+
+# Mirror of kondos-api/.github/workflows/ci.yml — same shape, same gating
+# (test before deploy; deploy only on push to main; per-branch concurrency
+# so duplicate pushes self-cancel; Fly deploy serialized so two pushes can't
+# fight over the same machine). Adapted for Python/poetry.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: pipx install poetry==1.8.3
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Configure Poetry to use in-project venv
+        run: poetry config virtualenvs.in-project true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Test
+        # conftest.py sets safe dummy env vars at import time so tests can
+        # run without real DB / R2 / GCP credentials. Pure unit + smoke
+        # tests only — anything that touches a real backend should mock or
+        # skip (see `tests/conftest.py` notes).
+        run: poetry run pytest tests -x
+
+  deploy:
+    name: Deploy to Fly.io
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: fly-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
