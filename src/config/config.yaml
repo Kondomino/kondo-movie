@@ -200,20 +200,22 @@ MovieMaker:
       LINE_SIZE: 76
       FONT_MARGIN: [0, 2]
   Watermark:
-    # The bundled watermark file is not currently shipped in library/logo/.
-    # Watermark is silently disabled in v1 — `MovieModel.config.watermark`
-    # defaults to `false` so the asset path is never resolved. Re-enabling
-    # the feature requires adding a kondomino watermark PNG under
-    # library/logo/ and matching this filename.
+    # Re-enabled 2026-05-04. Asset is `library/logo/kondomino_watermark.png`
+    # (1280×180 wordmark, white with subtle drop shadow). Bundled in the
+    # engine image via Dockerfile `COPY library/logo/`. `watermark.py`
+    # resolves it via the same `library/<...>` pattern as EDL templates.
+    # `MovieModel.config.watermark` now defaults to True — every render
+    # carries the brand mark unless explicitly suppressed (future premium
+    # feature).
     STORAGE_DIR_PREFIX: "logo"
     DEFAULT: "kondomino_watermark.png"
-    PIXEL_OFFSET_WIDTH_LANDSCAPE: 74
-    PIXEL_OFFSET_HEIGHT_LANDSCAPE: 74
-    SIZE_BY_HEIGHT_LANDSCAPE: 38
-    PIXEL_OFFSET_WIDTH_PORTRAIT: 55
-    PIXEL_OFFSET_HEIGHT_PORTRAIT: 80
-    SIZE_BY_HEIGHT_PORTRAIT: 45
-    OPACITY: 1.0
+    PIXEL_OFFSET_WIDTH_LANDSCAPE: 48
+    PIXEL_OFFSET_HEIGHT_LANDSCAPE: 36
+    SIZE_BY_HEIGHT_LANDSCAPE: 32
+    PIXEL_OFFSET_WIDTH_PORTRAIT: 36
+    PIXEL_OFFSET_HEIGHT_PORTRAIT: 60
+    SIZE_BY_HEIGHT_PORTRAIT: 36
+    OPACITY: 0.85
   Text:
     LETTER_SPACING: 10
 

@@ -77,6 +77,7 @@ COPY tests tests
 COPY library/templates/ /library/templates/
 COPY library/fonts/     /library/fonts/
 COPY library/notification/ /library/notification/
+COPY library/logo/      /library/logo/
 COPY library/fonts/     /usr/share/fonts/
 RUN fc-cache -fv
 
