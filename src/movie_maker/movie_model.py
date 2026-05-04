@@ -70,7 +70,14 @@ class MovieModel(BaseModel):
             default=None, description='Model containing AI options such as narration and captions'
         )
         watermark: bool = Field(
-            default=False, description="Include watermark in the movie; defaults to False ('No')."
+            default=True,
+            description=(
+                "Include the Kondomino brand watermark in the rendered movie. "
+                "Defaults to True post-2026-05-04 — every video carries the "
+                "brand mark unless explicitly suppressed (future premium "
+                "feature). The asset is bundled at `library/logo/` in the "
+                "engine image; see watermark.py."
+            ),
         )
         end_titles: Optional[EndTitles] = Field(
             default=None, description="End titles containing 'main_title' and optionally 'sub_title'."
