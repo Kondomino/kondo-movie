@@ -38,6 +38,14 @@ class ClipTypeEnum(str, CaseInsensitiveEnum):
     AGENT_NAME = "AgentName"
     ADDRESS = "Address"
     PROPERTY_LOCATION = "PropertyLocation"
+    # KONDO_ADDRESS / KONDO_LOCALITY render the kondo's REAL address (post-
+    # scene-2 framing). ADDRESS / PROPERTY_LOCATION still render the
+    # marketing-style intro pulled from end_titles.main_title /
+    # end_titles.sub_title (e.g. "No Condomínio" / kondo name). EDL
+    # templates use the original clip types in their FIRST occurrence
+    # (scene 2 intro) and the new types for later scenes.
+    KONDO_ADDRESS = "KondoAddress"
+    KONDO_LOCALITY = "KondoLocality"
     OCCASION_TEXT = "OccasionText"
     OCCASION_SUBTITLE = "OccasionSubtitle"
 

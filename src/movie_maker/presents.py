@@ -51,8 +51,9 @@ class PresentsManager:
             clip=background_clip, edl_clip=edl_clip, fps=self.fps
         )
 
-        # Step 3 - Add presents text
-        text = "PRESENTS"
+        # Step 3 - Add presents text. pt-BR ("apresenta") — the Kondomino
+        # engine serves the Brazilian market exclusively as of 2026-05.
+        text = "APRESENTA"
 
         # Calculate text position and size
         text_size_y = settings.MovieMaker.EndTitles.Main.LINE_SIZE

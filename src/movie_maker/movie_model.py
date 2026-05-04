@@ -104,7 +104,24 @@ class MovieModel(BaseModel):
     agent_name: Optional[str] = Field(
         default=None, description="Agent's full name (first_name + last_name)"
     )
-    
+    kondo_address_line1: Optional[str] = Field(
+        default=None,
+        description=(
+            "First line of the kondo's real address (e.g. 'Manguinhos, Rua das "
+            "Pedras' — neighborhood + street, no number). Rendered by KondoAddress "
+            "clips in scenes after the marketing intro. None → KondoAddress clips "
+            "are skipped silently."
+        ),
+    )
+    kondo_address_line2: Optional[str] = Field(
+        default=None,
+        description=(
+            "Second line of the kondo's real address (locality, e.g. 'Búzios, RJ'). "
+            "Rendered smaller below kondo_address_line1 by KondoLocality clips. "
+            "None → KondoLocality clips are skipped."
+        ),
+    )
+
 class MovieMakerResponseModel(BaseModel):
     video_file_path: Path = Field(
         ..., description='Local path of video file created'

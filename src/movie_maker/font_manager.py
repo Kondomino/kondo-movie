@@ -16,8 +16,12 @@ class FontManager:
         """Map clip type to font filename"""
         font_mapping = {
             ClipTypeEnum.AGENT_NAME: "AgentName.ttf",
-            ClipTypeEnum.ADDRESS: "Address.ttf", 
+            ClipTypeEnum.ADDRESS: "Address.ttf",
             ClipTypeEnum.PROPERTY_LOCATION: "PropertyLocation.ttf",
+            # KONDO_ADDRESS / KONDO_LOCALITY share fonts with their non-Kondo
+            # counterparts — same visual register, different text source.
+            ClipTypeEnum.KONDO_ADDRESS: "Address.ttf",
+            ClipTypeEnum.KONDO_LOCALITY: "PropertyLocation.ttf",
             ClipTypeEnum.OCCASION_TEXT: "OccasionTitle.ttf",
             ClipTypeEnum.OCCASION_SUBTITLE: "OccasionSubtitle.ttf",
             ClipTypeEnum.TITLE: "Title.ttf",
@@ -30,7 +34,9 @@ class FontManager:
         default_fonts = {
             ClipTypeEnum.AGENT_NAME: settings.MovieMaker.EndTitles.Main.Font.NAME,
             ClipTypeEnum.ADDRESS: "GothamOffice-Regular.otf",
-            ClipTypeEnum.PROPERTY_LOCATION: "Gotham-Light.otf", 
+            ClipTypeEnum.PROPERTY_LOCATION: "Gotham-Light.otf",
+            ClipTypeEnum.KONDO_ADDRESS: "GothamOffice-Regular.otf",
+            ClipTypeEnum.KONDO_LOCALITY: "Gotham-Light.otf",
             ClipTypeEnum.OCCASION_TEXT: "GothamOffice-Regular.otf",
             ClipTypeEnum.OCCASION_SUBTITLE: "Gotham-Light.otf",
             ClipTypeEnum.TITLE: settings.MovieMaker.EndTitles.Main.Font.NAME,
