@@ -369,14 +369,52 @@ async def get_job_status(job_id: str):
 @app.delete("/jobs/{job_id}")
 async def cancel_job(job_id: str):
     """
-    P8 will implement real cancellation via arq's abort_job. Until
-    then this stays a 501 so kondos-api's cancel UX surfaces a clean
-    "not implemented" rather than a silent success.
+    Cancel a render. Three cases by current state:
+
+      queued   — arq removes the job from the queue immediately.
+      running  — arq sets the abort flag and signals the worker. The
+                 to_thread blocking ffmpeg call can't be interrupted
+                 mid-frame, so the render usually finishes its current
+                 segment before the worker observes the abort. Best
+                 effort; the operator's row flips to 'failed' via the
+                 webhook regardless.
+      terminal — already done/failed; returns cancelled=false with a
+                 reason so the caller knows it's a no-op.
+      missing  — never existed or evicted past keep_result; returns
+                 404 so kondos-api decides whether to fail-mark.
+
+    Idempotent: calling twice on the same queued job returns
+    cancelled=true the first time, cancelled=false (already complete)
+    the second.
     """
-    raise HTTPException(
-        status_code=501,
-        detail=(
-            f"Job cancellation lands in P8 (job_id={job_id}). "
-            "Operator-driven retry/cancel UI ships with that phase."
-        ),
-    )
+    pool = await create_pool(get_redis_settings())
+    try:
+        job = Job(job_id=job_id, redis=pool)
+        arq_status = await job.status()
+
+        if arq_status == JobStatus.not_found:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"job_id={job_id} not found",
+            )
+
+        if arq_status == JobStatus.complete:
+            logger.info(
+                f"[VIDEO-API] cancel no-op job={job_id} state=complete (already terminal)"
+            )
+            return {
+                "job_id": job_id,
+                "cancelled": False,
+                "reason": "already complete",
+            }
+
+        # Returns True on successful abort, False if the worker missed
+        # the signal in time. Treat False as "best-effort done" — the
+        # render row will flip to failed via the webhook either way.
+        aborted = await job.abort(timeout=5)
+        logger.info(
+            f"[VIDEO-API] cancel job={job_id} state={arq_status.value} aborted={aborted}"
+        )
+        return {"job_id": job_id, "cancelled": bool(aborted)}
+    finally:
+        await pool.aclose()
