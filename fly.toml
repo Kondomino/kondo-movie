@@ -42,13 +42,20 @@ primary_region = 'gru'
     hard_limit = 4
 
 [checks]
+  # P3 of the reliability plan: probe /healthz, not /. Liveness only —
+  # `/healthz` doesn't touch Redis/DB/external services so a slow
+  # dependency can't flap the machine state. Readiness lives on
+  # `/readyz` (operator-facing); Fly doesn't probe it because we
+  # don't want a degraded worker to take the API machine down.
+  # 15s interval gives faster recovery on legitimate liveness
+  # failures without churning the proxy.
   [checks.health]
     port = 8080
     type = 'http'
-    interval = '30s'
-    timeout = '5s'
-    grace_period = '60s'
-    path = '/'
+    interval = '15s'
+    timeout = '2s'
+    grace_period = '20s'
+    path = '/healthz'
 
 [[vm]]
   size = 'performance-2x'
