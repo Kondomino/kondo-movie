@@ -14,6 +14,7 @@ removed in PR k4 alongside the Firestore purge.
 """
 
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, status
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
@@ -106,9 +107,21 @@ async def make_movie(request: MakeMovieRequestV2, response: Response):
     v2 proxied-identity render endpoint. Translates to the engine's
     internal request shape and runs through the stateless handler. Fires
     a lifecycle webhook back to kondos-api on completion (best-effort).
+
+    Both the render and the webhook POST are synchronous, CPU/IO-blocking
+    calls. Running them inline on the asyncio event loop would freeze
+    every other request — including Fly's `/healthz` probe — for the
+    entire 60-90s render, which historically caused mid-render machine
+    kills (see `references/kondo/architecture/v2/video-render-reliability-plan.md`
+    §0). Both calls therefore go through `run_in_threadpool` so the loop
+    stays responsive. P4 of that plan replaces the threadpool with a real
+    arq worker process; until then, this is the smallest change that
+    eliminates the loop-blocking failure mode.
     """
     legacy_request = v2_to_legacy_request(request)
-    action_response = MovieActionsHandler().make_movie(request=legacy_request)
+    action_response = await run_in_threadpool(
+        MovieActionsHandler().make_movie, request=legacy_request
+    )
     success = action_response.result.state == ActionStatus.State.SUCCESS
     if not success:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -132,7 +145,7 @@ async def make_movie(request: MakeMovieRequestV2, response: Response):
             "error": action_response.result.reason or "Engine reported failure (no reason given)",
         }
     payload = {k: v for k, v in payload.items() if v is not None}
-    fire_webhook(request.webhook_url, payload)
+    await run_in_threadpool(fire_webhook, request.webhook_url, payload)
 
     return action_response
 
