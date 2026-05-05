@@ -17,9 +17,22 @@ queue and drives the lifecycle via webhook back to kondos-api. Callers
 get a 202 in <500ms p95 (was 60-90s under the synchronous contract).
 """
 
+import json
+import os
+from typing import Optional
+
 from arq import create_pool
 from arq.jobs import Job, JobStatus
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, status
+from fastapi import (
+    Depends,
+    FastAPI,
+    APIRouter,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+    status,
+)
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
@@ -35,6 +48,7 @@ from movie_maker.movie_actions_model import (
     MakeMovieResponse,
 )
 from task_queue.connection import get_redis_settings, get_redis_url
+from task_queue.dead_letter import DEAD_LETTER_KEY
 from task_queue.heartbeat import (
     HEARTBEAT_STALE_AFTER_SECONDS,
     heartbeat_age_seconds,
@@ -416,5 +430,159 @@ async def cancel_job(job_id: str):
             f"[VIDEO-API] cancel job={job_id} state={arq_status.value} aborted={aborted}"
         )
         return {"job_id": job_id, "cancelled": bool(aborted)}
+    finally:
+        await pool.aclose()
+
+
+# ---- Operator dashboard (P12) ----
+#
+# Authenticated via the same shared secret as the outbound webhook
+# (X-Internal-Token = KONDO_WEBHOOK_TOKEN). Operator-only — these are
+# diagnostic surfaces meant for `curl + jq` triage, not customer
+# traffic. Empty token in env = endpoints reject unconditionally so
+# we don't accidentally expose them in misconfigured deployments.
+
+_INTERNAL_TOKEN_ENV = "KONDO_WEBHOOK_TOKEN"
+
+
+async def require_admin_token(
+    x_internal_token: Optional[str] = Header(default=None, alias="X-Internal-Token"),
+) -> None:
+    """FastAPI dependency: 401 unless the X-Internal-Token header matches the secret."""
+    expected = os.getenv(_INTERNAL_TOKEN_ENV, "")
+    if not expected:
+        # Misconfigured prod = closed-by-default. Don't leak even by accident.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Admin endpoints disabled: server token not configured",
+        )
+    if x_internal_token != expected:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid X-Internal-Token",
+        )
+
+
+@app.get("/admin/queue", dependencies=[Depends(require_admin_token)])
+async def admin_queue_status():
+    """
+    Operator triage: queue depth + sample of recently-dead jobs.
+
+    Returns:
+      queue_depth: pending arq jobs (ZCARD arq:queue)
+      dead_letter_count: total dead-lettered webhooks in the last 7d
+      worker_heartbeat_age_seconds: same gauge surfaced by /metrics
+    """
+    redis: Redis | None = None
+    queue_depth = 0
+    dead_letter_count = 0
+    heartbeat_age: float | None = None
+    error: str | None = None
+    try:
+        redis = Redis.from_url(
+            get_redis_url(), socket_timeout=2.0, socket_connect_timeout=2.0
+        )
+        try:
+            queue_depth = int(await redis.zcard("arq:queue"))
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            dead_letter_count = int(await redis.zcard(DEAD_LETTER_KEY))
+        except Exception:  # noqa: BLE001
+            pass
+        latest = await read_latest_heartbeat(redis)
+        heartbeat_age = heartbeat_age_seconds(latest)
+    except Exception as exc:  # noqa: BLE001
+        error = f"{type(exc).__name__}: {exc}"
+    finally:
+        if redis is not None:
+            try:
+                await redis.aclose()
+            except Exception:  # noqa: BLE001
+                pass
+
+    return {
+        "queue_depth": queue_depth,
+        "dead_letter_count": dead_letter_count,
+        "worker_heartbeat_age_seconds": heartbeat_age,
+        "error": error,
+    }
+
+
+@app.get("/admin/dead-webhooks", dependencies=[Depends(require_admin_token)])
+async def admin_dead_webhooks(limit: int = 50):
+    """
+    List the most recent dead-lettered webhook payloads. Members of
+    the kondo:webhook:dead ZSET are JSON-encoded records carrying
+    webhook_url, payload, reason, attempts, job_id, dead_at.
+
+    Returned newest-first, capped at `limit` (default 50, max 200).
+    """
+    limit = max(1, min(int(limit), 200))
+    redis: Redis | None = None
+    items: list[dict] = []
+    try:
+        redis = Redis.from_url(
+            get_redis_url(), socket_timeout=2.0, socket_connect_timeout=2.0
+        )
+        # ZREVRANGE returns highest score first = newest dead-lettered.
+        members = await redis.zrevrange(DEAD_LETTER_KEY, 0, limit - 1)
+        for raw in members or []:
+            try:
+                text = raw.decode() if isinstance(raw, (bytes, bytearray)) else raw
+                items.append(json.loads(text))
+            except Exception:  # noqa: BLE001
+                items.append({"raw": raw if isinstance(raw, str) else raw.decode("utf-8", "replace")})
+    finally:
+        if redis is not None:
+            try:
+                await redis.aclose()
+            except Exception:  # noqa: BLE001
+                pass
+
+    return {"count": len(items), "items": items}
+
+
+@app.post("/admin/dead-webhooks/replay", dependencies=[Depends(require_admin_token)])
+async def admin_replay_dead_webhook(payload: dict):
+    """
+    Re-enqueue a dead-lettered webhook. Body shape mirrors what
+    `/admin/dead-webhooks` returns:
+        { "webhook_url": "...", "payload": { ... }, "job_id": "..." }
+
+    The replayed delivery uses a fresh _job_id (suffixed with `:replay`
+    + epoch) so it doesn't collide with the original which is still
+    in the dead-letter ZSET. Removing the entry from the ZSET is left
+    to the operator — keeps an audit trail that the replay happened.
+    """
+    import time
+
+    webhook_url = payload.get("webhook_url")
+    inner_payload = payload.get("payload")
+    job_id = payload.get("job_id") or "manual-replay"
+    if not webhook_url or not isinstance(inner_payload, dict):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Body must include webhook_url + payload (object)",
+        )
+
+    pool = await create_pool(get_redis_settings())
+    try:
+        replay_job_id = f"{job_id}:replay:{int(time.time())}"
+        job = await pool.enqueue_job(
+            "deliver_webhook",
+            webhook_url,
+            inner_payload,
+            _job_id=replay_job_id,
+        )
+        if job is None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Replay job {replay_job_id} already queued",
+            )
+        logger.info(
+            f"[VIDEO-API] dead-webhook replay enqueued {replay_job_id} → {webhook_url}"
+        )
+        return {"replayed": True, "replay_job_id": replay_job_id}
     finally:
         await pool.aclose()
