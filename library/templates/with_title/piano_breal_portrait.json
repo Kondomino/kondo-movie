@@ -1,7 +1,7 @@
 {
   "name": "Piano Break - Portrait",
   "fps": 30,
-  "soundtrack_uri": "gs://editora-v2-templates/music/PIANI_BREAK_WITH_TITLE.wav",
+  "soundtrack_uri": "https://media.kondomino.com.br/music/library/harmony-in-motion-235766.mp3",
   "rank": 5,
   "voiceover_offset": 3,
   "orientation": "portrait",

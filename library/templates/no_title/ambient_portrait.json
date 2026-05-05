@@ -1,7 +1,7 @@
 {
   "name": "Ambient - Portrait",
   "fps": 30,
-  "soundtrack_uri": "gs://editora-v2-templates/music/AMBIENT_DANIEL_GALE_TITLE.wav",
+  "soundtrack_uri": "https://media.kondomino.com.br/music/library/harmony-in-motion-235766.mp3",
   "rank": 5,
   "voiceover_offset": 4,
   "orientation": "portrait",
