@@ -1,17 +1,14 @@
 """
-P4 tests for the worker-side render task.
+P5 contract tests:
+  - the worker-side render task still does what it did in P4 (translate
+    request, run pipeline, fire webhook, return result dict)
+  - the public /make_movie route returns 202 + the queued-shape body
+    immediately, with no inline render and no waiting on the worker
+  - duplicate job_ids surface as 409 (idempotency contract)
 
-Two surfaces:
-  - `render_movie(ctx, request_dict)` — the arq-callable task in
-    `task_queue.tasks`. Translates v2 → legacy, runs the sync pipeline
-    via asyncio.to_thread, fires the webhook, returns a JSON-able dict.
-  - `/make_movie` route's queue path (`KONDO_MOVIE_USE_QUEUE=true`) —
-    enqueues with `_job_id=request.job_id` and awaits the result.
-
-We don't run a real arq worker here (would require Redis + a worker
-process). The task is a plain async function — call it directly with
-a stubbed `ctx`. The route's enqueue path is tested by patching
-`create_pool` to return a mock pool.
+We don't run a real arq worker here — the task is a plain async fn,
+called directly with a stub ctx. The route is exercised via TestClient
+with `arq.create_pool` patched so no Redis is touched.
 """
 
 from __future__ import annotations
@@ -24,7 +21,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 
-# Same R2 / config dummies as the other test files.
+# Same R2 / config dummies as the other test files — imports of
+# storage_manager validate at module load time.
 _R2_DUMMIES = {
     "CLOUDFLARE_R2_KEY_ID": "test-r2-key-id",
     "CLOUDFLARE_R2_ACCESS_KEY": "test-r2-access-key",
@@ -36,11 +34,11 @@ for _k, _v in _R2_DUMMIES.items():
 
 def _v2_request_dict() -> dict[str, Any]:
     return {
-        "job_id": "p4-test-job-1",
+        "job_id": "p5-test-job-1",
         "agent": {"id": 1, "name": "Test"},
         "kondo": {"id": 1, "address": "Rua X, 0"},
         "media_urls": ["https://cdn.example.com/m1.jpg"],
-        "description": "p4-test",
+        "description": "p5-test",
         "edl_id": "city_beat",
         "voice_id": None,
         "music_url": None,
@@ -64,7 +62,7 @@ def _fake_action_response() -> Any:
         request_id=Session(
             user=Session.UserInfo(id="1"),
             project=Session.ProjectInfo(id="1"),
-            version=Session.VersionInfo(id="p4-test-job-1"),
+            version=Session.VersionInfo(id="p5-test-job-1"),
         ),
         result=ActionStatus(state=ActionStatus.State.SUCCESS),
         created=now,
@@ -78,14 +76,13 @@ def _fake_action_response() -> Any:
     )
 
 
+# ---- Worker task ----
+
 @pytest.mark.asyncio
 async def test_render_task_calls_movie_actions(monkeypatch):
     """
-    The task must:
-      - validate the request_dict back into MakeMovieRequestV2,
-      - translate via v2_to_legacy_request,
-      - call MovieActionsHandler().make_movie with the legacy request,
-      - return a JSON-serialisable dict shape.
+    Task contract: validate request_dict, translate v2→legacy, invoke
+    MovieActionsHandler.make_movie, return JSON-serialisable dict.
     """
     from movie_maker import movie_actions
 
@@ -98,7 +95,6 @@ async def test_render_task_calls_movie_actions(monkeypatch):
     monkeypatch.setattr(
         movie_actions.MovieActionsHandler, "make_movie", _fake_make_movie
     )
-    # No-op the webhook — we don't want network calls in unit tests.
     import task_queue.tasks as tasks_module
 
     monkeypatch.setattr(tasks_module, "fire_webhook", lambda *a, **kw: True)
@@ -107,12 +103,10 @@ async def test_render_task_calls_movie_actions(monkeypatch):
 
     result = await render_movie({}, _v2_request_dict())
 
-    assert len(handler_calls) == 1, "MovieActionsHandler.make_movie must be invoked once"
+    assert len(handler_calls) == 1
     legacy = handler_calls[0]
-    # Translation contract: caller's job_id rides on legacy.request_id.version.id.
-    assert legacy.request_id.version.id == "p4-test-job-1"
+    assert legacy.request_id.version.id == "p5-test-job-1"
     assert legacy.template == "city_beat"
-    # arq stores results via msgpack; dict shape is enough.
     assert isinstance(result, dict)
     assert result["result"]["state"] == "Success"
     assert result["story"]["movie_path"] == "https://cdn.example.com/out.mp4"
@@ -149,23 +143,17 @@ async def test_render_task_fires_webhook_with_done_payload(monkeypatch):
     assert payload["output_url"] == "https://cdn.example.com/out.mp4"
 
 
-def test_make_movie_route_enqueues_when_use_queue_flag_on(monkeypatch):
-    """
-    With KONDO_MOVIE_USE_QUEUE=true, the route must:
-      - call arq's create_pool,
-      - enqueue 'render_movie' with `_job_id` = caller's request.job_id,
-      - await the job's result and return the resulting MakeMovieResponse.
+# ---- /make_movie route — P5 contract ----
 
-    We patch create_pool to return a mock pool whose enqueue_job returns
-    a mock Job with a pre-cooked result. No Redis touched.
+def test_make_movie_returns_202_with_queued_shape():
+    """
+    The route MUST return immediately with HTTP 202 and the
+    `MakeMovieAcceptedResponse` shape — no waiting on the worker, no
+    full render result inline. This is the P5 contract change.
     """
     from fastapi.testclient import TestClient
 
-    monkeypatch.setenv("KONDO_MOVIE_USE_QUEUE", "true")
-
-    fake_response_dict = _fake_action_response().model_dump(mode="json")
     job = MagicMock()
-    job.result = AsyncMock(return_value=fake_response_dict)
     pool = MagicMock()
     pool.enqueue_job = AsyncMock(return_value=job)
     pool.aclose = AsyncMock(return_value=None)
@@ -176,27 +164,29 @@ def test_make_movie_route_enqueues_when_use_queue_flag_on(monkeypatch):
         with TestClient(app) as client:
             resp = client.post("/make_movie", json=_v2_request_dict())
 
-    assert resp.status_code == 200, resp.text
+    assert resp.status_code == 202, resp.text
+    body = resp.json()
+    assert body["job_id"] == "p5-test-job-1"
+    assert body["status"] == "queued"
     pool.enqueue_job.assert_awaited_once()
     args, kwargs = pool.enqueue_job.call_args
     assert args[0] == "render_movie"
-    # Idempotency: the caller-issued UUID is used as arq's _job_id.
-    assert kwargs.get("_job_id") == "p4-test-job-1"
-    job.result.assert_awaited_once()
+    # Idempotency: caller-issued UUID drives arq's _job_id.
+    assert kwargs.get("_job_id") == "p5-test-job-1"
+    # 202 + queued shape proves the route doesn't wait on the worker —
+    # the old contract returned the full MakeMovieResponse with story
+    # populated, which is incompatible with this body.
 
 
-def test_make_movie_route_returns_409_when_job_already_queued(monkeypatch):
+def test_make_movie_route_returns_409_when_job_already_queued():
     """
-    arq's `enqueue_job` returns None when a job with the same `_job_id`
-    is already queued or running. The route surfaces this as 409 so the
-    caller can distinguish it from a fresh enqueue.
+    arq's enqueue_job returns None when a job with the same `_job_id`
+    is already queued or running. The route surfaces this as 409.
     """
     from fastapi.testclient import TestClient
 
-    monkeypatch.setenv("KONDO_MOVIE_USE_QUEUE", "true")
-
     pool = MagicMock()
-    pool.enqueue_job = AsyncMock(return_value=None)  # duplicate job_id
+    pool.enqueue_job = AsyncMock(return_value=None)
     pool.aclose = AsyncMock(return_value=None)
 
     with patch("main.create_pool", AsyncMock(return_value=pool)):

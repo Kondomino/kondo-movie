@@ -1,7 +1,7 @@
 import os
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-from typing import Optional
+from typing import Literal, Optional
 from typing_extensions import Self
 from enum import Enum
 from datetime import datetime
@@ -297,7 +297,45 @@ class MakeMovieResponse(BaseModel):
                     f"Successful action needs a story"
                 )
         return self
-        
+
+
+# P5 contract types — what the public route returns, vs what the worker
+# task internally produces. Worker still returns MakeMovieResponse (full
+# render result) as the arq job result so we can read it later via
+# /jobs/:id/status; the route returns the lightweight Accepted/Status
+# shapes immediately so callers don't block.
+
+class MakeMovieAcceptedResponse(BaseModel):
+    """
+    Shape of `POST /make_movie` (P5+). Returned with HTTP 202 the
+    moment the job is enqueued — caller is expected to drive the
+    render lifecycle through the webhook + `/jobs/:id/status`.
+    """
+    job_id: str = Field(
+        ..., description="Caller-issued UUID; doubles as the arq job_id."
+    )
+    status: Literal['queued', 'processing'] = Field(
+        ..., description="Initial state. Always 'queued' on first enqueue."
+    )
+    notes: Optional[list[str]] = Field(
+        default=None, description="Engine-side warnings (e.g. EDL fallback). Empty in v1."
+    )
+
+
+class EngineJobStatusResponse(BaseModel):
+    """
+    Shape of `GET /jobs/:id/status` — polling fallback used by
+    kondos-api's VideoStatusPollerService when a webhook is missed.
+    """
+    job_id: str
+    phase: Literal['queued', 'processing', 'done', 'failed']
+    progress: int = Field(..., ge=0, le=100)
+    output_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    duration_seconds: Optional[float] = None
+    error: Optional[str] = None
+
+
 class VersionSnapshot(BaseModel):
     class Time(BaseModel):
         created : Optional[datetime] = Field(
