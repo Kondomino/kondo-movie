@@ -118,6 +118,99 @@ async def test_render_task_calls_movie_actions(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_oom_does_not_retry(monkeypatch):
+    """
+    P7: OOM is non-retryable. The render task must NOT raise arq.Retry
+    on a MemoryError; it fires the failed webhook and returns terminal.
+    """
+    from arq import Retry
+    from movie_maker import movie_actions
+
+    def _oom(self: Any, request: Any) -> Any:
+        raise MemoryError("simulated OOM")
+
+    monkeypatch.setattr(movie_actions.MovieActionsHandler, "make_movie", _oom)
+
+    ctx = _ctx_with_mocked_redis()
+    ctx["job_try"] = 1
+
+    from task_queue.tasks import render_movie
+
+    # No Retry raised — the task returns a failure dict.
+    result = await render_movie(ctx, _v2_request_dict())
+    assert isinstance(result, dict)
+    assert result["result"]["state"] == "Failure"
+    assert result["failure_class"] == "oom"
+
+    # And the failed webhook got enqueued.
+    ctx["redis"].enqueue_job.assert_awaited_once()
+    args, _ = ctx["redis"].enqueue_job.call_args
+    assert args[0] == "deliver_webhook"
+    assert args[2]["phase"] == "failed"
+
+
+@pytest.mark.asyncio
+async def test_r2_5xx_retries_with_backoff(monkeypatch):
+    """
+    P7: R2 503 is retryable up to 5 attempts. On try=1 the task must
+    raise arq.Retry rather than fire a webhook.
+    """
+    from arq import Retry
+    from movie_maker import movie_actions
+
+    class _FakeClientError(Exception):
+        pass
+
+    def _r2_503(self: Any, request: Any) -> Any:
+        err = _FakeClientError("R2 upload failed")
+        err.response = {"ResponseMetadata": {"HTTPStatusCode": 503}}
+        raise err
+
+    monkeypatch.setattr(movie_actions.MovieActionsHandler, "make_movie", _r2_503)
+
+    ctx = _ctx_with_mocked_redis()
+    ctx["job_try"] = 1
+
+    from task_queue.tasks import render_movie
+
+    with pytest.raises(Retry):
+        await render_movie(ctx, _v2_request_dict())
+
+    # The webhook is NOT fired on intermediate retries — only on
+    # terminal state. This is the contract that lets the engine
+    # complete its retry loop without spamming kondos-api with
+    # transient phase=failed callbacks.
+    ctx["redis"].enqueue_job.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_r2_5xx_terminal_after_max_tries(monkeypatch):
+    """Last attempt of a retryable failure dead-letters via failed webhook."""
+    from movie_maker import movie_actions
+
+    class _FakeClientError(Exception):
+        pass
+
+    def _r2_503(self: Any, request: Any) -> Any:
+        err = _FakeClientError("R2 upload failed")
+        err.response = {"ResponseMetadata": {"HTTPStatusCode": 503}}
+        raise err
+
+    monkeypatch.setattr(movie_actions.MovieActionsHandler, "make_movie", _r2_503)
+
+    ctx = _ctx_with_mocked_redis()
+    ctx["job_try"] = 5  # max_tries for r2_upload
+
+    from task_queue.tasks import render_movie
+
+    result = await render_movie(ctx, _v2_request_dict())
+    assert result["failure_class"] == "r2_upload"
+    ctx["redis"].enqueue_job.assert_awaited_once()
+    args, _ = ctx["redis"].enqueue_job.call_args
+    assert args[2]["phase"] == "failed"
+
+
+@pytest.mark.asyncio
 async def test_render_task_enqueues_deliver_webhook_on_done(monkeypatch):
     """
     P6 contract: the render task no longer fires the webhook inline. It
