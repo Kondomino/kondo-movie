@@ -29,7 +29,7 @@ from task_queue.heartbeat import (
     HEARTBEAT_PERIOD_SECONDS,
     write_heartbeat,
 )
-from task_queue.tasks import render_movie
+from task_queue.tasks import deliver_webhook, render_movie
 
 
 # Module-level handle to the heartbeat loop task. Stored here so
@@ -115,8 +115,11 @@ class WorkerSettings:
     one machine doesn't help throughput and doubles RAM pressure.
     """
 
-    functions = [ping, render_movie]
+    functions = [ping, render_movie, deliver_webhook]
     redis_settings: RedisSettings = get_redis_settings()
+    # max_jobs governs concurrent renders. deliver_webhook is short-lived
+    # (a single HTTP POST) and shares the same worker; in practice the
+    # bottleneck is always the render so this is fine.
     max_jobs: int = 1
     job_timeout: int = 600  # 10 min — renders are 60-90s on perf-2x
     keep_result: int = 3600  # 1h — webhook is the source of truth

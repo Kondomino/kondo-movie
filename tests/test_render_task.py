@@ -78,6 +78,14 @@ def _fake_action_response() -> Any:
 
 # ---- Worker task ----
 
+def _ctx_with_mocked_redis() -> dict[str, Any]:
+    """Stub arq context with an enqueue_job mock so the render task can
+    enqueue the webhook delivery without a real Redis pool."""
+    redis = MagicMock()
+    redis.enqueue_job = AsyncMock(return_value=MagicMock())
+    return {"redis": redis, "job_id": "p5-test-job-1"}
+
+
 @pytest.mark.asyncio
 async def test_render_task_calls_movie_actions(monkeypatch):
     """
@@ -95,13 +103,10 @@ async def test_render_task_calls_movie_actions(monkeypatch):
     monkeypatch.setattr(
         movie_actions.MovieActionsHandler, "make_movie", _fake_make_movie
     )
-    import task_queue.tasks as tasks_module
-
-    monkeypatch.setattr(tasks_module, "fire_webhook", lambda *a, **kw: True)
 
     from task_queue.tasks import render_movie
 
-    result = await render_movie({}, _v2_request_dict())
+    result = await render_movie(_ctx_with_mocked_redis(), _v2_request_dict())
 
     assert len(handler_calls) == 1
     legacy = handler_calls[0]
@@ -113,8 +118,12 @@ async def test_render_task_calls_movie_actions(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_render_task_fires_webhook_with_done_payload(monkeypatch):
-    """On success the task fires a webhook with phase=done + output_url."""
+async def test_render_task_enqueues_deliver_webhook_on_done(monkeypatch):
+    """
+    P6 contract: the render task no longer fires the webhook inline. It
+    enqueues a `deliver_webhook` arq job with `_job_id=<render-id>:webhook`
+    so duplicate render attempts can't double-fire.
+    """
     from movie_maker import movie_actions
 
     monkeypatch.setattr(
@@ -123,24 +132,23 @@ async def test_render_task_fires_webhook_with_done_payload(monkeypatch):
         lambda self, request: _fake_action_response(),
     )
 
-    captured: list[tuple[Any, ...]] = []
-    import task_queue.tasks as tasks_module
-
-    def _capture_webhook(url: str, payload: dict, *_: Any, **__: Any) -> bool:
-        captured.append((url, payload))
-        return True
-
-    monkeypatch.setattr(tasks_module, "fire_webhook", _capture_webhook)
+    ctx = _ctx_with_mocked_redis()
 
     from task_queue.tasks import render_movie
 
-    await render_movie({}, _v2_request_dict())
-    assert len(captured) == 1
-    url, payload = captured[0]
-    assert url == "https://example.invalid/webhook"
+    await render_movie(ctx, _v2_request_dict())
+
+    ctx["redis"].enqueue_job.assert_awaited_once()
+    args, kwargs = ctx["redis"].enqueue_job.call_args
+    assert args[0] == "deliver_webhook"
+    # args[1] is webhook_url, args[2] is the payload dict
+    assert args[1] == "https://example.invalid/webhook"
+    payload = args[2]
     assert payload["phase"] == "done"
     assert payload["progress"] == 100
     assert payload["output_url"] == "https://cdn.example.com/out.mp4"
+    # Idempotency tag: render's job_id + ':webhook' suffix
+    assert kwargs.get("_job_id") == "p5-test-job-1:webhook"
 
 
 # ---- /make_movie route — P5 contract ----
