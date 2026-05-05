@@ -41,6 +41,7 @@ from task_queue.failure_classifier import (
     backoff_for_attempt,
     classify_failure,
 )
+from task_queue.metrics import add_to_counter, incr_counter
 from utils.common_models import ActionStatus
 
 
@@ -84,6 +85,8 @@ async def render_movie(ctx: dict[str, Any], request_dict: dict[str, Any]) -> dic
     stores the returned dict as the job result so the caller side
     (kondos-api poller) can read terminal state via /jobs/:id/status.
     """
+    import time
+
     from arq import Retry
 
     request = MakeMovieRequestV2.model_validate(request_dict)
@@ -91,14 +94,21 @@ async def render_movie(ctx: dict[str, Any], request_dict: dict[str, Any]) -> dic
 
     job_id = ctx.get("job_id") or request.job_id
     job_try: int = int(ctx.get("job_try", 1))
+    edl_id = request.edl_id
+    redis = ctx.get("redis")
+
     logger.info(
         f"[VIDEO-WORKER] render started job={job_id} kondo={request.kondo.id} "
         f"try={job_try}"
     )
 
+    if redis is not None:
+        await incr_counter(redis, "kondo_renders_started_total", {"edl_id": edl_id})
+
     # ---- Run the pipeline; capture exception OR failure-state response ----
     caught_exc: Optional[BaseException] = None
     action_response = None
+    started_at = time.monotonic()
     try:
         action_response = await asyncio.to_thread(
             MovieActionsHandler().make_movie, request=legacy
@@ -109,6 +119,7 @@ async def render_movie(ctx: dict[str, Any], request_dict: dict[str, Any]) -> dic
             f"[VIDEO-WORKER] render raised job={job_id} try={job_try}: "
             f"{type(exc).__name__}: {exc}"
         )
+    duration = time.monotonic() - started_at
 
     # ---- Decide success vs failure ----
     if caught_exc is None and action_response is not None:
@@ -116,7 +127,21 @@ async def render_movie(ctx: dict[str, Any], request_dict: dict[str, Any]) -> dic
     else:
         success = False
 
+    # Duration histogram: record on every attempt (success or fail), so
+    # operators see "renders that go bad still take time" trends.
+    if redis is not None:
+        await add_to_counter(
+            redis, "kondo_render_duration_seconds_sum", duration, {"edl_id": edl_id}
+        )
+        await incr_counter(
+            redis, "kondo_render_duration_seconds_count", {"edl_id": edl_id}
+        )
+
     if success:
+        if redis is not None:
+            await incr_counter(
+                redis, "kondo_renders_succeeded_total", {"edl_id": edl_id}
+            )
         payload = _build_done_payload(action_response)
         await _enqueue_webhook(ctx, request.webhook_url, payload, job_id)
         logger.info(f"[VIDEO-WORKER] render succeeded job={job_id} try={job_try}")
@@ -132,7 +157,10 @@ async def render_movie(ctx: dict[str, Any], request_dict: dict[str, Any]) -> dic
 
     # Attempts left? If so, re-raise arq.Retry so the same job_id
     # comes back to the worker after the backoff. The webhook is NOT
-    # fired on intermediate retries — only on terminal state.
+    # fired on intermediate retries — only on terminal state. We also
+    # do NOT bump renders_failed_total here — that counter tracks
+    # *terminal* failures, so an intermediate retry that eventually
+    # succeeds doesn't count as a failure.
     if classification.has_attempts_left(job_try):
         defer = backoff_for_attempt(job_try)
         logger.warning(
@@ -141,7 +169,15 @@ async def render_movie(ctx: dict[str, Any], request_dict: dict[str, Any]) -> dic
         )
         raise Retry(defer=defer)
 
-    # Terminal failure: fire failed webhook + return.
+    # Terminal failure: fire failed webhook + return. Bump the failed
+    # counter with the real classification label (now that P7's
+    # classifier is the source of truth).
+    if redis is not None:
+        await incr_counter(
+            redis,
+            "kondo_renders_failed_total",
+            {"edl_id": edl_id, "failure_class": classification.failure_class},
+        )
     error_text = _build_error_text(caught_exc, action_response)
     payload = {
         "phase": "failed",
@@ -284,13 +320,22 @@ async def deliver_webhook(
                 attempts=job_try,
                 job_id=job_id,
             )
+            await incr_counter(
+                ctx["redis"], "kondo_webhook_attempts_total", {"outcome": "exhausted"}
+            )
             return {"delivered": False, "reason": reason, "tries": job_try}
+        await incr_counter(
+            ctx["redis"], "kondo_webhook_attempts_total", {"outcome": "network_err"}
+        )
         raise Retry(defer=next_backoff)
 
     if 200 <= status_code < 300:
         logger.info(
             f"[VIDEO-WEBHOOK] delivered status={status_code} try={job_try} "
             f"job={job_id} url={webhook_url}"
+        )
+        await incr_counter(
+            ctx["redis"], "kondo_webhook_attempts_total", {"outcome": "2xx"}
         )
         return {"delivered": True, "status": status_code, "tries": job_try}
 
@@ -299,6 +344,9 @@ async def deliver_webhook(
         logger.warning(
             f"[VIDEO-WEBHOOK] http {status_code} try={job_try}/{WEBHOOK_MAX_TRIES} "
             f"job={job_id} — retrying in {next_backoff}s"
+        )
+        await incr_counter(
+            ctx["redis"], "kondo_webhook_attempts_total", {"outcome": "5xx"}
         )
         raise Retry(defer=next_backoff)
 
@@ -312,5 +360,9 @@ async def deliver_webhook(
         reason=reason,
         attempts=job_try,
         job_id=job_id,
+    )
+    outcome = "exhausted" if retryable else "4xx"
+    await incr_counter(
+        ctx["redis"], "kondo_webhook_attempts_total", {"outcome": outcome}
     )
     return {"delivered": False, "reason": reason, "tries": job_try}
