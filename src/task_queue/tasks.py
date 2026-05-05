@@ -21,7 +21,7 @@ duplicate render attempt doesn't double-fire the webhook.
 from __future__ import annotations
 
 import asyncio
-from typing import Any
+from typing import Any, Optional
 
 from arq import Retry
 
@@ -36,6 +36,11 @@ from notification.engine_webhook import (
     post_webhook_once,
 )
 from task_queue.dead_letter import push_dead_letter
+from task_queue.failure_classifier import (
+    FailureClassification,
+    backoff_for_attempt,
+    classify_failure,
+)
 from utils.common_models import ActionStatus
 
 
@@ -59,93 +64,160 @@ def _is_retryable_status(status_code: int) -> bool:
 
 async def render_movie(ctx: dict[str, Any], request_dict: dict[str, Any]) -> dict[str, Any]:
     """
-    Worker-side render. Same pipeline as the in-process threadpool path,
-    but executed inside the dedicated worker process.
+    Worker-side render with classified retry policy (P7).
 
-    Heartbeat strategy: the heavy sync MoviePy/ffmpeg work goes through
-    `asyncio.to_thread` so the worker's asyncio event loop stays free
-    to fire the periodic heartbeat (driven by the on_startup hook in
-    worker.py). Without to_thread, a 90s render would block the loop
-    and the heartbeat would silently miss its 15s cadence —
-    `/readyz` would flap to "stale" mid-render.
+    Pipeline:
+      1. Run MovieActionsHandler.make_movie inside asyncio.to_thread so
+         the event loop stays free for heartbeats during the long sync
+         work.
+      2. If the handler raises OR returns FAILURE: hand the signal to
+         classify_failure. If retryable + attempts left → raise
+         arq.Retry with backoff (no webhook fired). Else → fire failed
+         webhook + return failure dict so the engine.lifecycle reaches
+         a terminal state.
+      3. On success: fire the done webhook + return the full response.
 
-    Webhook delivery is now its own arq task (`deliver_webhook`).
-    Render success/failure enqueues a delivery job; the render task
-    itself no longer touches the network at the end. Failure of the
-    render still produces a `phase=failed` webhook so kondos-api can
-    flip the row.
+    Webhook delivery is enqueued as a separate `deliver_webhook` arq
+    job (P6). _job_id=f"{render_job_id}:webhook" prevents double-fires.
 
-    Returns the response as a JSON-serializable dict so arq can store
-    it as the job result. The caller (main.py /jobs/:id/status) can
-    reconstruct the `MakeMovieResponse` from this dict.
+    On final failure (whether transient-exhausted or fail-fast), arq
+    stores the returned dict as the job result so the caller side
+    (kondos-api poller) can read terminal state via /jobs/:id/status.
     """
+    from arq import Retry
+
     request = MakeMovieRequestV2.model_validate(request_dict)
     legacy = v2_to_legacy_request(request)
 
     job_id = ctx.get("job_id") or request.job_id
-    logger.info(f"[VIDEO-WORKER] render started job={job_id} kondo={request.kondo.id}")
-
-    action_response = await asyncio.to_thread(
-        MovieActionsHandler().make_movie, request=legacy
+    job_try: int = int(ctx.get("job_try", 1))
+    logger.info(
+        f"[VIDEO-WORKER] render started job={job_id} kondo={request.kondo.id} "
+        f"try={job_try}"
     )
 
-    success = action_response.result.state == ActionStatus.State.SUCCESS
+    # ---- Run the pipeline; capture exception OR failure-state response ----
+    caught_exc: Optional[BaseException] = None
+    action_response = None
+    try:
+        action_response = await asyncio.to_thread(
+            MovieActionsHandler().make_movie, request=legacy
+        )
+    except Exception as exc:  # noqa: BLE001
+        caught_exc = exc
+        logger.warning(
+            f"[VIDEO-WORKER] render raised job={job_id} try={job_try}: "
+            f"{type(exc).__name__}: {exc}"
+        )
+
+    # ---- Decide success vs failure ----
+    if caught_exc is None and action_response is not None:
+        success = action_response.result.state == ActionStatus.State.SUCCESS
+    else:
+        success = False
 
     if success:
-        payload = {
-            "phase": "done",
-            "progress": 100,
-            "output_url": (
-                action_response.story.movie_path if action_response.story else None
-            ),
-        }
-        if not payload["output_url"]:
-            payload = {
-                "phase": "failed",
-                "progress": 100,
-                "error": "Render reported success but output URL is empty",
-            }
-    else:
-        payload = {
-            "phase": "failed",
-            "progress": 100,
-            "error": (
-                action_response.result.reason
-                or "Engine reported failure (no reason given)"
-            ),
-        }
-    payload = {k: v for k, v in payload.items() if v is not None}
+        payload = _build_done_payload(action_response)
+        await _enqueue_webhook(ctx, request.webhook_url, payload, job_id)
+        logger.info(f"[VIDEO-WORKER] render succeeded job={job_id} try={job_try}")
+        return action_response.model_dump(mode="json")
 
-    # Enqueue the durable webhook delivery. _job_id ties it 1:1 to the
-    # render so duplicate render attempts can't double-fire (arq
-    # dedups by _job_id). On Redis trouble, fall back to a synchronous
-    # best-effort attempt — better one missed retry than nothing.
-    redis = ctx.get("redis")
-    if redis is not None:
-        try:
-            await redis.enqueue_job(
-                "deliver_webhook",
-                request.webhook_url,
-                payload,
-                _job_id=f"{job_id}:webhook",
-            )
-        except Exception as exc:  # noqa: BLE001
-            logger.warning(
-                f"[VIDEO-WORKER] webhook enqueue failed job={job_id}: "
-                f"{type(exc).__name__}: {exc} — falling back to inline POST"
-            )
-            await _inline_webhook_fallback(request.webhook_url, payload)
-    else:
-        # Defensive: ctx['redis'] should always exist in a real arq
-        # invocation. Inline fallback keeps the test path working
-        # without a live worker pool.
-        await _inline_webhook_fallback(request.webhook_url, payload)
+    # ---- Failure path: classify, then retry-or-terminal ----
+    failure_reason = (
+        action_response.result.reason
+        if action_response is not None and action_response.result.state != ActionStatus.State.SUCCESS
+        else None
+    )
+    classification = classify_failure(exc=caught_exc, reason=failure_reason)
 
-    logger.info(
-        f"[VIDEO-WORKER] render {'succeeded' if success else 'failed'} job={job_id}"
+    # Attempts left? If so, re-raise arq.Retry so the same job_id
+    # comes back to the worker after the backoff. The webhook is NOT
+    # fired on intermediate retries — only on terminal state.
+    if classification.has_attempts_left(job_try):
+        defer = backoff_for_attempt(job_try)
+        logger.warning(
+            f"[VIDEO-WORKER] retry job={job_id} class={classification.failure_class} "
+            f"try={job_try}/{classification.max_tries} defer={defer}s"
+        )
+        raise Retry(defer=defer)
+
+    # Terminal failure: fire failed webhook + return.
+    error_text = _build_error_text(caught_exc, action_response)
+    payload = {
+        "phase": "failed",
+        "progress": 100,
+        "error": error_text,
+    }
+    await _enqueue_webhook(ctx, request.webhook_url, payload, job_id)
+    logger.error(
+        f"[VIDEO-WORKER] render terminal-failed job={job_id} "
+        f"class={classification.failure_class} try={job_try}/{classification.max_tries} "
+        f"error={error_text}"
     )
 
-    return action_response.model_dump(mode="json")
+    # If the handler returned a clean FAILURE response, return it for
+    # forensics; otherwise build a minimal failure dict.
+    if action_response is not None:
+        return action_response.model_dump(mode="json")
+    return {
+        "result": {"state": "Failure", "reason": error_text},
+        "failure_class": classification.failure_class,
+        "tries": job_try,
+    }
+
+
+def _build_done_payload(action_response: Any) -> dict[str, Any]:
+    """Webhook payload for a successful render. Falls back to failed-shape
+    when the handler reported success but produced no output URL."""
+    output_url = action_response.story.movie_path if action_response.story else None
+    if not output_url:
+        return {
+            "phase": "failed",
+            "progress": 100,
+            "error": "Render reported success but output URL is empty",
+        }
+    return {"phase": "done", "progress": 100, "output_url": output_url}
+
+
+def _build_error_text(
+    caught_exc: Optional[BaseException], action_response: Any
+) -> str:
+    if caught_exc is not None:
+        return f"{type(caught_exc).__name__}: {caught_exc}"
+    if action_response is not None and action_response.result.reason:
+        return action_response.result.reason
+    return "Engine reported failure (no reason given)"
+
+
+async def _enqueue_webhook(
+    ctx: dict[str, Any],
+    webhook_url: str,
+    payload: dict[str, Any],
+    job_id: str,
+) -> None:
+    """
+    Enqueue durable webhook delivery (P6). _job_id ties it 1:1 to the
+    render so duplicate render attempts can't double-fire. Falls back
+    to a synchronous best-effort POST when the queue is unreachable.
+    """
+    payload = {k: v for k, v in payload.items() if v is not None}
+    redis = ctx.get("redis")
+    if redis is None:
+        await _inline_webhook_fallback(webhook_url, payload)
+        return
+    try:
+        await redis.enqueue_job(
+            "deliver_webhook",
+            webhook_url,
+            payload,
+            _job_id=f"{job_id}:webhook",
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            f"[VIDEO-WORKER] webhook enqueue failed job={job_id}: "
+            f"{type(exc).__name__}: {exc} — falling back to inline POST"
+        )
+        await _inline_webhook_fallback(webhook_url, payload)
 
 
 async def _inline_webhook_fallback(webhook_url: str, payload: dict[str, Any]) -> None:
