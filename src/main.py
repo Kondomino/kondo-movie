@@ -41,6 +41,7 @@ from task_queue.heartbeat import (
     is_heartbeat_stale,
     read_latest_heartbeat,
 )
+from task_queue.metrics import collect_counters, render_prometheus_text
 
 
 app = FastAPI()
@@ -160,6 +161,56 @@ async def readyz(response: Response):
         "worker_heartbeat_stale_after_seconds": HEARTBEAT_STALE_AFTER_SECONDS,
         "worker": "ok" if (latest is not None and not stale) else "no-heartbeat",
     }
+
+
+@app.get("/metrics", response_class=Response)
+async def metrics() -> Response:
+    """
+    Prometheus-style exposition. Reads counters from Redis (kept up to
+    date by render_movie + deliver_webhook) and samples a couple of
+    gauges live (queue depth, heartbeat age). Operators / external
+    Prometheus pull this; no auth (same scope as /healthz — operational
+    only, no PII).
+
+    On Redis trouble we still serve a 200 with a partial response so
+    a Prometheus scrape doesn't churn — the queue_depth gauge is just
+    omitted. Counters were last written by tasks, so a Redis blip
+    means stale-but-served numbers, not 5xx churn.
+    """
+    redis: Redis | None = None
+    counters: list[tuple[str, dict[str, str], float]] = []
+    gauges: list[tuple[str, dict[str, str], float]] = []
+    try:
+        redis = Redis.from_url(
+            get_redis_url(), socket_timeout=2.0, socket_connect_timeout=2.0
+        )
+        counters = await collect_counters(redis)
+
+        # Queue depth (gauge): arq stores the queue as a Redis sorted set
+        # under its default name `arq:queue`. zcard gives current pending.
+        try:
+            depth = await redis.zcard("arq:queue")
+            gauges.append(("kondo_queue_depth", {}, float(depth)))
+        except Exception:  # noqa: BLE001
+            pass
+
+        # Heartbeat age (gauge) — useful when correlating render
+        # failures with worker availability.
+        latest = await read_latest_heartbeat(redis)
+        age = heartbeat_age_seconds(latest)
+        if age is not None:
+            gauges.append(("kondo_worker_heartbeat_age_seconds", {}, float(age)))
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(f"[VIDEO-API] /metrics partial response: {type(exc).__name__}: {exc}")
+    finally:
+        if redis is not None:
+            try:
+                await redis.aclose()
+            except Exception:  # noqa: BLE001
+                pass
+
+    body = render_prometheus_text(counters, gauges)
+    return Response(content=body, media_type="text/plain; version=0.0.4; charset=utf-8")
 
 
 @app.get("/")
