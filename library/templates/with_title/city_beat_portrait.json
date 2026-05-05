@@ -1,7 +1,7 @@
 {
   "name": "City Beat - Portrait",
   "fps": 30,
-  "soundtrack_uri": "gs://editora-v2-templates/music/CITY_BEAT_V2.wav",
+  "soundtrack_uri": "https://media.kondomino.com.br/music/library/cool-lounge-403501.mp3",
   "rank": 1,
   "voiceover_offset": 4,
   "orientation": "portrait",

@@ -1,80 +1,79 @@
-
 {
-    "name": "Calistoga",
-    "soundtrack_uri": "gs://editora-v2-templates/music/CALISTOGA_NO_TITLE.wav",
-    "fps": 30,
-    "rank": 10,
-    "clips": [
-        {
-            "clip_number": 1,
-            "clip_type": "Image",
-            "duration": {
-                "seconds": 3,
-                "frames": 19
-            },
-            "clip_effect": "ZoomIn"
+  "name": "Calistoga",
+  "soundtrack_uri": "https://media.kondomino.com.br/music/library/elegant-corporate-inspiration-2-506051.mp3",
+  "fps": 30,
+  "rank": 10,
+  "clips": [
+    {
+      "clip_number": 1,
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 3,
+        "frames": 19
+      },
+      "clip_effect": "ZoomIn"
+    },
+    {
+      "clip_number": 2,
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 26
+      },
+      "clip_effect": "ZoomIn"
+    },
+    {
+      "clip_number": 3,
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 24
+      },
+      "clip_effect": "ZoomIn"
+    },
+    {
+      "clip_number": 4,
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 26
+      },
+      "clip_effect": "ZoomIn"
+    },
+    {
+      "clip_number": 5,
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 24
+      },
+      "clip_effect": "ZoomIn"
+    },
+    {
+      "clip_number": 6,
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 1,
+        "frames": 26
+      },
+      "clip_effect": "ZoomIn"
+    },
+    {
+      "clip_number": 7,
+      "clip_type": "Image",
+      "duration": {
+        "seconds": 3,
+        "frames": 18
+      },
+      "clip_effect": "ZoomIn",
+      "transition_out": {
+        "effect": "fade",
+        "duration": {
+          "seconds": 0,
+          "frames": 10
         },
-        {
-            "clip_number": 2,
-            "clip_type": "Image",
-            "duration": {
-                "seconds": 1,
-                "frames": 26
-            },
-            "clip_effect": "ZoomIn"
-        },
-        {
-            "clip_number": 3,
-            "clip_type": "Image",
-            "duration": {
-                "seconds": 1,
-                "frames": 24
-            },
-            "clip_effect": "ZoomIn"
-        },
-        {
-            "clip_number": 4,
-            "clip_type": "Image",
-            "duration": {
-                "seconds": 1,
-                "frames": 26
-            },
-            "clip_effect": "ZoomIn"
-        },
-        {
-            "clip_number": 5,
-            "clip_type": "Image",
-            "duration": {
-                "seconds": 1,
-                "frames": 24
-            },
-            "clip_effect": "ZoomIn"
-        },
-        {
-            "clip_number": 6,
-            "clip_type": "Image",
-            "duration": {
-                "seconds": 1,
-                "frames": 26
-            },
-            "clip_effect": "ZoomIn"
-        },
-        {
-            "clip_number": 7,
-            "clip_type": "Image",
-            "duration": {
-                "seconds": 3,
-                "frames": 18
-            },
-            "clip_effect": "ZoomIn",
-            "transition_out": {
-                "effect": "fade",
-                "duration": {
-                    "seconds": 0,
-                    "frames": 10
-                },
-                "transition_frame":false 
-            }
-        }
-    ]
+        "transition_frame": false
+      }
+    }
+  ]
 }

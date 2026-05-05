@@ -1,7 +1,7 @@
 {
   "name": "Sonata - Portrait",
   "fps": 30,
-  "soundtrack_uri": "gs://editora-v2-templates/music/SONATA_V2.wav",
+  "soundtrack_uri": "https://media.kondomino.com.br/music/library/elegant-elegant-music-508012.mp3",
   "rank": 4,
   "voiceover_offset": null,
   "orientation": "portrait",
