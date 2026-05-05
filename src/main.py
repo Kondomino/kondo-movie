@@ -3,23 +3,23 @@ kondo-movie HTTP surface.
 
 The engine is a stateless renderer. Public surface is intentionally small:
 
-    GET  /                       — back-compat health (alias of /healthz)
-    GET  /healthz                — cheap liveness (no deps; Fly probe target)
-    GET  /readyz                 — readiness (Redis ping + worker heartbeat)
-    GET  /api/v1/                — health (kept for parity with proxies)
-    POST /make_movie             — render endpoint (v2 proxied-identity contract)
-    GET  /jobs/{job_id}/status   — polling fallback (501 until arq lands)
-    DELETE /jobs/{job_id}        — cancel (501 until arq lands)
+    GET    /                       — back-compat health (alias of /healthz)
+    GET    /healthz                — cheap liveness (no deps; Fly probe target)
+    GET    /readyz                 — readiness (Redis ping + worker heartbeat)
+    GET    /api/v1/                — health (kept for parity with proxies)
+    POST   /make_movie             — enqueue render; returns 202 + queued
+    GET    /jobs/{job_id}/status   — poll lifecycle (kondos-api fallback)
+    DELETE /jobs/{job_id}          — cancel (501 until P8)
 
-Everything else (Editora-era account/property/legacy-video routes) was
-removed in PR k4 alongside the Firestore purge.
+P5 contract change: /make_movie is fire-and-forget from the route's
+perspective. The worker process consumes from the kondo:render arq
+queue and drives the lifecycle via webhook back to kondos-api. Callers
+get a 202 in <500ms p95 (was 60-90s under the synchronous contract).
 """
 
-import os
-
 from arq import create_pool
+from arq.jobs import Job, JobStatus
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, status
-from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
@@ -28,14 +28,12 @@ from redis.asyncio import Redis
 
 from logger import logger
 from config.config import settings
-from movie_maker.movie_actions import MovieActionsHandler
 from movie_maker.movie_actions_model import (
+    EngineJobStatusResponse,
+    MakeMovieAcceptedResponse,
     MakeMovieRequestV2,
     MakeMovieResponse,
-    v2_to_legacy_request,
 )
-from utils.common_models import ActionStatus
-from notification.engine_webhook import fire_webhook
 from task_queue.connection import get_redis_settings, get_redis_url
 from task_queue.heartbeat import (
     HEARTBEAT_STALE_AFTER_SECONDS,
@@ -43,17 +41,6 @@ from task_queue.heartbeat import (
     is_heartbeat_stale,
     read_latest_heartbeat,
 )
-
-
-def _use_queue() -> bool:
-    """
-    Feature flag for the P4 worker path. Default false — the route runs
-    the render in-process via run_in_threadpool (P2 behavior). Flip to
-    true via `fly secrets set KONDO_MOVIE_USE_QUEUE=true` once the
-    worker process is deployed and `/readyz` reports `worker: ok`.
-    Acts as the rollback switch if the queue path misbehaves.
-    """
-    return os.getenv("KONDO_MOVIE_USE_QUEUE", "false").lower() == "true"
 
 
 app = FastAPI()
@@ -193,65 +180,29 @@ app.include_router(v1_router)
 
 # ---- Render ----
 
-@app.post("/make_movie", response_model=MakeMovieResponse)
-async def make_movie(request: MakeMovieRequestV2, response: Response):
+@app.post(
+    "/make_movie",
+    response_model=MakeMovieAcceptedResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def make_movie(request: MakeMovieRequestV2):
     """
-    v2 proxied-identity render endpoint. Translates to the engine's
-    internal request shape and runs through the stateless handler. Fires
-    a lifecycle webhook back to kondos-api on completion (best-effort).
+    Enqueue a render onto the worker queue and return 202 immediately.
 
-    Two execution paths, gated on KONDO_MOVIE_USE_QUEUE:
+    The worker (separate Fly machine, see fly.toml `[[processes]]`)
+    consumes `kondo:render`, runs the pipeline, and POSTs the lifecycle
+    webhook to kondos-api on completion (P6 will move the webhook into
+    its own retry-aware queue). Callers should drive the lifecycle via
+    that webhook; `GET /jobs/:id/status` is the poll-fallback for when
+    the webhook is missed.
 
-    - default (false): in-process via run_in_threadpool (P2 behavior).
-      The blocking sync render runs in the threadpool so the asyncio
-      loop stays responsive for `/healthz` etc.
-
-    - true: enqueue onto arq, await the worker's result. Worker process
-      lives on a separate Fly machine (per fly.toml `[[processes]]`).
-      Same external response — caller still gets the full
-      `MakeMovieResponse` synchronously. P5 will flip the route to
-      return 202 immediately and let the webhook drive the lifecycle.
-
-    Idempotency: the queue path passes `_job_id=request.job_id` so a
+    Idempotency: the route passes `_job_id=request.job_id` so a
     duplicate submission of the same kondos-api UUID dedups at the
-    arq layer (§2.3 of the plan).
-    """
-    if _use_queue():
-        return await _make_movie_via_queue(request, response)
-    return await _make_movie_inline(request, response)
+    arq layer (§2.3 of the plan). When arq reports the job_id is
+    already queued/running, this endpoint returns 409.
 
-
-async def _make_movie_inline(
-    request: MakeMovieRequestV2, response: Response
-) -> MakeMovieResponse:
-    """In-process P2 path. Render + webhook go through the threadpool."""
-    legacy_request = v2_to_legacy_request(request)
-    action_response = await run_in_threadpool(
-        MovieActionsHandler().make_movie, request=legacy_request
-    )
-    success = action_response.result.state == ActionStatus.State.SUCCESS
-    if not success:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
-    payload = _webhook_payload_from_response(action_response, success)
-    await run_in_threadpool(fire_webhook, request.webhook_url, payload)
-    return action_response
-
-
-async def _make_movie_via_queue(
-    request: MakeMovieRequestV2, response: Response
-) -> MakeMovieResponse:
-    """
-    Queue path. Enqueues with the caller's UUID as the arq job_id and
-    waits for the worker to finish.
-
-    Pool creation per-request: wasteful but acceptable at v1 volume.
-    P5 refactors to FastAPI lifespan-managed pool when we re-shape
-    the route around 202 + webhook.
-
-    Job timeout matches the worker's `job_timeout=600s` so a stuck
-    render bubbles up as a clean failure rather than hanging the
-    request indefinitely.
+    Pool creation per-request is wasteful but acceptable at v1 volume.
+    A FastAPI lifespan-managed pool is a follow-up (out of P5 scope).
     """
     pool = await create_pool(get_redis_settings())
     try:
@@ -262,73 +213,119 @@ async def _make_movie_via_queue(
         )
         if job is None:
             # arq returns None when a job with the same _job_id is
-            # already queued or running. Idempotent retry — surface
-            # via 409 so the caller knows it's not a fresh submission.
-            response.status_code = status.HTTP_409_CONFLICT
+            # already queued or running. Surface as 409 so the caller
+            # can distinguish from a fresh enqueue.
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Render job_id={request.job_id} already in progress",
             )
-        result_dict = await job.result(timeout=600)
     finally:
         await pool.aclose()
 
-    action_response = MakeMovieResponse.model_validate(result_dict)
-    success = action_response.result.state == ActionStatus.State.SUCCESS
-    if not success:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return action_response
+    logger.info(f"[VIDEO-API] enqueued render job_id={request.job_id} kondo={request.kondo.id}")
+    return MakeMovieAcceptedResponse(job_id=request.job_id, status="queued")
 
 
-def _webhook_payload_from_response(
-    action_response: MakeMovieResponse, success: bool
-) -> dict:
-    if success:
-        payload = {
-            "phase": "done",
-            "progress": 100,
-            "output_url": (
-                action_response.story.movie_path if action_response.story else None
+# ---- Job lifecycle ----
+
+# Maps arq's internal job state to our public lifecycle phase.
+# arq's JobStatus enum values: deferred, queued, in_progress, complete, not_found.
+_ARQ_STATUS_TO_PHASE: dict[JobStatus, str] = {
+    JobStatus.deferred: "queued",
+    JobStatus.queued: "queued",
+    JobStatus.in_progress: "processing",
+    # `complete` is split into done/failed by inspecting the result —
+    # see _job_status_payload below.
+    JobStatus.not_found: "failed",
+}
+
+
+async def _job_status_payload(pool, job_id: str) -> EngineJobStatusResponse:
+    """
+    Build the public status shape from arq's job state. Reads the result
+    when the job is complete to derive done vs failed and surface the
+    output URL / error.
+    """
+    job = Job(job_id=job_id, redis=pool)
+    arq_status = await job.status()
+
+    if arq_status == JobStatus.not_found:
+        # Job either never existed or was evicted past keep_result.
+        # 404 lets the caller (kondos-api poller) decide whether to
+        # mark the row failed.
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"job_id={job_id} not found",
+        )
+
+    if arq_status != JobStatus.complete:
+        return EngineJobStatusResponse(
+            job_id=job_id,
+            phase=_ARQ_STATUS_TO_PHASE[arq_status],
+            progress=0 if arq_status in (JobStatus.deferred, JobStatus.queued) else 50,
+        )
+
+    # complete — inspect the result. arq's result_info() returns a
+    # JobResult with `success` (bool) and `result` (the task return).
+    result_info = await job.result_info()
+    if result_info is None or not result_info.success:
+        return EngineJobStatusResponse(
+            job_id=job_id,
+            phase="failed",
+            progress=100,
+            error=(
+                str(result_info.result) if result_info is not None else "Job result unavailable"
             ),
-        }
-        if not payload["output_url"]:
-            payload = {
-                "phase": "failed",
-                "progress": 100,
-                "error": "Render reported success but output URL is empty",
-            }
-    else:
-        payload = {
-            "phase": "failed",
-            "progress": 100,
-            "error": (
-                action_response.result.reason
-                or "Engine reported failure (no reason given)"
-            ),
-        }
-    return {k: v for k, v in payload.items() if v is not None}
+        )
 
+    # The render task returns a MakeMovieResponse dict. Reconstruct
+    # to read story.movie_path; failed-render-with-success-job (no
+    # output URL) is rare but handled by validating presence.
+    try:
+        full = MakeMovieResponse.model_validate(result_info.result)
+    except Exception as exc:  # noqa: BLE001
+        return EngineJobStatusResponse(
+            job_id=job_id,
+            phase="failed",
+            progress=100,
+            error=f"Invalid worker result shape: {type(exc).__name__}",
+        )
 
-# ---- Job lifecycle (501 stubs — arq integration pending) ----
-
-@app.get("/jobs/{job_id}/status")
-async def get_job_status(job_id: str):
-    raise HTTPException(
-        status_code=501,
-        detail=(
-            f"Job-status polling is not yet implemented (job_id={job_id}). "
-            "This endpoint will land with the arq worker integration. Until then, "
-            "/make_movie remains synchronous and returns the final result inline."
-        ),
+    output_url = full.story.movie_path if full.story else None
+    return EngineJobStatusResponse(
+        job_id=job_id,
+        phase="done" if output_url else "failed",
+        progress=100,
+        output_url=output_url,
+        error=None if output_url else "Render completed but output URL is empty",
     )
+
+
+@app.get("/jobs/{job_id}/status", response_model=EngineJobStatusResponse)
+async def get_job_status(job_id: str):
+    """
+    Poll-fallback consumed by kondos-api's VideoStatusPollerService
+    when a webhook is missed. Reads arq's job state directly from
+    Redis — no caching, no extra DB hop.
+    """
+    pool = await create_pool(get_redis_settings())
+    try:
+        return await _job_status_payload(pool, job_id)
+    finally:
+        await pool.aclose()
 
 
 @app.delete("/jobs/{job_id}")
 async def cancel_job(job_id: str):
+    """
+    P8 will implement real cancellation via arq's abort_job. Until
+    then this stays a 501 so kondos-api's cancel UX surfaces a clean
+    "not implemented" rather than a silent success.
+    """
     raise HTTPException(
         status_code=501,
         detail=(
-            f"Job cancellation is not yet implemented (job_id={job_id}). "
-            "This endpoint will land with the arq worker integration."
+            f"Job cancellation lands in P8 (job_id={job_id}). "
+            "Operator-driven retry/cancel UI ships with that phase."
         ),
     )
