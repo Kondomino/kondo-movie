@@ -1,19 +1,25 @@
-# fly.toml for kondo-movie — v1 launch deploy.
+# fly.toml for kondo-movie.
 #
-# Companion app to kondos-api. Both run on Fly.io in gru (São Paulo)
-# for low-latency between the two and to media.kondomino.com.br (R2
-# is global so region matters less for the storage roundtrip).
+# P4 of the reliability plan: split into two processes within the same
+# Fly app + same Docker image:
 #
-# Sizing notes:
-#   - The render uses MoviePy + ffmpeg, which is CPU-bound.
-#     shared-cpu-1x pegged at 100% for ~11min on a 60s mp4 in early
-#     prod tests; performance-2x drops it to ~60-90s.
-#   - 4GB memory leaves headroom for moviepy frame buffers on 1080p.
-#   - auto_stop+auto_start: machine sleeps when idle (zero cost),
-#     wakes on first request. Render-side cold start is ~5s.
+#   api    — uvicorn FastAPI, serves /make_movie, /healthz, /readyz.
+#            auto_stop allowed; sleeps when idle, wakes on inbound HTTP.
+#   worker — arq render worker, consumes the kondo:render queue.
+#            min_machines_running=1 so it survives idle (the queue is
+#            an internal contract; Fly's proxy can't see it). Same
+#            perf-2x sizing as before because ffmpeg saturates 2 vCPUs.
 #
-# Health: GET / returns the welcome JSON without touching DB or
-# external services, so the health probe is a pure readiness check.
+# Both processes share the image — the Dockerfile builds once and
+# the [processes] table below picks the entrypoint per group.
+#
+# After deploying for the first time, scale the worker explicitly:
+#     fly scale count worker=1 --region gru
+# (api defaults to 1 machine via min_machines_running=0 + auto_start.)
+#
+# Rollback: set `fly secrets set KONDO_MOVIE_USE_QUEUE=false` to flip
+# the api back to the in-process P2 path. The worker process can stay
+# running idle without harm (no jobs land on the queue).
 
 app = 'kondo-movie'
 primary_region = 'gru'
@@ -26,37 +32,61 @@ primary_region = 'gru'
   DEPLOYMENT = 'flyio'
   PORT = '8080'
 
-[http_service]
+# ---- Process commands ----
+# Both consume the same image; only the entrypoint differs.
+[processes]
+  api    = 'uvicorn src.main:app --host 0.0.0.0 --port 8080'
+  worker = 'arq task_queue.worker.WorkerSettings'
+
+# ---- HTTP service: api process only ----
+# The worker exposes no HTTP surface; Fly's proxy doesn't route to it.
+[[services]]
+  protocol = 'tcp'
   internal_port = 8080
-  force_https = true
+  processes = ['api']
   auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
-  # Renders take ~60s and block the worker. Cap concurrency so a
-  # second render forces a fly machine spin-up rather than queueing
-  # behind the first.
-  [http_service.concurrency]
+  [[services.ports]]
+    port = 80
+    handlers = ['http']
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  # Renders take ~60s and saturate the worker per machine. Cap
+  # concurrency so a burst on the api process forces queue depth
+  # to grow instead of stacking concurrent requests on one worker
+  # machine.
+  [services.concurrency]
     type = 'requests'
     soft_limit = 2
     hard_limit = 4
 
-[checks]
-  # P3 of the reliability plan: probe /healthz, not /. Liveness only —
-  # `/healthz` doesn't touch Redis/DB/external services so a slow
-  # dependency can't flap the machine state. Readiness lives on
-  # `/readyz` (operator-facing); Fly doesn't probe it because we
-  # don't want a degraded worker to take the API machine down.
-  # 15s interval gives faster recovery on legitimate liveness
-  # failures without churning the proxy.
-  [checks.health]
-    port = 8080
-    type = 'http'
+  # P3 health probe: cheap liveness, no Redis. /readyz is operator-
+  # facing; Fly doesn't probe it because we don't want a degraded
+  # readiness signal to take the api machine down.
+  [[services.http_checks]]
     interval = '15s'
     timeout = '2s'
     grace_period = '20s'
+    method = 'get'
     path = '/healthz'
 
+# ---- VM sizing ----
+# api: same perf-2x as before. Could downsize to perf-1x once we
+# confirm the imports don't push memory; deferred.
 [[vm]]
   size = 'performance-2x'
   memory = '4gb'
+  processes = ['api']
+
+# worker: perf-2x is the floor for ffmpeg. 4GB matches moviepy frame
+# buffers. min_machines_running=1 enforced via `fly scale count`.
+[[vm]]
+  size = 'performance-2x'
+  memory = '4gb'
+  processes = ['worker']

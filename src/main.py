@@ -15,6 +15,9 @@ Everything else (Editora-era account/property/legacy-video routes) was
 removed in PR k4 alongside the Firestore purge.
 """
 
+import os
+
+from arq import create_pool
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, status
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
@@ -33,13 +36,24 @@ from movie_maker.movie_actions_model import (
 )
 from utils.common_models import ActionStatus
 from notification.engine_webhook import fire_webhook
-from task_queue.connection import get_redis_url
+from task_queue.connection import get_redis_settings, get_redis_url
 from task_queue.heartbeat import (
     HEARTBEAT_STALE_AFTER_SECONDS,
     heartbeat_age_seconds,
     is_heartbeat_stale,
     read_latest_heartbeat,
 )
+
+
+def _use_queue() -> bool:
+    """
+    Feature flag for the P4 worker path. Default false — the route runs
+    the render in-process via run_in_threadpool (P2 behavior). Flip to
+    true via `fly secrets set KONDO_MOVIE_USE_QUEUE=true` once the
+    worker process is deployed and `/readyz` reports `worker: ok`.
+    Acts as the rollback switch if the queue path misbehaves.
+    """
+    return os.getenv("KONDO_MOVIE_USE_QUEUE", "false").lower() == "true"
 
 
 app = FastAPI()
@@ -186,16 +200,31 @@ async def make_movie(request: MakeMovieRequestV2, response: Response):
     internal request shape and runs through the stateless handler. Fires
     a lifecycle webhook back to kondos-api on completion (best-effort).
 
-    Both the render and the webhook POST are synchronous, CPU/IO-blocking
-    calls. Running them inline on the asyncio event loop would freeze
-    every other request — including Fly's `/healthz` probe — for the
-    entire 60-90s render, which historically caused mid-render machine
-    kills (see `references/kondo/architecture/v2/video-render-reliability-plan.md`
-    §0). Both calls therefore go through `run_in_threadpool` so the loop
-    stays responsive. P4 of that plan replaces the threadpool with a real
-    arq worker process; until then, this is the smallest change that
-    eliminates the loop-blocking failure mode.
+    Two execution paths, gated on KONDO_MOVIE_USE_QUEUE:
+
+    - default (false): in-process via run_in_threadpool (P2 behavior).
+      The blocking sync render runs in the threadpool so the asyncio
+      loop stays responsive for `/healthz` etc.
+
+    - true: enqueue onto arq, await the worker's result. Worker process
+      lives on a separate Fly machine (per fly.toml `[[processes]]`).
+      Same external response — caller still gets the full
+      `MakeMovieResponse` synchronously. P5 will flip the route to
+      return 202 immediately and let the webhook drive the lifecycle.
+
+    Idempotency: the queue path passes `_job_id=request.job_id` so a
+    duplicate submission of the same kondos-api UUID dedups at the
+    arq layer (§2.3 of the plan).
     """
+    if _use_queue():
+        return await _make_movie_via_queue(request, response)
+    return await _make_movie_inline(request, response)
+
+
+async def _make_movie_inline(
+    request: MakeMovieRequestV2, response: Response
+) -> MakeMovieResponse:
+    """In-process P2 path. Render + webhook go through the threadpool."""
     legacy_request = v2_to_legacy_request(request)
     action_response = await run_in_threadpool(
         MovieActionsHandler().make_movie, request=legacy_request
@@ -204,11 +233,63 @@ async def make_movie(request: MakeMovieRequestV2, response: Response):
     if not success:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
+    payload = _webhook_payload_from_response(action_response, success)
+    await run_in_threadpool(fire_webhook, request.webhook_url, payload)
+    return action_response
+
+
+async def _make_movie_via_queue(
+    request: MakeMovieRequestV2, response: Response
+) -> MakeMovieResponse:
+    """
+    Queue path. Enqueues with the caller's UUID as the arq job_id and
+    waits for the worker to finish.
+
+    Pool creation per-request: wasteful but acceptable at v1 volume.
+    P5 refactors to FastAPI lifespan-managed pool when we re-shape
+    the route around 202 + webhook.
+
+    Job timeout matches the worker's `job_timeout=600s` so a stuck
+    render bubbles up as a clean failure rather than hanging the
+    request indefinitely.
+    """
+    pool = await create_pool(get_redis_settings())
+    try:
+        job = await pool.enqueue_job(
+            "render_movie",
+            request.model_dump(mode="json"),
+            _job_id=request.job_id,
+        )
+        if job is None:
+            # arq returns None when a job with the same _job_id is
+            # already queued or running. Idempotent retry — surface
+            # via 409 so the caller knows it's not a fresh submission.
+            response.status_code = status.HTTP_409_CONFLICT
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Render job_id={request.job_id} already in progress",
+            )
+        result_dict = await job.result(timeout=600)
+    finally:
+        await pool.aclose()
+
+    action_response = MakeMovieResponse.model_validate(result_dict)
+    success = action_response.result.state == ActionStatus.State.SUCCESS
+    if not success:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    return action_response
+
+
+def _webhook_payload_from_response(
+    action_response: MakeMovieResponse, success: bool
+) -> dict:
     if success:
         payload = {
             "phase": "done",
             "progress": 100,
-            "output_url": action_response.story.movie_path if action_response.story else None,
+            "output_url": (
+                action_response.story.movie_path if action_response.story else None
+            ),
         }
         if not payload["output_url"]:
             payload = {
@@ -220,12 +301,12 @@ async def make_movie(request: MakeMovieRequestV2, response: Response):
         payload = {
             "phase": "failed",
             "progress": 100,
-            "error": action_response.result.reason or "Engine reported failure (no reason given)",
+            "error": (
+                action_response.result.reason
+                or "Engine reported failure (no reason given)"
+            ),
         }
-    payload = {k: v for k, v in payload.items() if v is not None}
-    await run_in_threadpool(fire_webhook, request.webhook_url, payload)
-
-    return action_response
+    return {k: v for k, v in payload.items() if v is not None}
 
 
 # ---- Job lifecycle (501 stubs — arq integration pending) ----
