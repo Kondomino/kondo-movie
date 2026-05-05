@@ -42,6 +42,7 @@ from task_queue.failure_classifier import (
     classify_failure,
 )
 from task_queue.metrics import add_to_counter, incr_counter
+from task_queue.oom import FfmpegOomError, check_memory_pressure
 from utils.common_models import ActionStatus
 
 
@@ -104,6 +105,28 @@ async def render_movie(ctx: dict[str, Any], request_dict: dict[str, Any]) -> dic
 
     if redis is not None:
         await incr_counter(redis, "kondo_renders_started_total", {"edl_id": edl_id})
+
+    # P11 pre-flight: refuse to start a render on a starving worker.
+    # FfmpegOomError is non-retryable per P7's classifier — rerunning
+    # on the same machine just OOMs again. Bumps the failed counter
+    # with the oom label, fires a failed webhook, returns terminal.
+    try:
+        check_memory_pressure()
+    except FfmpegOomError as exc:
+        logger.error(
+            f"[VIDEO-WORKER] pre-flight OOM guard tripped job={job_id}: {exc}"
+        )
+        if redis is not None:
+            await incr_counter(
+                redis,
+                "kondo_renders_failed_total",
+                {"edl_id": edl_id, "failure_class": "oom"},
+            )
+        await _enqueue_failed_webhook(ctx, request.webhook_url, str(exc), job_id)
+        return {
+            "result": {"state": "Failure", "reason": str(exc)},
+            "failure_class": "oom",
+        }
 
     # ---- Run the pipeline; capture exception OR failure-state response ----
     caught_exc: Optional[BaseException] = None
@@ -251,6 +274,37 @@ async def _enqueue_webhook(
     except Exception as exc:  # noqa: BLE001
         logger.warning(
             f"[VIDEO-WORKER] webhook enqueue failed job={job_id}: "
+            f"{type(exc).__name__}: {exc} — falling back to inline POST"
+        )
+        await _inline_webhook_fallback(webhook_url, payload)
+
+
+async def _enqueue_failed_webhook(
+    ctx: dict[str, Any],
+    webhook_url: str,
+    error: str,
+    job_id: str,
+) -> None:
+    """
+    P11 helper: enqueue a `phase=failed` webhook from the OOM pre-flight
+    path. Same shape as the regular failure webhook — kondos-api flips
+    the row through the existing applyEngineCallback.
+    """
+    payload = {"phase": "failed", "progress": 100, "error": error}
+    redis = ctx.get("redis")
+    if redis is None:
+        await _inline_webhook_fallback(webhook_url, payload)
+        return
+    try:
+        await redis.enqueue_job(
+            "deliver_webhook",
+            webhook_url,
+            payload,
+            _job_id=f"{job_id}:webhook",
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            f"[VIDEO-WORKER] OOM-guard webhook enqueue failed job={job_id}: "
             f"{type(exc).__name__}: {exc} — falling back to inline POST"
         )
         await _inline_webhook_fallback(webhook_url, payload)
