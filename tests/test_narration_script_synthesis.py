@@ -74,6 +74,40 @@ def test_synthesizes_brief_when_kondo_name_present(monkeypatch):
     assert "Maria Silva" in captured["brief"]
 
 
+def test_brief_uses_natural_narration_phrasing(monkeypatch):
+    # Locked 2026-05-09 with Victor: brief reads as voiceover, not as a
+    # labeled key/value list. Drop the "Empreendimento:" key prefix and
+    # use "Situado em" instead of "Localização:" — the brief is read
+    # verbatim today (OpenAI quota exhausted, ScriptManager falls back).
+    captured: dict = {}
+
+    class FakeScriptManager:
+        def generate_script(self, description: str) -> str:
+            captured["brief"] = description
+            return description  # mimic the verbatim fallback
+
+    monkeypatch.setattr("movie_maker.movie.ScriptManager", FakeScriptManager)
+
+    maker = _maker(
+        _stub_movie_model(
+            kondo_name="Aretê Búzios",
+            address1="Manguinhos",
+            address2="Búzios, RJ",
+            agent_name="Maria Silva",
+        )
+    )
+    script = maker._synthesize_default_script()
+
+    # No labeled-key prefixes anywhere in the brief.
+    assert "Empreendimento:" not in script
+    assert "Localização:" not in script
+    # Natural-narration phrasing.
+    assert "Situado em" in script
+    # Brief must still feature the kondo identity.
+    assert script.startswith("Aretê Búzios.")
+    assert "Apresentado por Maria Silva" in script
+
+
 def test_returns_empty_when_no_context(monkeypatch):
     # No kondo name, no address, no agent name → there's nothing meaningful
     # to narrate. Better silent than a "we have no idea what this is" script.

@@ -8,7 +8,32 @@ from config.config import settings
 from logger import logger
 from gcp.secret import secret_mgr
 
-        
+
+# Verbatim-fallback char cap. Caller-supplied briefs above this get
+# truncated so a runaway brief doesn't pile up ElevenLabs spend, but
+# the cap is generous enough that all kondos-api-synthesized briefs
+# pass through unchanged (they cap at ~250 chars in practice).
+_FALLBACK_MAX_CHARS = 500
+
+
+def _fallback_script(description: str) -> str:
+    """Return the brief verbatim (or truncated if absurdly long).
+
+    Used whenever ScriptManager can't reach OpenAI — service disabled,
+    quota exhausted (current prod state on the engine), or the model
+    keeps blowing the SCRIPT_MAX_CHARACTERS cap. The previous fallback
+    prefixed an English "Property description: " literal that ElevenLabs
+    then narrated verbatim into the final video — surfaced as user
+    feedback 2026-05-09. The brief is already pt-BR + voiceover-shaped
+    by the synthesizer in MovieMaker._synthesize_default_script, so we
+    just hand it back as-is.
+    """
+    text = (description or "").strip()
+    if len(text) <= _FALLBACK_MAX_CHARS:
+        return text
+    return text[:_FALLBACK_MAX_CHARS].rstrip() + "..."
+
+
 class ScriptManager():
     
     def __init__(self):
@@ -21,8 +46,7 @@ class ScriptManager():
     def generate_script(self, description:str):
         if not settings.FeatureFlags.ENABLE_OPENAI or self.client is None:
             logger.error("OpenAI script generation called but service is disabled")
-            # Return a fallback script
-            return f"Property description: {description[:100]}..." if len(description) > 100 else description
+            return _fallback_script(description)
             
         num_attempts = 0
         while True:
@@ -77,13 +101,13 @@ class ScriptManager():
                 else:
                     if num_attempts > settings.OpenAI.Narration.MAX_GEN_ATTEMPTS:
                         logger.error('Script generation - Too many attempts. Returning fallback script')
-                        return f"Property description: {description[:100]}..." if len(description) > 100 else description
+                        return _fallback_script(description)
                     else:
                         logger.warning(f'Generated script exceeded char count. Allowed: {settings.OpenAI.Narration.SCRIPT_MAX_CHARACTERS}, Actual: {script_len}. Retrying')
                         num_attempts += 1
             except Exception as e:
                 logger.error(f"OpenAI script generation failed: {str(e)} - returning fallback script")
-                return f"Property description: {description[:100]}..." if len(description) > 100 else description
+                return _fallback_script(description)
             
 def main():
     parser = argparse.ArgumentParser(description='AI Script Generator')
