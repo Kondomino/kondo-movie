@@ -26,10 +26,32 @@ class CaptionsManager:
             self.srt_file_path = srt_file_path
             self.srt_file = open(file=self.srt_file_path, mode="w+t")
 
-    def generate_captions(self, voiceover_file_path: str) -> tuple[SubtitlesClip, Path]:
+    def generate_captions(self, voiceover_file_path: str) -> tuple[SubtitlesClip | None, Path]:
+        """
+        Generate caption clip from the narration audio. Returns
+        `(None, srt_path)` when the transcriber produced no captions —
+        the mock transcriber (AssemblyAI/OpenAI disabled or failing)
+        writes an empty SRT, and moviepy's `SubtitlesClip` chokes on
+        that with an unhelpful `max() iterable argument is empty`. The
+        caller is expected to skip appending None to the clip list.
+        """
         self.transcriber.generate_captions_from_voiceover(
             voiceover_file_path=voiceover_file_path, srt_file=self.srt_file
         )
+
+        # Empty SRT → no subtitles to render. Common when transcription
+        # is unavailable or fails silently; without this guard the
+        # render crashes mid-export ("max() iterable argument is empty"
+        # from inside SubtitlesClip).
+        try:
+            srt_size = self.srt_file_path.stat().st_size
+        except OSError:
+            srt_size = 0
+        if srt_size == 0:
+            logger.warning(
+                "[CAPTIONS] transcriber produced empty SRT — skipping caption clip"
+            )
+            return (None, self.srt_file_path)
 
         generator = lambda txt: TextClip(
             text=textwrap.fill(
