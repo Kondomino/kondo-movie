@@ -224,16 +224,21 @@ class MovieMaker:
         silent video. Better silent than narrating "we have no idea what
         this is."
         """
+        # pt-BR phrasing tuned for ElevenLabs voiceover. The brief is
+        # likely to be read verbatim today (OpenAI quota is exhausted, so
+        # ScriptManager.generate_script falls back to returning whatever
+        # we send), so each line has to make sense as spoken narration —
+        # not as a labeled key/value list.
         parts: list[str] = []
         if self.movie_model.kondo_name:
-            parts.append(f"Empreendimento: {self.movie_model.kondo_name}.")
+            parts.append(f"{self.movie_model.kondo_name}.")
         addr_lines = [
             self.movie_model.kondo_address_line1,
             self.movie_model.kondo_address_line2,
         ]
         addr = ", ".join(p for p in addr_lines if p)
         if addr:
-            parts.append(f"Localização: {addr}.")
+            parts.append(f"Situado em {addr}.")
         if self.movie_model.agent_name:
             parts.append(f"Apresentado por {self.movie_model.agent_name}.")
 
