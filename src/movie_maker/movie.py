@@ -13,6 +13,7 @@ from movie_maker.edl_model import EDL, ClipTypeEnum
 from movie_maker.captions import CaptionsManager
 from movie_maker.watermark import Watermark
 from ai.tts import TTS
+from ai.script_manager import ScriptManager
 from gcp.storage import StorageManager, CloudPath
 from movie_maker.image_fetch import download_http_image, is_http_url, suffix_from_url
 
@@ -96,6 +97,27 @@ class MovieMaker:
             tts = TTS()
             narration = self.movie_model.config.narration
 
+            # Synthesize a script when the caller enabled narration but did
+            # not supply one. The kondos-api wizard sends an empty
+            # description today (engine is the source of truth for script
+            # generation). Without this, the previous "if enabled and
+            # script" check silently skipped TTS — the user sees a silent
+            # video and nothing in the logs hints why.
+            if narration.enabled and not (narration.script or "").strip():
+                synthesized = self._synthesize_default_script()
+                if synthesized:
+                    logger.info(
+                        f"[NARRATION] caller-supplied script empty — synthesized "
+                        f"{len(synthesized)} chars from kondo identity"
+                    )
+                    narration = narration.model_copy(update={"script": synthesized})
+                    self.movie_model.config.narration = narration
+                else:
+                    logger.warning(
+                        "[NARRATION] enabled=true but script is empty and "
+                        "no kondo context available to synthesize — render will be silent"
+                    )
+
             if narration.enabled and narration.script:
                 with NamedTemporaryFile(delete=False, suffix=".wav") as voiceover_file:
                     voiceover_file_path = voiceover_file.name
@@ -176,3 +198,47 @@ class MovieMaker:
         finally:
             if music_file_path and os.path.exists(music_file_path):
                 os.remove(str(music_file_path))
+
+    def _synthesize_default_script(self) -> str:
+        """
+        Build a narration script from the kondo + agent identity when the
+        caller didn't supply one.
+
+        Strategy: assemble a brief from whatever contextual fields the
+        request carried (kondo name, address lines, agent name), then run
+        it through ScriptManager so OpenAI rewrites it into a polished
+        voiceover. ScriptManager has its own fallback path (returns the
+        first 100 chars of the brief verbatim) if OpenAI is disabled or
+        errors, so this method always returns *something* unless we have
+        no context at all.
+
+        Returns an empty string when there isn't enough context to build a
+        meaningful brief — the caller logs a warning and falls back to
+        silent video. Better silent than narrating "we have no idea what
+        this is."
+        """
+        parts: list[str] = []
+        if self.movie_model.kondo_name:
+            parts.append(f"Empreendimento: {self.movie_model.kondo_name}.")
+        addr_lines = [
+            self.movie_model.kondo_address_line1,
+            self.movie_model.kondo_address_line2,
+        ]
+        addr = ", ".join(p for p in addr_lines if p)
+        if addr:
+            parts.append(f"Localização: {addr}.")
+        if self.movie_model.agent_name:
+            parts.append(f"Apresentado por {self.movie_model.agent_name}.")
+
+        if not parts:
+            return ""
+
+        brief = " ".join(parts)
+        try:
+            script = ScriptManager().generate_script(description=brief)
+            return (script or "").strip()
+        except Exception as e:
+            logger.warning(
+                f"[NARRATION] ScriptManager failed ({e}); using brief verbatim"
+            )
+            return brief

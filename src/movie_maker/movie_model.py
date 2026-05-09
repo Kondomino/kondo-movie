@@ -104,6 +104,15 @@ class MovieModel(BaseModel):
     agent_name: Optional[str] = Field(
         default=None, description="Agent's full name (first_name + last_name)"
     )
+    kondo_name: Optional[str] = Field(
+        default=None,
+        description=(
+            "Display name of the condominium (e.g. 'Aretê Búzios'). Plumbed "
+            "from MakeMovieRequestV2.kondo.name; used when synthesizing a "
+            "default narration script if the caller didn't supply one. None → "
+            "ScriptManager falls back to address-only context."
+        ),
+    )
     kondo_address_line1: Optional[str] = Field(
         default=None,
         description=(

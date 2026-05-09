@@ -185,6 +185,32 @@ def test_translation_passes_agent_name_through():
     assert legacy.agent_name == "Maria Silva"
 
 
+def test_translation_passes_kondo_name_through():
+    # kondo_name was added 2026-05-09 so MovieMaker can synthesize a default
+    # narration script when the caller leaves description empty (kondos-api
+    # wizard's standard payload). Pin that the field plumbs through.
+    v2 = _v2(
+        kondo=MakeMovieKondo(
+            id=7001,
+            address="Rua X, 1",
+            name="Aretê Búzios",
+            address_line1="Manguinhos, Rua das Pedras",
+            address_line2="Búzios, RJ",
+        ),
+    )
+    legacy = v2_to_legacy_request(v2)
+    assert legacy.kondo_name == "Aretê Búzios"
+    assert legacy.kondo_address_line1 == "Manguinhos, Rua das Pedras"
+    assert legacy.kondo_address_line2 == "Búzios, RJ"
+
+
+def test_translation_kondo_name_optional():
+    # Old kondos-api callers don't send kondo.name — translation must still
+    # produce a valid legacy request with kondo_name=None.
+    legacy = v2_to_legacy_request(_v2())
+    assert legacy.kondo_name is None
+
+
 def test_v2_music_url_is_captured_but_not_yet_mapped():
     # Forward-compat: music_url is part of the contract but the engine
     # doesn't yet have a per-render music override. The translation

@@ -326,6 +326,7 @@ class MovieActionsHandler:
             config=request.config,
             user_id=request.request_id.user.id,
             agent_name=request.agent_name,
+            kondo_name=request.kondo_name,
             kondo_address_line1=request.kondo_address_line1,
             kondo_address_line2=request.kondo_address_line2,
         )
