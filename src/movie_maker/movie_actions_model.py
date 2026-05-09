@@ -155,6 +155,14 @@ class MakeMovieRequest(BaseModel):
         description='Display name for the agent presenting the video. In the v2 stateless flow this '
                     'comes straight from the request; pre-stateless flows looked it up from Firestore.'
     )
+    kondo_name : Optional[str] = Field(
+        default=None,
+        description=(
+            "Display name of the condominium (e.g. 'Aretê Búzios'). Plumbed "
+            "from MakeMovieRequestV2.kondo.name. Consumed by ScriptManager "
+            "when synthesizing a default narration script."
+        ),
+    )
     kondo_address_line1 : Optional[str] = Field(
         default=None,
         description=(
@@ -242,6 +250,7 @@ def v2_to_legacy_request(v2: MakeMovieRequestV2) -> 'MakeMovieRequest':
         config=config,
         webhook_url=v2.webhook_url,
         agent_name=v2.agent.name,
+        kondo_name=v2.kondo.name,
         kondo_address_line1=v2.kondo.address_line1,
         kondo_address_line2=v2.kondo.address_line2,
     )
