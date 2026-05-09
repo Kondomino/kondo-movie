@@ -147,7 +147,14 @@ class MovieMaker:
                         subtitles, srt_file_path = captions_mgr.generate_captions(
                             voiceover_file_path=voiceover_file_path
                         )
-                        clips.append(subtitles)
+                        # CaptionsManager returns None when the SRT came
+                        # back empty (mock transcriber, no AssemblyAI key,
+                        # OpenAI 429, etc.). Render proceeds without
+                        # captions; audio is still in. The warning is
+                        # logged inside CaptionsManager so caption-loss
+                        # is observable in Axiom.
+                        if subtitles is not None:
+                            clips.append(subtitles)
 
             if self.movie_model.config.watermark:
                 watermark = Watermark(
