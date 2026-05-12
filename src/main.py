@@ -21,6 +21,24 @@ import json
 import os
 from typing import Optional
 
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
+
+_sentry_dsn = os.getenv("SENTRY_DSN")
+if _sentry_dsn:
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        environment=os.getenv("SENTRY_ENVIRONMENT") or os.getenv("ENVIRONMENT") or "development",
+        release=os.getenv("SENTRY_RELEASE") or os.getenv("FLY_MACHINE_VERSION"),
+        traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+        send_default_pii=True,
+        integrations=[
+            StarletteIntegration(transaction_style="url"),
+            FastApiIntegration(transaction_style="url"),
+        ],
+    )
+
 from arq import create_pool
 from arq.jobs import Job, JobStatus
 from fastapi import (
@@ -124,6 +142,12 @@ async def general_exception_handler(request: Request, exc: Exception):
 @app.get("/healthz")
 async def healthz():
     return {"status": "ok"}
+
+
+@app.get("/sentry-debug")
+async def sentry_debug():
+    """Admin-only: triggers a ZeroDivisionError to verify Sentry event delivery."""
+    _ = 1 / 0
 
 
 @app.get("/readyz")

@@ -23,7 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create the cache directory
 RUN mkdir -p $POETRY_CACHE_DIR
 
-RUN poetry install --only main --no-root
+RUN poetry install --only main --no-root && \
+    pip install "sentry-sdk[fastapi]"
 
 # Install Playwright Python package (but not browsers) in builder
 RUN pip install playwright

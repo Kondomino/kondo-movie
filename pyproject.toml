@@ -53,6 +53,7 @@ psycopg2-binary = "^2.9.0"
 # Pinned to ^0.26 — latest stable as of 2026-05-04. Includes the
 # `RedisSettings.from_dsn` helper we rely on in task_queue/connection.py.
 arq = "^0.26.0"
+sentry-sdk = {extras = ["fastapi"], version = "^2.0"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0"
