@@ -32,7 +32,8 @@ if _sentry_dsn:
         environment=os.getenv("SENTRY_ENVIRONMENT") or os.getenv("ENVIRONMENT") or "development",
         release=os.getenv("SENTRY_RELEASE") or os.getenv("FLY_MACHINE_VERSION"),
         traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
-        send_default_pii=True,
+        send_default_pii=False,
+        enable_tracing=True,
         integrations=[
             StarletteIntegration(transaction_style="url"),
             FastApiIntegration(transaction_style="url"),
@@ -88,6 +89,11 @@ app.add_middleware(
 
 
 # ---- Exception handlers (keep responses JSON-shaped for kondos-api) ----
+#
+# Custom handlers catch exceptions before Sentry's default integration
+# can see them — so we must explicitly call capture_exception.
+# 422 (validation) errors are client-config issues; skip those.
+# 5xx and unexpected errors always go to Sentry.
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -110,6 +116,8 @@ async def pydantic_validation_exception_handler(request: Request, exc: Validatio
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     logger.exception(exc)
+    if exc.status_code >= 500:
+        sentry_sdk.capture_exception(exc)
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},
@@ -119,6 +127,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     logger.exception(exc)
+    sentry_sdk.capture_exception(exc)
     return JSONResponse(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
         content={"detail": str(exc)},
