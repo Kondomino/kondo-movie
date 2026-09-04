@@ -6,22 +6,26 @@
 #   api    — uvicorn FastAPI, serves /make_movie, /healthz, /readyz.
 #            auto_stop allowed; sleeps when idle, wakes on inbound HTTP.
 #   worker — arq render worker, consumes the kondo:render queue.
-#            min_machines_running=1 so it survives idle (the queue is
-#            an internal contract; Fly's proxy can't see it). Same
-#            perf-2x sizing as before because ffmpeg saturates 2 vCPUs.
+#            A pinned worker (min_machines_running=1) is what the queue
+#            would want — Fly's proxy can't see a Redis queue, so an
+#            idle worker gets stopped with jobs still waiting. Same
+#            perf-2x sizing because ffmpeg saturates 2 vCPUs.
 #
 # Both processes share the image — the Dockerfile builds once and
 # the [processes] table below picks the entrypoint per group.
 #
-# After deploying for the first time, scale the worker explicitly:
-#     fly scale count worker=1 --region gru
-# (api defaults to 1 machine via min_machines_running=0 + auto_start.)
+# COST DECISION (2026-09-01): both processes stay at count 0. A pinned
+# perf-2x worker bills ~$62/mo whether or not a video is rendered, and
+# the platform is dormant. After the first deploy:
+#     fly scale count api=0 worker=0 -a kondomino-movie
+# Wake it for a render session with `worker=1`, then scale back down.
+# Full sequence and rationale: ops/migrate-org.md (steps 7, P4/P6).
 #
 # Rollback: set `fly secrets set KONDO_MOVIE_USE_QUEUE=false` to flip
 # the api back to the in-process P2 path. The worker process can stay
 # running idle without harm (no jobs land on the queue).
 
-app = 'kondo-movie'
+app = 'kondomino-movie'
 primary_region = 'gru'
 
 [build]
@@ -77,15 +81,19 @@ primary_region = 'gru'
     path = '/healthz'
 
 # ---- VM sizing ----
-# api: same perf-2x as before. Could downsize to perf-1x once we
-# confirm the imports don't push memory; deferred.
+# api: perf-1x / 2GB. ffmpeg and moviepy run on the worker, so this
+# process only serves /make_movie, /healthz and /readyz — it never
+# touches a frame buffer. Halves the cost of the one engine machine
+# that would ever be left awake. Raise back to perf-2x / 4gb if the
+# import chain OOMs on boot. Mirrored in ops/fleet.conf (MOVIE_API_VM).
 [[vm]]
-  size = 'performance-2x'
-  memory = '4gb'
+  size = 'performance-1x'
+  memory = '2gb'
   processes = ['api']
 
-# worker: perf-2x is the floor for ffmpeg. 4GB matches moviepy frame
-# buffers. min_machines_running=1 enforced via `fly scale count`.
+# worker: perf-2x is the floor for ffmpeg — do not downsize. 4GB
+# matches moviepy frame buffers. Count is 0 while dormant (see the
+# cost decision above); `fly scale count worker=1` wakes it.
 [[vm]]
   size = 'performance-2x'
   memory = '4gb'
