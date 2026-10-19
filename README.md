@@ -1,3 +1,5 @@
+> **Congelado em 2026-10-19.** A Kondomino virou uma empresa API-first: o produto é a API de dados em `kondos-api` (ADR-010). Este repositório fica guardado para um possível retorno, sem desenvolvimento. O admin e a ficha do kondo agora vivem em `kondo-web-api`. Para voltar: `ops/hibernacao-2026-10.md` no diretório guarda-chuva.
+
 # kondo-movie
 
 Stateless video engine for [Kondomino](https://kondomino.com.br). Renders cinematic property reels from images + an EDL template, called from `kondos-api` via the v2 `/make_movie` contract.
